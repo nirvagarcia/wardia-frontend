@@ -47,16 +47,16 @@ export const AccountCard: React.FC<AccountCardProps> = ({ account, onEdit, onDel
   const locale = language === "es" ? "es-PE" : "en-US";
 
   return (
-    <div className="bg-zinc-100 dark:bg-zinc-900/50 backdrop-blur-sm border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 space-y-6">
+    <div className="card-surface rounded-2xl p-6 space-y-5">
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
-          <div className="bg-emerald-500/20 p-3 rounded-xl">
+          <div className="bg-white dark:bg-zinc-800 p-2.5 rounded-xl ring-1 ring-black/[0.06] dark:ring-white/[0.06] shadow-sm">
             {getBankLogo(account.bankName) ? (
               <Image
                 src={getBankLogo(account.bankName)!}
                 alt={account.bankName}
-                width={32}
-                height={32}
+                width={28}
+                height={28}
                 className="object-contain"
               />
             ) : (
@@ -64,81 +64,81 @@ export const AccountCard: React.FC<AccountCardProps> = ({ account, onEdit, onDel
             )}
           </div>
           <div>
-            <h3 className="font-semibold text-lg text-zinc-900 dark:text-white">{account.bankName}</h3>
-            <span className="text-sm text-gray-600 dark:text-gray-400 capitalize">{account.accountType}</span>
+            <h3 className="font-semibold text-zinc-900 dark:text-white">{account.bankName}</h3>
+            <span className="text-xs text-zinc-500 dark:text-zinc-500 capitalize">{account.accountType}</span>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           {account.isDefault && (
-            <span className="text-xs px-2 py-1 bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-full">
+            <span className="text-[10px] font-semibold px-2.5 py-1 bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 rounded-full ring-1 ring-cyan-500/10">
               {t("accounts.default")}
             </span>
           )}
           {onEdit && (
             <button
               onClick={() => onEdit(account)}
-              className="p-2 hover:bg-blue-500/10 rounded-lg transition-colors group"
+              className="p-1.5 hover:bg-zinc-200/80 dark:hover:bg-zinc-700/50 rounded-lg transition-colors group"
               title={t("common.edit")}
             >
-              <Edit2 className="w-4 h-4 text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500" />
+              <Edit2 className="w-3.5 h-3.5 text-zinc-400 dark:text-zinc-500 group-hover:text-blue-500" />
             </button>
           )}
           {onDelete && (
             <button
               onClick={() => onDelete(account.id)}
-              className="p-2 hover:bg-red-500/10 rounded-lg transition-colors group"
+              className="p-1.5 hover:bg-red-500/10 rounded-lg transition-colors group"
               title={t("common.delete")}
             >
-              <Trash2 className="w-4 h-4 text-zinc-600 dark:text-zinc-400 group-hover:text-red-500" />
+              <Trash2 className="w-3.5 h-3.5 text-zinc-400 dark:text-zinc-500 group-hover:text-red-500" />
             </button>
           )}
         </div>
       </div>
 
       <div className="space-y-4">
-        <div className="pb-4 border-b border-zinc-200 dark:border-zinc-800">
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">{t("accounts.available")}</p>
-          <p className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">
+        <div className="pb-4 border-b border-zinc-200/60 dark:border-zinc-800/60">
+          <p className="text-xs text-zinc-500 dark:text-zinc-500 mb-1 font-medium">{t("accounts.available")}</p>
+          <p className="text-2xl font-bold text-cyan-600 dark:text-cyan-400 tracking-tight">
             {formatCurrency(account.balance)}
           </p>
         </div>
 
         <div className="space-y-3">
           <div>
-            <p className="text-xs text-gray-500 dark:text-gray-500 mb-1">{t("accounts.accountNumber")}</p>
-            <p className="font-mono text-sm text-zinc-900 dark:text-white">
+            <p className="text-[11px] text-zinc-500 dark:text-zinc-500 mb-1 font-medium">{t("accounts.accountNumber")}</p>
+            <p className="font-mono text-sm text-zinc-900 dark:text-white cursor-text select-text">
               {isMasked ? maskAccountNumber(account.accountNumber) : account.accountNumber}
             </p>
           </div>
 
           <div className="flex items-center justify-between gap-3">
             <div className="flex-1">
-              <p className="text-xs text-gray-500 dark:text-gray-500 mb-1">CCI</p>
-              <p className="font-mono text-sm text-zinc-900 dark:text-white">
+              <p className="text-[11px] text-zinc-500 dark:text-zinc-500 mb-1 font-medium">CCI</p>
+              <p className="font-mono text-sm text-zinc-900 dark:text-white cursor-text select-text">
                 {isMasked ? maskAccountNumber(account.cci) : account.cci}
               </p>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               <button
                 onClick={toggleMask}
-                className="p-2 bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 rounded-lg transition-colors"
+                className="p-2 bg-zinc-100 dark:bg-zinc-800/80 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-lg transition-colors ring-1 ring-black/[0.04] dark:ring-white/[0.06]"
                 aria-label={isMasked ? "Show full numbers" : "Hide numbers"}
               >
                 {isMasked ? (
-                  <Eye className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                  <Eye className="w-4 h-4 text-zinc-500 dark:text-zinc-400" />
                 ) : (
-                  <EyeOff className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                  <EyeOff className="w-4 h-4 text-zinc-500 dark:text-zinc-400" />
                 )}
               </button>
 
               <button
                 onClick={handleCopyCCI}
                 className={cn(
-                  "flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all",
+                  "flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all",
                   copied
-                    ? "bg-emerald-600 text-white"
-                    : "bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 text-zinc-900 dark:text-gray-300"
+                    ? "bg-cyan-500 text-white shadow-md shadow-cyan-500/25"
+                    : "bg-zinc-100 dark:bg-zinc-800/80 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 ring-1 ring-black/[0.04] dark:ring-white/[0.06]"
                 )}
               >
                 {copied ? (
@@ -157,8 +157,8 @@ export const AccountCard: React.FC<AccountCardProps> = ({ account, onEdit, onDel
           </div>
         </div>
 
-        <div className="pt-4 border-t border-zinc-200 dark:border-zinc-800">
-          <p className="text-xs text-gray-500">
+        <div className="pt-4 border-t border-zinc-200/60 dark:border-zinc-800/60">
+          <p className="text-[11px] text-zinc-400 dark:text-zinc-600">
             {t("accounts.lastUpdated")}: {account.lastUpdated.toLocaleString(locale, {
               month: "short",
               day: "numeric",

@@ -125,7 +125,7 @@ export function AddCredentialsModal({
                 "w-full px-4 py-3 rounded-xl border bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white",
                 errors.bankName
                   ? "border-red-500"
-                  : "border-zinc-200 dark:border-zinc-700 focus:border-emerald-500"
+                  : "border-zinc-200 dark:border-zinc-700 focus:border-cyan-$100"
               )}
             />
             {errors.bankName && <p className="text-red-500 text-sm mt-1">{errors.bankName}</p>}
@@ -145,7 +145,7 @@ export function AddCredentialsModal({
                 "w-full px-4 py-3 rounded-xl border bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white font-mono",
                 errors.username
                   ? "border-red-500"
-                  : "border-zinc-200 dark:border-zinc-700 focus:border-emerald-500"
+                  : "border-zinc-200 dark:border-zinc-700 focus:border-cyan-$100"
               )}
             />
             {errors.username && <p className="text-red-500 text-sm mt-1">{errors.username}</p>}
@@ -165,7 +165,7 @@ export function AddCredentialsModal({
                 "w-full px-4 py-3 rounded-xl border bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white font-mono",
                 errors.password
                   ? "border-red-500"
-                  : "border-zinc-200 dark:border-zinc-700 focus:border-emerald-500"
+                  : "border-zinc-200 dark:border-zinc-700 focus:border-cyan-$100"
               )}
             />
             {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
@@ -181,7 +181,7 @@ export function AddCredentialsModal({
               value={formData.digitalKey}
               onChange={(e) => setFormData({ ...formData, digitalKey: e.target.value })}
               placeholder="123456"
-              className="w-full px-4 py-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white font-mono focus:border-emerald-500"
+              className="w-full px-4 py-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white font-mono focus:border-cyan-$100"
             />
           </div>
 
@@ -195,7 +195,7 @@ export function AddCredentialsModal({
               value={formData.securityToken}
               onChange={(e) => setFormData({ ...formData, securityToken: e.target.value })}
               placeholder="TOKEN-123"
-              className="w-full px-4 py-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white font-mono focus:border-emerald-500"
+              className="w-full px-4 py-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white font-mono focus:border-cyan-$100"
             />
           </div>
 
@@ -209,7 +209,7 @@ export function AddCredentialsModal({
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
               placeholder={t("credentials.notes")}
               rows={3}
-              className="w-full px-4 py-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white focus:border-emerald-500"
+              className="w-full px-4 py-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white focus:border-cyan-$100"
             />
           </div>
 
@@ -223,7 +223,7 @@ export function AddCredentialsModal({
             </button>
             <button
               type="submit"
-              className="flex-1 px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white transition-colors font-medium"
+              className="flex-1 px-6 py-3 rounded-xl bg-cyan-$100 hover:bg-emerald-700 text-white transition-colors font-medium"
             >
               {editingCredential 
                 ? t("forms.update")

@@ -6,7 +6,7 @@
  * Hidden on mobile devices where BottomNav is used instead.
  */
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
@@ -38,8 +38,13 @@ export const Sidebar: React.FC = () => {
   const { theme, setTheme } = useTheme();
   const { language, setLanguage, currency, setCurrency } = usePreferencesStore();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [mounted, setMounted] = useState(false);
   
   const t = (key: string) => getTranslation(language, key);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const navItems: NavItem[] = [
     { href: "/dashboard", labelKey: "nav.home", icon: Home },
@@ -65,80 +70,93 @@ export const Sidebar: React.FC = () => {
   return (
     <aside 
       className={cn(
-        "hidden md:flex md:flex-col h-screen sticky top-0 bg-white dark:bg-zinc-950 border-r border-zinc-200 dark:border-zinc-800 transition-all duration-300",
-        isCollapsed ? "md:w-20" : "md:w-64 lg:w-72"
+        "hidden md:flex md:flex-col h-screen sticky top-0 transition-all duration-300 border-r",
+        "bg-gradient-to-b from-white via-white to-zinc-50/80 dark:from-zinc-950 dark:via-zinc-950 dark:to-zinc-900/50",
+        "border-zinc-200/80 dark:border-zinc-800/80",
+        isCollapsed ? "md:w-[76px]" : "md:w-64 lg:w-72"
       )}
     >
-      <div className="p-6 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between">
-        {!isCollapsed && (
-          <div className="flex items-center gap-3 flex-1 min-w-0">
-            <div className="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0">
-              <Image 
-                src="/wardia-icon.png" 
-                alt="WARDIA" 
-                width={40} 
-                height={40}
-                className="w-full h-full object-contain"
-              />
-            </div>
+      <div className={cn(
+        "border-b border-zinc-200/80 dark:border-zinc-800/80 flex items-center justify-between",
+        isCollapsed ? "p-3 flex-col gap-3" : "p-5"
+      )}>
+        <div className={cn(
+          "flex items-center gap-3",
+          isCollapsed ? "flex-col" : "flex-1 min-w-0"
+        )}>
+          <div className={cn(
+            "rounded-xl overflow-hidden flex-shrink-0 ring-1 ring-black/5 dark:ring-white/10",
+            isCollapsed ? "w-11 h-11" : "w-10 h-10"
+          )}>
+            <Image 
+              src="/wardia-icon.png" 
+              alt="WARDIA" 
+              width={44} 
+              height={44}
+              className="w-full h-full object-contain"
+            />
+          </div>
+          {!isCollapsed && (
             <div className="flex-1 min-w-0">
-              <h1 className="text-xl font-bold text-zinc-900 dark:text-white truncate">WARDIA</h1>
-              <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+              <h1 className="text-lg font-bold tracking-tight text-zinc-900 dark:text-white truncate">WARDIA</h1>
+              <p className="text-[11px] text-zinc-500 dark:text-zinc-500 truncate">
                 {t("nav.appTagline")}
               </p>
             </div>
-          </div>
-        )}
-        
-        {isCollapsed && (
-          <div className="mx-auto">
-            <div className="w-10 h-10 rounded-xl overflow-hidden">
-              <Image 
-                src="/wardia-icon.png" 
-                alt="WARDIA" 
-                width={40} 
-                height={40}
-                className="w-full h-full object-contain"
-              />
-            </div>
-          </div>
-        )}
+          )}
+        </div>
         
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors ml-2 flex-shrink-0"
+          className={cn(
+            "p-1.5 rounded-lg transition-all duration-200 flex-shrink-0",
+            "hover:bg-zinc-100 dark:hover:bg-zinc-800/80",
+            "text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300"
+          )}
           aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {isCollapsed ? (
-            <ChevronRight className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+            <ChevronRight className="w-4 h-4" />
           ) : (
-            <ChevronLeft className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+            <ChevronLeft className="w-4 h-4" />
           )}
         </button>
       </div>
 
-      <div className="p-3 border-b border-zinc-200 dark:border-zinc-800">
-        <div className={cn("flex gap-2", isCollapsed ? "flex-col" : "justify-center")}>
+      <div className="px-3 py-3 border-b border-zinc-200/80 dark:border-zinc-800/80">
+        <div className={cn(
+          "flex gap-1",
+          isCollapsed ? "flex-col items-center" : "justify-center"
+        )}>
           <button
             onClick={toggleTheme}
-            className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors"
-            title={theme === "dark" ? "Light mode" : "Dark mode"}
+            className={cn(
+              "p-2 rounded-xl transition-all duration-200 group",
+              "bg-zinc-100/80 hover:bg-zinc-200/80 dark:bg-zinc-800/50 dark:hover:bg-zinc-700/50",
+              "ring-1 ring-black/[0.04] dark:ring-white/[0.06]"
+            )}
+            title={mounted ? (theme === "dark" ? "Light mode" : "Dark mode") : "Toggle theme"}
+            suppressHydrationWarning
           >
-            {theme === "dark" ? (
-              <Sun className="w-5 h-5 text-amber-500" />
+            {mounted && theme === "dark" ? (
+              <Sun className="w-[18px] h-[18px] text-zinc-500 dark:text-zinc-400 group-hover:text-zinc-700 dark:group-hover:text-zinc-200 transition-colors" />
             ) : (
-              <Moon className="w-5 h-5 text-indigo-500" />
+              <Moon className="w-[18px] h-[18px] text-zinc-500 dark:text-zinc-400 group-hover:text-zinc-700 dark:group-hover:text-zinc-200 transition-colors" />
             )}
           </button>
 
           <button
             onClick={toggleLanguage}
-            className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors flex items-center justify-center"
+            className={cn(
+              "p-2 rounded-xl transition-all duration-200 group flex items-center justify-center",
+              "bg-zinc-100/80 hover:bg-zinc-200/80 dark:bg-zinc-800/50 dark:hover:bg-zinc-700/50",
+              "ring-1 ring-black/[0.04] dark:ring-white/[0.06]"
+            )}
             title={language === "es" ? "English" : "Español"}
           >
-            <Globe className="w-5 h-5 text-blue-500" />
+            <Globe className="w-[18px] h-[18px] text-zinc-500 dark:text-zinc-400 group-hover:text-zinc-700 dark:group-hover:text-zinc-200 transition-colors" />
             {!isCollapsed && (
-              <span className="ml-1 text-xs font-medium text-gray-600 dark:text-gray-400">
+              <span className="ml-1.5 text-[11px] font-semibold text-zinc-500 dark:text-zinc-400">
                 {language.toUpperCase()}
               </span>
             )}
@@ -146,12 +164,16 @@ export const Sidebar: React.FC = () => {
 
           <button
             onClick={rotateCurrency}
-            className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors flex items-center justify-center"
+            className={cn(
+              "p-2 rounded-xl transition-all duration-200 group flex items-center justify-center",
+              "bg-zinc-100/80 hover:bg-zinc-200/80 dark:bg-zinc-800/50 dark:hover:bg-zinc-700/50",
+              "ring-1 ring-black/[0.04] dark:ring-white/[0.06]"
+            )}
             title={`Currency: ${currency}`}
           >
-            <DollarSign className="w-5 h-5 text-emerald-500" />
+            <DollarSign className="w-[18px] h-[18px] text-zinc-500 dark:text-zinc-400 group-hover:text-zinc-700 dark:group-hover:text-zinc-200 transition-colors" />
             {!isCollapsed && (
-              <span className="ml-1 text-xs font-medium text-gray-600 dark:text-gray-400">
+              <span className="ml-1.5 text-[11px] font-semibold text-zinc-500 dark:text-zinc-400">
                 {currency}
               </span>
             )}
@@ -159,7 +181,8 @@ export const Sidebar: React.FC = () => {
         </div>
       </div>
 
-      <nav className="flex-1 p-4 space-y-1 overflow-y-auto">{navItems.map((item) => {
+      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+        {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = pathname === item.href;
 
@@ -168,20 +191,38 @@ export const Sidebar: React.FC = () => {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200",
+                "relative flex items-center gap-3 rounded-xl transition-all duration-200 group",
                 isActive
-                  ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-medium"
-                  : "text-gray-700 dark:text-gray-300 hover:bg-zinc-100 dark:hover:bg-zinc-800/50",
-                isCollapsed && "justify-center"
+                  ? "bg-cyan-500/[0.08] dark:bg-cyan-500/[0.12]"
+                  : "hover:bg-zinc-100/80 dark:hover:bg-zinc-800/50",
+                isCollapsed ? "justify-center px-3 py-3" : "px-4 py-3"
               )}
               title={isCollapsed ? t(item.labelKey) : undefined}
             >
-              <Icon className={cn("w-5 h-5 flex-shrink-0", isActive && "text-emerald-500")} />
+              {isActive && (
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 rounded-r-full bg-cyan-500" />
+              )}
+              
+              <Icon className={cn(
+                "flex-shrink-0 transition-colors duration-200",
+                isCollapsed ? "w-5 h-5" : "w-5 h-5",
+                isActive
+                  ? "text-cyan-600 dark:text-cyan-400"
+                  : "text-zinc-500 dark:text-zinc-400 group-hover:text-zinc-700 dark:group-hover:text-zinc-200"
+              )} />
+              
               {!isCollapsed && (
                 <>
-                  <span className="text-base flex-1">{t(item.labelKey)}</span>
+                  <span className={cn(
+                    "text-sm font-medium flex-1 transition-colors",
+                    isActive 
+                      ? "text-cyan-700 dark:text-cyan-300" 
+                      : "text-zinc-600 dark:text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-100"
+                  )}>
+                    {t(item.labelKey)}
+                  </span>
                   {isActive && (
-                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                    <div className="w-1.5 h-1.5 rounded-full bg-cyan-500" />
                   )}
                 </>
               )}
@@ -190,27 +231,31 @@ export const Sidebar: React.FC = () => {
         })}
       </nav>
 
-      <div className="p-4 border-t border-zinc-200 dark:border-zinc-800">
+      <div className="p-3 border-t border-zinc-200/80 dark:border-zinc-800/80">
         <Link 
           href="/profile"
           className={cn(
-            "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200",
+            "flex items-center gap-3 rounded-xl transition-all duration-200 group",
             pathname === "/profile"
-              ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-              : "bg-zinc-50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800/50",
-            isCollapsed && "justify-center"
+              ? "bg-cyan-500/[0.08] dark:bg-cyan-500/[0.12]"
+              : "hover:bg-zinc-100/80 dark:hover:bg-zinc-800/50",
+            isCollapsed ? "justify-center px-3 py-3" : "px-4 py-3"
           )}
           title={isCollapsed ? "Nirvana - Premium User" : undefined}
         >
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-600 to-teal-600 flex items-center justify-center flex-shrink-0">
+          <div className={cn(
+            "rounded-full bg-gradient-to-br from-cyan-500 to-teal-500 flex items-center justify-center flex-shrink-0",
+            "shadow-md shadow-cyan-500/20 ring-2 ring-white/80 dark:ring-zinc-900/80",
+            isCollapsed ? "w-10 h-10" : "w-10 h-10"
+          )}>
             <User className="w-5 h-5 text-white" />
           </div>
           {!isCollapsed && (
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-zinc-900 dark:text-white truncate">
+              <p className="text-sm font-semibold text-zinc-900 dark:text-white truncate">
                 Nirvana
               </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+              <p className="text-[11px] text-zinc-500 dark:text-zinc-500 truncate">
                 {t("nav.premiumUser")}
               </p>
             </div>

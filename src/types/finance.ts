@@ -27,6 +27,10 @@ export interface IAccount {
   balance: IAmount;
   lastUpdated: Date;
   isDefault: boolean;
+  network: CardNetwork;
+  cvv: string;
+  expiryMonth: number;
+  expiryYear: number;
 }
 
 /**
@@ -34,6 +38,7 @@ export interface IAccount {
  */
 export interface ICreditCard {
   id: string;
+  bankName: string;
   cardholderName: string;
   cardNumber: string;
   network: CardNetwork;

@@ -15,7 +15,7 @@ import { BankCredentialsSection } from "@/components/features/bank-credentials-s
 import { AddAccountModal } from "@/components/modals/add-account-modal";
 import { AddCredentialsModal } from "@/components/modals/add-credentials-modal";
 import {ConfirmModal } from "@/components/modals/confirm-modal";
-import { Wallet, Plus, TrendingUp, AlertCircle } from "lucide-react";
+import { Wallet, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   DndContext,
@@ -315,11 +315,13 @@ export default function AccountsPage(): React.JSX.Element {
       <header className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold flex items-center gap-2 text-zinc-900 dark:text-white">
-              <Wallet className="w-8 h-8 text-emerald-500 dark:text-emerald-400" />
+            <h1 className="text-3xl font-bold flex items-center gap-2.5 text-zinc-900 dark:text-white tracking-tight">
+              <div className="bg-cyan-500/10 p-2 rounded-xl ring-1 ring-cyan-500/10">
+                <Wallet className="w-6 h-6 text-cyan-500 dark:text-cyan-400" />
+              </div>
               {t("accounts.title")}
             </h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-2">{t("accounts.subtitle")}</p>
+            <p className="text-zinc-500 dark:text-zinc-500 mt-1">{t("accounts.subtitle")}</p>
           </div>
           <button 
             onClick={() => {
@@ -332,20 +334,22 @@ export default function AccountsPage(): React.JSX.Element {
                 setIsAddModalOpen(true);
               }
             }}
-            className="bg-emerald-600 hover:bg-emerald-700 p-3 rounded-xl transition-colors text-white"
+            className="relative group bg-gradient-to-br from-cyan-500 via-cyan-600 to-teal-600 hover:from-cyan-600 hover:via-cyan-700 hover:to-teal-700 p-4 rounded-2xl transition-all text-white hover:scale-105 active:scale-95 ring-1 ring-white/20 overflow-hidden"
           >
-            <Plus className="w-6 h-6" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <Plus className="w-6 h-6 relative z-10 drop-shadow-lg" />
           </button>
         </div>
 
-        <div className="grid grid-cols-3 gap-2 bg-zinc-100 dark:bg-zinc-900/50 backdrop-blur-sm border border-zinc-200 dark:border-zinc-800 rounded-xl p-1">
+        {/* Premium segmented tabs */}
+        <div className="flex gap-2">
           <button
             onClick={() => setActiveTab("debit")}
             className={cn(
-              "py-3 px-4 rounded-lg font-medium transition-all",
+              "flex-1 py-3 px-5 rounded-xl text-sm font-bold transition-all duration-300",
               activeTab === "debit"
-                ? "bg-emerald-600 text-white shadow-lg"
-                : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
+                ? "bg-gradient-to-br from-cyan-500 to-cyan-600 text-white shadow-lg hover:shadow-xl"
+                : "bg-white/50 dark:bg-zinc-800/50 text-zinc-600 dark:text-zinc-400 hover:bg-white/80 dark:hover:bg-zinc-800/80 hover:text-zinc-900 dark:hover:text-zinc-100"
             )}
           >
             {t("accounts.debit")}
@@ -353,10 +357,10 @@ export default function AccountsPage(): React.JSX.Element {
           <button
             onClick={() => setActiveTab("credit")}
             className={cn(
-              "py-3 px-4 rounded-lg font-medium transition-all",
+              "flex-1 py-3 px-5 rounded-xl text-sm font-bold transition-all duration-300",
               activeTab === "credit"
-                ? "bg-emerald-600 text-white shadow-lg"
-                : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
+                ? "bg-gradient-to-br from-cyan-500 to-cyan-600 text-white shadow-lg hover:shadow-xl"
+                : "bg-white/50 dark:bg-zinc-800/50 text-zinc-600 dark:text-zinc-400 hover:bg-white/80 dark:hover:bg-zinc-800/80 hover:text-zinc-900 dark:hover:text-zinc-100"
             )}
           >
             {t("accounts.credit")}
@@ -364,10 +368,10 @@ export default function AccountsPage(): React.JSX.Element {
           <button
             onClick={() => setActiveTab("credentials")}
             className={cn(
-              "py-3 px-4 rounded-lg font-medium transition-all flex items-center justify-center gap-2",
+              "flex-1 py-3 px-5 rounded-xl text-sm font-bold transition-all duration-300",
               activeTab === "credentials"
-                ? "bg-emerald-600 text-white shadow-lg"
-                : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
+                ? "bg-gradient-to-br from-cyan-500 to-cyan-600 text-white shadow-lg hover:shadow-xl"
+                : "bg-white/50 dark:bg-zinc-800/50 text-zinc-600 dark:text-zinc-400 hover:bg-white/80 dark:hover:bg-zinc-800/80 hover:text-zinc-900 dark:hover:text-zinc-100"
             )}
           >
             {t("credentials.title")}
@@ -375,36 +379,54 @@ export default function AccountsPage(): React.JSX.Element {
         </div>
 
         {activeTab === "debit" ? (
-          <div className="bg-gradient-to-br from-zinc-800 to-zinc-900 dark:from-zinc-900 dark:to-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded-2xl p-6">
-            <p className="text-sm text-gray-200 dark:text-gray-400 mb-2">{t("accounts.totalBalance")}</p>
-            <p className="text-4xl font-bold text-white">{formatCurrency(totalBalance)}</p>
-            <p className="text-sm text-emerald-300 dark:text-emerald-400 mt-2">
-              {accounts.length} {t("accounts.bankAccounts")}
-            </p>
-          </div>
-        ) : (
           <div className="grid grid-cols-2 gap-4">
-            <div className="bg-zinc-100 dark:bg-zinc-900/50 backdrop-blur-sm border border-zinc-200 dark:border-zinc-800 rounded-2xl p-5">
-              <div className="flex items-center gap-2 mb-3">
-                <TrendingUp className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
-                <span className="text-sm text-gray-600 dark:text-gray-400">{t("accounts.available")}</span>
+            <div className="relative overflow-hidden rounded-2xl p-6 bg-gradient-to-br from-cyan-50 to-teal-100 dark:from-cyan-600/30 dark:to-teal-600/30 shadow-sm dark:shadow-[0_8px_16px_rgba(0,0,0,0.3)] border border-cyan-200/40 dark:border-white/5">
+              <div className="absolute inset-0 shadow-[inset_0_1px_2px_rgba(255,255,255,0.5)] dark:shadow-[inset_0_2px_8px_rgba(255,255,255,0.05)]" />
+              <div className="relative">
+                <p className="text-cyan-700 dark:text-cyan-300 text-sm font-semibold mb-1">Balance de Cuentas</p>
+                <p className="text-[2.5rem] leading-tight font-bold text-cyan-900 dark:text-white tracking-tight">{formatCurrency(totalBalance)}</p>
+                <p className="text-cyan-600 dark:text-cyan-400 text-sm mt-2 font-medium">
+                  {accounts.length} {accounts.length === 1 ? "tarjeta débito" : "tarjetas débito"}
+                </p>
               </div>
-              <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
-                {formatCurrency(totalAvailable)}
-              </p>
             </div>
 
-            <div className="bg-zinc-100 dark:bg-zinc-900/50 backdrop-blur-sm border border-zinc-200 dark:border-zinc-800 rounded-2xl p-5">
-              <div className="flex items-center gap-2 mb-3">
-                <AlertCircle className="w-5 h-5 text-red-500 dark:text-red-400" />
-                <span className="text-sm text-gray-600 dark:text-gray-400">{t("accounts.used")}</span>
+            <div className="relative overflow-hidden rounded-2xl p-6 bg-gradient-to-br from-red-50 to-rose-100 dark:from-red-600/30 dark:to-rose-600/30 shadow-sm dark:shadow-[0_8px_16px_rgba(0,0,0,0.3)] border border-red-200/40 dark:border-white/5">
+              <div className="absolute inset-0 shadow-[inset_0_1px_2px_rgba(255,255,255,0.5)] dark:shadow-[inset_0_2px_8px_rgba(255,255,255,0.05)]" />
+              <div className="relative">
+                <p className="text-red-700 dark:text-red-300 text-sm font-semibold mb-1">{t("dashboard.spent")}</p>
+                <p className="text-[2.5rem] leading-tight font-bold text-red-900 dark:text-white tracking-tight">{formatCurrency(totalBalance * 0.15)}</p>
+                <p className="text-red-600 dark:text-red-400 text-sm mt-2 font-medium">
+                  {t("dashboard.thisMonth")}
+                </p>
               </div>
-              <p className="text-2xl font-bold text-red-600 dark:text-red-400">
-                {formatCurrency(totalUsedCredit)}
-              </p>
             </div>
           </div>
-        )}
+        ) : activeTab === "credit" ? (
+          <div className="grid grid-cols-2 gap-4">
+            <div className="relative overflow-hidden rounded-2xl p-6 bg-gradient-to-br from-cyan-50 to-teal-100 dark:from-cyan-600/30 dark:to-teal-600/30 shadow-sm dark:shadow-[0_8px_16px_rgba(0,0,0,0.3)] border border-cyan-200/40 dark:border-white/5">
+              <div className="absolute inset-0 shadow-[inset_0_1px_2px_rgba(255,255,255,0.5)] dark:shadow-[inset_0_2px_8px_rgba(255,255,255,0.05)]" />
+              <div className="relative">
+                <p className="text-cyan-700 dark:text-cyan-300 text-sm font-semibold mb-1">{t("accounts.available")}</p>
+                <p className="text-[2.5rem] leading-tight font-bold text-cyan-900 dark:text-white tracking-tight">{formatCurrency(totalAvailable)}</p>
+                <p className="text-cyan-600 dark:text-cyan-400 text-sm mt-2 font-medium">
+                  {cards.length} {cards.length === 1 ? "tarjeta crédito" : "tarjetas crédito"}
+                </p>
+              </div>
+            </div>
+
+            <div className="relative overflow-hidden rounded-2xl p-6 bg-gradient-to-br from-red-50 to-rose-100 dark:from-red-600/30 dark:to-rose-600/30 shadow-sm dark:shadow-[0_8px_16px_rgba(0,0,0,0.3)] border border-red-200/40 dark:border-white/5">
+              <div className="absolute inset-0 shadow-[inset_0_1px_2px_rgba(255,255,255,0.5)] dark:shadow-[inset_0_2px_8px_rgba(255,255,255,0.05)]" />
+              <div className="relative">
+                <p className="text-red-700 dark:text-red-300 text-sm font-semibold mb-1">{t("accounts.used")}</p>
+                <p className="text-[2.5rem] leading-tight font-bold text-red-900 dark:text-white tracking-tight">{formatCurrency(totalUsedCredit)}</p>
+                <p className="text-red-600 dark:text-red-400 text-sm mt-2 font-medium">
+                  {t("dashboard.thisMonth")}
+                </p>
+              </div>
+            </div>
+          </div>
+        ) : null}
       </header>
 
       <section>

@@ -16,11 +16,11 @@ interface MainLayoutProps {
 
 export default function MainLayout({ children }: Readonly<MainLayoutProps>): React.JSX.Element {
   return (
-    <div className="flex min-h-screen bg-white dark:bg-zinc-950">
+    <div className="flex min-h-screen bg-zinc-50/50 dark:bg-zinc-950">
       <Sidebar />
       
       <div className="flex-1 min-w-0">
-        <main className="w-full max-w-[1400px] mx-auto px-4 md:px-6 lg:px-8 pt-6 md:pt-8 pb-24 md:pb-6">
+        <main className="w-full max-w-[1400px] mx-auto px-4 md:px-6 lg:px-8 pt-[47px] md:pt-[55px] pb-24 md:pb-10">
           {children}
         </main>
       </div>

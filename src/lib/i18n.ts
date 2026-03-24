@@ -23,8 +23,8 @@ export const translations = {
       summary: "Aquí está tu resumen financiero de",
       totalBalance: "Balance Total",
       debt: "Deuda",
-      available: "Disponible",
-      monthlyServices: "Servicios Mensuales",
+      available: "Disponible",      spent: "Gastado",
+      thisMonth: "este mes",      monthlyServices: "Servicios Mensuales",
       monthlyRecurring: "Costo mensual recurrente de",
       upcomingPayments: "Próximos Pagos de",
       stayOnTop: "Mantente al día con tus compromisos",
@@ -35,6 +35,7 @@ export const translations = {
       subscription: "Suscripción",
       bill: "Factura",
       acrossAccounts: "En todas tus cuentas a la fecha",
+      financialHealth: "Salud Financiera",
     },
 
     // Accounts
@@ -156,6 +157,8 @@ export const translations = {
       ofMonth: "del mes",
       dueDay: "Vence: Día",
       lastUpdated: "Última actualización",
+      card: "tarjeta",
+      cards: "tarjetas",
     },
 
     // Modals & Forms
@@ -179,9 +182,11 @@ export const translations = {
       cardholderNameRequired: "Nombre del titular requerido",
       cardNumber: "Número de Tarjeta",
       invalidCardNumber: "Número de tarjeta inválido",
+      cardNetwork: "Red de Tarjeta",
       network: "Red",
       expiryMonth: "Mes de Expiración",
       expiryYear: "Año de Expiración",
+      expirationDate: "Fecha de Expiración",
       expiryRequired: "Fecha de expiración requerida",
       creditLimit: "Límite de Crédito",
       invalidCreditLimit: "Límite inválido",
@@ -243,6 +248,8 @@ export const translations = {
       totalBalance: "Total Balance",
       debt: "Debt",
       available: "Available",
+      spent: "Spent",
+      thisMonth: "this month",
       monthlyServices: "Monthly Services",
       monthlyRecurring: "Monthly recurring cost for",
       upcomingPayments: "Upcoming Payments for",
@@ -254,6 +261,7 @@ export const translations = {
       subscription: "Subscription",
       bill: "Bill",
       acrossAccounts: "Across all accounts to date",
+      financialHealth: "Financial Health",
     },
 
     // Accounts
@@ -375,6 +383,8 @@ export const translations = {
       ofMonth: "of month",
       dueDay: "Due: Day",
       lastUpdated: "Last updated",
+      card: "card",
+      cards: "cards",
     },
 
     // Modals & Forms
@@ -398,9 +408,11 @@ export const translations = {
       cardholderNameRequired: "Cardholder name required",
       cardNumber: "Card Number",
       invalidCardNumber: "Invalid card number",
+      cardNetwork: "Card Network",
       network: "Network",
       expiryMonth: "Expiry Month",
       expiryYear: "Expiry Year",
+      expirationDate: "Expiration Date",
       expiryRequired: "Expiry date required",
       creditLimit: "Credit Limit",
       invalidCreditLimit: "Invalid limit",

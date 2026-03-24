@@ -77,9 +77,9 @@ function SortableServiceCard(props: SortableServiceCardProps) {
       ref={setNodeRef}
       style={style}
       className={cn(
-        "bg-zinc-100 dark:bg-zinc-900/50 backdrop-blur-sm border rounded-xl p-4 transition-all hover:bg-zinc-200 dark:hover:bg-zinc-800/50 cursor-grab active:cursor-grabbing",
-        isDueSoon ? "border-amber-500/50" : "border-zinc-200 dark:border-zinc-800",
-        isDragging && "scale-105 shadow-2xl z-50 opacity-90"
+        "card-surface rounded-xl p-4 transition-all duration-200 cursor-grab active:cursor-grabbing group",
+        isDueSoon && "ring-1 ring-teal-500/30",
+        isDragging && "scale-105 card-elevated z-50 opacity-90"
       )}
       {...attributes}
       {...listeners}
@@ -90,44 +90,44 @@ function SortableServiceCard(props: SortableServiceCardProps) {
 }
 
 function ServiceCardContent(props: SortableServiceCardProps) {
-  const { sub, daysUntil, isDueSoon, language, locale, formatCurrency, getFrequencyLabel, getStatusLabel, onEdit, onDelete, t } = props;
+  const { sub, daysUntil, isDueSoon, locale, formatCurrency, getFrequencyLabel, getStatusLabel, onEdit, onDelete, t } = props;
 
   return (
     <div className="space-y-3">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-3 flex-1 min-w-0">
           <div className={cn(
-            "w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0",
-            "bg-gradient-to-br from-purple-500/20 to-purple-600/20"
+            "w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0",
+            "bg-cyan-500/10 ring-1 ring-cyan-500/10"
           )}>
-            <DollarSign className="w-5 h-5 text-purple-500 dark:text-purple-400" />
+            <DollarSign className="w-4 h-4 text-cyan-500 dark:text-cyan-400" />
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-zinc-900 dark:text-white truncate">{sub.name}</h3>
+            <h3 className="font-semibold text-sm text-zinc-900 dark:text-white truncate">{sub.name}</h3>
             {sub.description && (
-              <p className="text-sm text-gray-600 dark:text-gray-400 truncate">{sub.description}</p>
+              <p className="text-xs text-zinc-500 dark:text-zinc-500 truncate">{sub.description}</p>
             )}
           </div>
         </div>
 
-        <div className="flex items-center gap-1 flex-shrink-0" onPointerDown={(e) => e.stopPropagation()}>
+        <div className="flex items-center gap-0.5 flex-shrink-0" onPointerDown={(e) => e.stopPropagation()}>
           <button
             onClick={() => onEdit(sub)}
-            className="p-2 hover:bg-blue-500/10 rounded-lg transition-colors group"
+            className="p-1.5 hover:bg-zinc-200/80 dark:hover:bg-zinc-700/50 rounded-lg transition-colors group/btn"
           >
-            <Edit2 className="w-4 h-4 text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500" />
+            <Edit2 className="w-3.5 h-3.5 text-zinc-400 dark:text-zinc-500 group-hover/btn:text-blue-500" />
           </button>
           <button
             onClick={() => onDelete(sub.id)}
-            className="p-2 hover:bg-red-500/10 rounded-lg transition-colors group"
+            className="p-1.5 hover:bg-red-500/10 rounded-lg transition-colors group/btn"
           >
-            <Trash2 className="w-4 h-4 text-zinc-600 dark:text-zinc-400 group-hover:text-red-500" />
+            <Trash2 className="w-3.5 h-3.5 text-zinc-400 dark:text-zinc-500 group-hover/btn:text-red-500" />
           </button>
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2 text-xs">
-        <div className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
+      <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
+        <div className="flex items-center gap-1 text-zinc-500 dark:text-zinc-500">
           <Calendar className="w-3 h-3 flex-shrink-0" />
           <span className="whitespace-nowrap">
             {sub.nextPaymentDate.toLocaleDateString(locale, {
@@ -138,7 +138,7 @@ function ServiceCardContent(props: SortableServiceCardProps) {
         </div>
         
         {isDueSoon && (
-          <span className="font-medium text-amber-500 dark:text-amber-400 whitespace-nowrap">
+          <span className="font-semibold text-teal-600 dark:text-teal-400 whitespace-nowrap">
             {daysUntil === 0
               ? t("dashboard.dueToday")
               : daysUntil === 1
@@ -147,30 +147,30 @@ function ServiceCardContent(props: SortableServiceCardProps) {
           </span>
         )}
         
-        <span className="px-2 py-0.5 bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-full capitalize whitespace-nowrap">
+        <span className="px-2 py-0.5 bg-zinc-200/80 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 rounded-full capitalize whitespace-nowrap font-medium">
           {getFrequencyLabel(sub.frequency)}
         </span>
         
         {sub.autoRenewal && (
-          <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-full whitespace-nowrap">
+          <span className="px-2 py-0.5 bg-cyan-$100/10 text-cyan-$100 dark:text-cyan-$100 rounded-full whitespace-nowrap ring-1 ring-cyan-$100/10 font-medium">
             {t("services.autoRenewal")}
           </span>
         )}
         
         <span
           className={cn(
-            "px-2 py-0.5 rounded-full whitespace-nowrap",
+            "px-2 py-0.5 rounded-full whitespace-nowrap font-medium",
             sub.status === "active"
-              ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400"
-              : "bg-gray-500/20 text-gray-600 dark:text-gray-400"
+              ? "bg-cyan-$100/10 text-cyan-$100 dark:text-cyan-$100 ring-1 ring-cyan-$100/10"
+              : "bg-zinc-200/80 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-500"
           )}
         >
           {getStatusLabel(sub.status)}
         </span>
       </div>
 
-      <div className="pt-2 border-t border-zinc-200 dark:border-zinc-800">
-        <p className="text-2xl font-bold text-zinc-900 dark:text-white">{formatCurrency(sub.amount)}</p>
+      <div className="pt-2 border-t border-zinc-200/60 dark:border-zinc-800/60">
+        <p className="text-xl font-bold text-zinc-900 dark:text-white tracking-tight">{formatCurrency(sub.amount)}</p>
       </div>
     </div>
   );
@@ -184,6 +184,7 @@ export default function ServicesPage(): React.JSX.Element {
   const [services, setServices] = useState<ISubscription[]>(mockSubscriptions);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingService, setEditingService] = useState<ISubscription | null>(null);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [confirmDelete, setConfirmDelete] = useState<{
     isOpen: boolean;
     id: string | null;
@@ -193,6 +194,18 @@ export default function ServicesPage(): React.JSX.Element {
     id: null,
     name: "",
   });
+
+  const toggleCategory = (category: string) => {
+    setSelectedCategories(prev => 
+      prev.includes(category) 
+        ? prev.filter(c => c !== category)
+        : [...prev, category]
+    );
+  };
+
+  const clearFilters = () => {
+    setSelectedCategories([]);
+  };
 
   const handleAddService = (newService: Omit<ISubscription, "id">) => {
     const serviceWithId: ISubscription = {
@@ -277,7 +290,13 @@ export default function ServicesPage(): React.JSX.Element {
     return formatter.format(amount.value);
   };
 
-  const totalMonthlyInPEN = services
+  const filteredServices = selectedCategories.length > 0
+    ? services.filter(s => selectedCategories.includes(s.category))
+    : services;
+
+  const allCategories = Array.from(new Set(services.map(s => s.category)));
+
+  const totalMonthlyInPEN = filteredServices
     .filter((sub) => sub.frequency === "monthly" && sub.status === "active")
     .reduce((sum, sub) => {
       const valueInPEN = sub.amount.currency === "USD" ? sub.amount.value * 3.75 : sub.amount.value;
@@ -289,14 +308,6 @@ export default function ServicesPage(): React.JSX.Element {
   const upcomingSubs = services.filter(
     (sub) => sub.nextPaymentDate >= now && sub.nextPaymentDate <= sevenDaysFromNow
   );
-
-  const categorizedSubs = services.reduce((acc, sub) => {
-    if (!acc[sub.category]) {
-      acc[sub.category] = [];
-    }
-    acc[sub.category].push(sub);
-    return acc;
-  }, {} as Record<string, typeof services>);
 
   const getDaysUntil = (date: Date): number => {
     const diff = date.getTime() - now.getTime();
@@ -323,15 +334,17 @@ export default function ServicesPage(): React.JSX.Element {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <header className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold flex items-center gap-2 text-zinc-900 dark:text-white">
-              <Receipt className="w-8 h-8 text-emerald-500 dark:text-emerald-400" />
+            <h1 className="text-3xl font-bold flex items-center gap-2.5 text-zinc-900 dark:text-white tracking-tight">
+              <div className="bg-cyan-500/10 p-2 rounded-xl ring-1 ring-cyan-500/10">
+                <Receipt className="w-6 h-6 text-cyan-500 dark:text-cyan-400" />
+              </div>
               {t("services.title")}
             </h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-2">{t("services.subtitle")}</p>
+            <p className="text-zinc-500 dark:text-zinc-500 mt-1">{t("services.subtitle")}</p>
           </div>
           
           <button
@@ -339,44 +352,73 @@ export default function ServicesPage(): React.JSX.Element {
               setEditingService(null);
               setIsAddModalOpen(true);
             }}
-            className="p-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl transition-colors shadow-lg hover:shadow-xl"
+            className="bg-cyan-500 hover:bg-cyan-600 p-3 rounded-xl transition-all text-white hover:scale-105 active:scale-95"
           >
-            <Plus className="w-6 h-6" />
+            <Plus className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="bg-gradient-to-br from-purple-600 to-purple-800 rounded-2xl p-6 shadow-xl">
-          <div className="flex items-start justify-between mb-4">
-            <div>
-              <p className="text-purple-100 text-sm font-medium">{t("services.totalMonthlyCost")}</p>
-              <h2 className="text-4xl font-bold text-white mt-2">
-                {currency === "PEN" ? "S/" : currency === "USD" ? "$" : "€"} {totalMonthlyInPEN.toLocaleString(locale, { minimumFractionDigits: 2 })}
-              </h2>
-            </div>
-            <div className="bg-white/20 backdrop-blur-sm p-3 rounded-xl">
-              <TrendingUp className="w-6 h-6 text-white" />
-            </div>
+        <div className="relative overflow-hidden rounded-2xl p-6 bg-gradient-to-br from-cyan-50 to-teal-100 dark:from-cyan-600/30 dark:to-teal-600/30 shadow-sm dark:shadow-[0_8px_16px_rgba(0,0,0,0.3)] border border-cyan-200/40 dark:border-white/5">
+          <div className="absolute inset-0 shadow-[inset_0_1px_2px_rgba(255,255,255,0.5)] dark:shadow-[inset_0_2px_8px_rgba(255,255,255,0.05)]" />
+          <div className="relative">
+            <p className="text-cyan-700 dark:text-cyan-300 text-sm font-semibold mb-1">{t("services.totalMonthlyCost")}</p>
+            <p className="text-[2.5rem] leading-tight font-bold text-cyan-900 dark:text-white tracking-tight">
+              {currency === "PEN" ? "S/" : currency === "USD" ? "$" : "€"} {totalMonthlyInPEN.toLocaleString(locale, { minimumFractionDigits: 2 })}
+            </p>
+            <p className="text-cyan-600 dark:text-cyan-400 text-sm mt-2 font-medium">
+              {filteredServices.filter((s) => s.status === "active").length} {t("services.activeServices")}
+            </p>
           </div>
-          <p className="text-purple-100 text-sm">
-            {services.filter((s) => s.status === "active").length} {t("services.activeServices")}
-          </p>
         </div>
 
         {upcomingSubs.length > 0 && (
-          <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4">
+          <div className="card-surface rounded-xl p-4 ring-1 ring-teal-500/20">
             <div className="flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+              <div className="bg-teal-500/10 p-2 rounded-lg ring-1 ring-teal-500/10 flex-shrink-0 mt-0.5">
+                <AlertCircle className="w-4 h-4 text-teal-500" />
+              </div>
               <div>
-                <p className="font-semibold text-amber-600 dark:text-amber-400">
+                <p className="font-semibold text-teal-600 dark:text-teal-400 text-sm">
                   {upcomingSubs.length} {upcomingSubs.length > 1 ? t("services.pendingPayments").split(" | ")[1] : t("services.pendingPayments").split(" | ")[0]} {t("services.thisWeek")}
                 </p>
-                <p className="text-sm text-amber-700 dark:text-amber-300/80 mt-1">
+                <p className="text-xs text-teal-700/80 dark:text-teal-300/60 mt-1">
                   {upcomingSubs.map((sub) => sub.name).join(", ")}
                 </p>
               </div>
             </div>
           </div>
         )}
+
+        <div className="flex flex-wrap gap-2 items-center">
+          {allCategories.map((category) => {
+            const IconComponent = categoryIcons[category] || DollarSign;
+            const isActive = selectedCategories.includes(category);
+            
+            return (
+              <button
+                key={category}
+                onClick={() => toggleCategory(category)}
+                className={cn(
+                  "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all",
+                  isActive
+                    ? "bg-cyan-500 text-white shadow-md shadow-cyan-500/25"
+                    : "bg-white dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 border border-zinc-200 dark:border-zinc-700"
+                )}
+              >
+                <IconComponent className="w-3.5 h-3.5" />
+                {getCategoryLabel(category)}
+              </button>
+            );
+          })}
+          {selectedCategories.length > 0 && (
+            <button
+              onClick={clearFilters}
+              className="text-xs text-cyan-600 dark:text-cyan-400 hover:underline font-medium"
+            >
+              Limpiar filtros
+            </button>
+          )}
+        </div>
       </header>
 
       <DndContext
@@ -385,46 +427,47 @@ export default function ServicesPage(): React.JSX.Element {
         onDragEnd={handleDragEnd}
       >
         <SortableContext
-          items={services.map((s) => s.id)}
+          items={filteredServices.map((s) => s.id)}
           strategy={verticalListSortingStrategy}
         >
-          <section className="space-y-6">
-            {Object.entries(categorizedSubs).map(([category, subs]) => {
-              const IconComponent = categoryIcons[category] || DollarSign;
-              
-              return (
-                <div key={category} className="space-y-3">
-                  <h2 className="text-lg font-semibold text-zinc-700 dark:text-gray-300 flex items-center gap-2">
-                    <IconComponent className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
-                    {getCategoryLabel(category)}
-                  </h2>
-
-                  <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3">
-                    {subs.map((sub) => {
-                      const daysUntil = getDaysUntil(sub.nextPaymentDate);
-                      const isDueSoon = daysUntil <= 3;
-
-                      return (
-                        <SortableServiceCard
-                          key={sub.id}
-                          sub={sub}
-                          daysUntil={daysUntil}
-                          isDueSoon={isDueSoon}
-                          language={language}
-                          locale={locale}
-                          formatCurrency={formatCurrency}
-                          getFrequencyLabel={getFrequencyLabel}
-                          getStatusLabel={getStatusLabel}
-                          onEdit={handleEditService}
-                          onDelete={handleDeleteService}
-                          t={t}
-                        />
-                      );
-                    })}
-                  </div>
+          <section>
+            {filteredServices.length === 0 ? (
+              <div className="card-surface rounded-2xl p-12 text-center">
+                <div className="bg-zinc-100 dark:bg-zinc-800 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Receipt className="w-8 h-8 text-zinc-400" />
                 </div>
-              );
-            })}
+                <h3 className="text-lg font-semibold text-zinc-700 dark:text-zinc-300 mb-2">
+                  No hay servicios en esta categoría
+                </h3>
+                <p className="text-sm text-zinc-500 dark:text-zinc-500">
+                  Selecciona otra categoría o limpia los filtros para ver todos tus servicios
+                </p>
+              </div>
+            ) : (
+              <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+                {filteredServices.map((sub) => {
+                  const daysUntil = getDaysUntil(sub.nextPaymentDate);
+                  const isDueSoon = daysUntil <= 3;
+
+                  return (
+                    <SortableServiceCard
+                      key={sub.id}
+                      sub={sub}
+                      daysUntil={daysUntil}
+                      isDueSoon={isDueSoon}
+                      language={language}
+                      locale={locale}
+                      formatCurrency={formatCurrency}
+                      getFrequencyLabel={getFrequencyLabel}
+                      getStatusLabel={getStatusLabel}
+                      onEdit={handleEditService}
+                      onDelete={handleDeleteService}
+                      t={t}
+                    />
+                  );
+                })}
+              </div>
+            )}
           </section>
         </SortableContext>
       </DndContext>
@@ -436,7 +479,7 @@ export default function ServicesPage(): React.JSX.Element {
           <p className="text-gray-600 dark:text-gray-400 mb-6">{t("services.addFirstService")}</p>
           <button 
             onClick={() => setIsAddModalOpen(true)}
-            className="bg-emerald-600 hover:bg-emerald-700 px-6 py-3 rounded-lg font-medium transition-colors text-white"
+            className="bg-cyan-$100 hover:bg-emerald-700 px-6 py-3 rounded-lg font-medium transition-colors text-white"
           >
             {t("services.addService")}
           </button>

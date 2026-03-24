@@ -49,6 +49,7 @@ export function AddAccountModal({
     balance: "",
     accountSubType: "checking" as AccountType,
     isDefault: false,
+    cvv: "",
     
     cardholderName: "",
     cardNumber: "",
@@ -71,6 +72,7 @@ export function AddAccountModal({
       balance: "",
       accountSubType: "checking" as AccountType,
       isDefault: false,
+      cvv: "",
       cardholderName: "",
       cardNumber: "",
       expiryMonth: "",
@@ -97,11 +99,12 @@ export function AddAccountModal({
         balance: editingAccount.balance.value.toString(),
         accountSubType: editingAccount.accountType,
         isDefault: editingAccount.isDefault,
+        network: editingAccount.network,
+        cvv: editingAccount.cvv,
+        expiryMonth: editingAccount.expiryMonth.toString(),
+        expiryYear: editingAccount.expiryYear.toString(),
         cardholderName: "",
         cardNumber: "",
-        expiryMonth: "",
-        expiryYear: "",
-        network: "visa",
         creditLimit: "",
         usedCredit: "",
         cutoffDay: "",
@@ -110,17 +113,18 @@ export function AddAccountModal({
     } else if (editingCard) {
       setAccountType("credit");
       setFormData({
-        bankName: "",
+        bankName: editingCard.bankName,
         accountNumber: "",
         cci: "",
         balance: "",
         accountSubType: "checking",
         isDefault: false,
+        network: editingCard.network,
+        cvv: "",
         cardholderName: editingCard.cardholderName,
         cardNumber: editingCard.cardNumber,
         expiryMonth: editingCard.expiryMonth.toString(),
         expiryYear: editingCard.expiryYear.toString(),
-        network: editingCard.network,
         creditLimit: editingCard.creditLimit.value.toString(),
         usedCredit: editingCard.usedCredit.value.toString(),
         cutoffDay: editingCard.cutoffDay.toString(),
@@ -166,6 +170,10 @@ export function AddAccountModal({
           currency: currency,
         },
         isDefault: formData.isDefault,
+        network: formData.network,
+        cvv: formData.cvv || "000",
+        expiryMonth: parseInt(formData.expiryMonth) || 12,
+        expiryYear: parseInt(formData.expiryYear) || 2030,
       };
 
       if (isEditMode && editingAccount && onUpdateAccount) {
@@ -197,6 +205,7 @@ export function AddAccountModal({
       const creditLimitValue = parseFloat(formData.creditLimit);
 
       const newCard: Omit<ICreditCard, "id" | "lastStatementDate" | "nextPaymentDate" | "minimumPayment"> = {
+        bankName: formData.bankName,
         cardholderName: formData.cardholderName,
         cardNumber: formData.cardNumber,
         network: formData.network,
@@ -260,15 +269,15 @@ export function AddAccountModal({
               className={cn(
                 "p-4 rounded-xl border-2 transition-all flex flex-col items-center gap-2",
                 accountType === "debit"
-                  ? "border-emerald-500 bg-emerald-500/10"
+                  ? "border-cyan-$100 bg-cyan-$100/10"
                   : "border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600",
                 isEditMode && "opacity-50 cursor-not-allowed"
               )}
             >
-              <Wallet className={cn("w-8 h-8", accountType === "debit" ? "text-emerald-500" : "text-zinc-400")} />
+              <Wallet className={cn("w-8 h-8", accountType === "debit" ? "text-cyan-$100" : "text-zinc-400")} />
               <span className={cn(
                 "font-medium",
-                accountType === "debit" ? "text-emerald-600 dark:text-emerald-400" : "text-zinc-600 dark:text-zinc-400"
+                accountType === "debit" ? "text-cyan-$100 dark:text-cyan-$100" : "text-zinc-600 dark:text-zinc-400"
               )}>
                 {t("accounts.debit")}
               </span>
@@ -281,15 +290,15 @@ export function AddAccountModal({
               className={cn(
                 "p-4 rounded-xl border-2 transition-all flex flex-col items-center gap-2",
                 accountType === "credit"
-                  ? "border-emerald-500 bg-emerald-500/10"
+                  ? "border-cyan-$100 bg-cyan-$100/10"
                   : "border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600",
                 isEditMode && "opacity-50 cursor-not-allowed"
               )}
             >
-              <CreditCard className={cn("w-8 h-8", accountType === "credit" ? "text-emerald-500" : "text-zinc-400")} />
+              <CreditCard className={cn("w-8 h-8", accountType === "credit" ? "text-cyan-$100" : "text-zinc-400")} />
               <span className={cn(
                 "font-medium",
-                accountType === "credit" ? "text-emerald-600 dark:text-emerald-400" : "text-zinc-600 dark:text-zinc-400"
+                accountType === "credit" ? "text-cyan-$100 dark:text-cyan-$100" : "text-zinc-600 dark:text-zinc-400"
               )}>
                 {t("accounts.credit")}
               </span>
@@ -310,7 +319,7 @@ export function AddAccountModal({
                 "w-full px-4 py-3 rounded-xl border bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white",
                 errors.bankName
                   ? "border-red-500"
-                  : "border-zinc-200 dark:border-zinc-700 focus:border-emerald-500"
+                  : "border-zinc-200 dark:border-zinc-700 focus:border-cyan-$100"
               )}
             />
             {errors.bankName && <p className="text-red-500 text-sm mt-1">{errors.bankName}</p>}
@@ -335,21 +344,37 @@ export function AddAccountModal({
 
                 <div>
                   <label className="block text-sm font-medium text-zinc-700 dark:text-gray-300 mb-2">
-                    {t("forms.currentBalance")}
+                    {t("forms.cardNetwork")}
                   </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={formData.balance}
-                    onChange={(e) => setFormData({ ...formData, balance: e.target.value })}
-                    placeholder="0.00"
-                    className={cn(
-                      "w-full px-4 py-3 rounded-xl border bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white",
-                      errors.balance ? "border-red-500" : "border-zinc-200 dark:border-zinc-700"
-                    )}
-                  />
-                  {errors.balance && <p className="text-red-500 text-sm mt-1">{errors.balance}</p>}
+                  <select
+                    value={formData.network}
+                    onChange={(e) => setFormData({ ...formData, network: e.target.value as CardNetwork })}
+                    className="w-full px-4 py-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white"
+                  >
+                    <option value="visa">VISA</option>
+                    <option value="mastercard">Mastercard</option>
+                    <option value="amex">American Express</option>
+                    <option value="discover">Discover</option>
+                  </select>
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-zinc-700 dark:text-gray-300 mb-2">
+                  {t("forms.currentBalance")}
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={formData.balance}
+                  onChange={(e) => setFormData({ ...formData, balance: e.target.value })}
+                  placeholder="0.00"
+                  className={cn(
+                    "w-full px-4 py-3 rounded-xl border bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white",
+                    errors.balance ? "border-red-500" : "border-zinc-200 dark:border-zinc-700"
+                  )}
+                />
+                {errors.balance && <p className="text-red-500 text-sm mt-1">{errors.balance}</p>}
               </div>
 
               <div>
@@ -389,12 +414,54 @@ export function AddAccountModal({
                 {errors.cci && <p className="text-red-500 text-sm mt-1">{errors.cci}</p>}
               </div>
 
+              <div className="grid grid-cols-3 gap-4">
+                <div className="col-span-2">
+                  <label className="block text-sm font-medium text-zinc-700 dark:text-gray-300 mb-2">
+                    {t("forms.expirationDate")}
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <input
+                      type="number"
+                      value={formData.expiryMonth}
+                      onChange={(e) => setFormData({ ...formData, expiryMonth: e.target.value })}
+                      placeholder="MM"
+                      min="1"
+                      max="12"
+                      className="w-full px-4 py-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white font-mono text-center"
+                    />
+                    <input
+                      type="number"
+                      value={formData.expiryYear}
+                      onChange={(e) => setFormData({ ...formData, expiryYear: e.target.value })}
+                      placeholder="YYYY"
+                      min="2024"
+                      max="2040"
+                      className="w-full px-4 py-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white font-mono text-center"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-zinc-700 dark:text-gray-300 mb-2">
+                    CVV
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.cvv}
+                    onChange={(e) => setFormData({ ...formData, cvv: e.target.value })}
+                    placeholder="123"
+                    maxLength={4}
+                    className="w-full px-4 py-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white font-mono text-center"
+                  />
+                </div>
+              </div>
+
               <label className="flex items-center gap-3 p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl cursor-pointer">
                 <input
                   type="checkbox"
                   checked={formData.isDefault}
                   onChange={(e) => setFormData({ ...formData, isDefault: e.target.checked })}
-                  className="w-5 h-5 rounded border-zinc-300 text-emerald-600 focus:ring-emerald-500"
+                  className="w-5 h-5 rounded border-zinc-300 text-cyan-$100 focus:ring-cyan-$100"
                 />
                 <span className="text-zinc-900 dark:text-white font-medium">
                   {t("forms.setAsDefault")}
@@ -544,7 +611,7 @@ export function AddAccountModal({
             </button>
             <button
               type="submit"
-              className="flex-1 px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white transition-colors font-medium"
+              className="flex-1 px-6 py-3 rounded-xl bg-cyan-$100 hover:bg-emerald-700 text-white transition-colors font-medium"
             >
               {isEditMode
                 ? t("forms.saveChanges")

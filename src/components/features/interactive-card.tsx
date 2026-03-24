@@ -97,8 +97,6 @@ export const InteractiveCard: React.FC<InteractiveCardProps> = ({ card, disableI
             </p>
           </div>
         </div>
-
-        <div className="absolute top-20 left-6 w-12 h-10 bg-gradient-to-br from-amber-400 to-yellow-600 rounded opacity-80" />
       </motion.div>
     </div>
   );

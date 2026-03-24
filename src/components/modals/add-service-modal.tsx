@@ -178,14 +178,14 @@ export function AddServiceModal({ isOpen, onClose, onAdd, editingService, onUpda
                   className={cn(
                     "p-4 rounded-xl border-2 transition-all flex flex-col items-center gap-2",
                     formData.category === key
-                      ? "border-emerald-500 bg-emerald-500/10"
+                      ? "border-cyan-$100 bg-cyan-$100/10"
                       : "border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600"
                   )}
                 >
                   <span className="text-3xl">{icon}</span>
                   <span className={cn(
                     "text-sm font-medium",
-                    formData.category === key ? "text-emerald-600 dark:text-emerald-400" : "text-zinc-600 dark:text-zinc-400"
+                    formData.category === key ? "text-cyan-$100 dark:text-cyan-$100" : "text-zinc-600 dark:text-zinc-400"
                   )}>
                     {t(`services.category${key.charAt(0).toUpperCase() + key.slice(1)}`)}
                   </span>
@@ -208,7 +208,7 @@ export function AddServiceModal({ isOpen, onClose, onAdd, editingService, onUpda
                 "w-full px-4 py-3 rounded-xl border bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white",
                 errors.name
                   ? "border-red-500 dark:border-red-500"
-                  : "border-zinc-200 dark:border-zinc-700 focus:border-emerald-500 dark:focus:border-emerald-500"
+                  : "border-zinc-200 dark:border-zinc-700 focus:border-cyan-$100 dark:focus:border-cyan-$100"
               )}
             />
             {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
@@ -224,7 +224,7 @@ export function AddServiceModal({ isOpen, onClose, onAdd, editingService, onUpda
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               placeholder={t("forms.descriptionPlaceholder")}
               rows={3}
-              className="w-full px-4 py-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white focus:border-emerald-500 dark:focus:border-emerald-500"
+              className="w-full px-4 py-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white focus:border-cyan-$100 dark:focus:border-cyan-$100"
             />
           </div>
 
@@ -248,7 +248,7 @@ export function AddServiceModal({ isOpen, onClose, onAdd, editingService, onUpda
                     "w-full pl-12 pr-4 py-3 rounded-xl border bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white",
                     errors.amount
                       ? "border-red-500 dark:border-red-500"
-                      : "border-zinc-200 dark:border-zinc-700 focus:border-emerald-500 dark:focus:border-emerald-500"
+                      : "border-zinc-200 dark:border-zinc-700 focus:border-cyan-$100 dark:focus:border-cyan-$100"
                   )}
                 />
               </div>
@@ -263,7 +263,7 @@ export function AddServiceModal({ isOpen, onClose, onAdd, editingService, onUpda
               <select
                 value={formData.frequency}
                 onChange={(e) => setFormData({ ...formData, frequency: e.target.value as "monthly" | "yearly" | "weekly" | "quarterly" })}
-                className="w-full px-4 py-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white focus:border-emerald-500 dark:focus:border-emerald-500"
+                className="w-full px-4 py-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white focus:border-cyan-$100 dark:focus:border-cyan-$100"
               >
                 <option value="monthly">{t("services.monthly")}</option>
                 <option value="yearly">{t("services.yearly")}</option>
@@ -286,7 +286,7 @@ export function AddServiceModal({ isOpen, onClose, onAdd, editingService, onUpda
                 "w-full px-4 py-3 rounded-xl border bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white",
                 errors.nextPaymentDate
                   ? "border-red-500 dark:border-red-500"
-                  : "border-zinc-200 dark:border-zinc-700 focus:border-emerald-500 dark:focus:border-emerald-500"
+                  : "border-zinc-200 dark:border-zinc-700 focus:border-cyan-$100 dark:focus:border-cyan-$100"
               )}
             />
             {errors.nextPaymentDate && <p className="text-red-500 text-sm mt-1">{errors.nextPaymentDate}</p>}
@@ -295,7 +295,7 @@ export function AddServiceModal({ isOpen, onClose, onAdd, editingService, onUpda
           <div className="space-y-4">
             <label className="flex items-center justify-between p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl cursor-pointer">
               <div className="flex items-center gap-3">
-                <CheckCircle className="w-5 h-5 text-emerald-500" />
+                <CheckCircle className="w-5 h-5 text-cyan-$100" />
                 <div>
                   <p className="font-medium text-zinc-900 dark:text-white">
                     {t("forms.autoRenewal")}
@@ -310,7 +310,7 @@ export function AddServiceModal({ isOpen, onClose, onAdd, editingService, onUpda
                 onClick={() => setFormData({ ...formData, autoRenewal: !formData.autoRenewal })}
                 className={cn(
                   "relative w-12 h-7 rounded-full transition-colors",
-                  formData.autoRenewal ? "bg-emerald-600" : "bg-zinc-300 dark:bg-zinc-700"
+                  formData.autoRenewal ? "bg-cyan-$100" : "bg-zinc-300 dark:bg-zinc-700"
                 )}
               >
                 <div
@@ -333,7 +333,7 @@ export function AddServiceModal({ isOpen, onClose, onAdd, editingService, onUpda
             </button>
             <button
               type="submit"
-              className="flex-1 px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white transition-colors font-medium"
+              className="flex-1 px-6 py-3 rounded-xl bg-cyan-$100 hover:bg-emerald-700 text-white transition-colors font-medium"
             >
               {isEditMode
                 ? t("forms.saveChanges")

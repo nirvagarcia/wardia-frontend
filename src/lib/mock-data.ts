@@ -28,6 +28,10 @@ export const mockAccounts: IAccount[] = [
     balance: createAmount(8450.75),
     lastUpdated: new Date("2026-03-22T10:30:00"),
     isDefault: true,
+    network: "visa",
+    cvv: "123",
+    expiryMonth: 8,
+    expiryYear: 2028,
   },
   {
     id: "acc-2",
@@ -38,6 +42,10 @@ export const mockAccounts: IAccount[] = [
     balance: createAmount(15200.00),
     lastUpdated: new Date("2026-03-22T09:15:00"),
     isDefault: false,
+    network: "mastercard",
+    cvv: "456",
+    expiryMonth: 12,
+    expiryYear: 2027,
   },
   {
     id: "acc-3",
@@ -48,12 +56,17 @@ export const mockAccounts: IAccount[] = [
     balance: createAmount(3780.50),
     lastUpdated: new Date("2026-03-21T16:45:00"),
     isDefault: false,
+    network: "visa",
+    cvv: "789",
+    expiryMonth: 6,
+    expiryYear: 2029,
   },
 ];
 
 export const mockCreditCards: ICreditCard[] = [
   {
     id: "card-1",
+    bankName: "Banco de Crédito del Perú (BCP)",
     cardholderName: "Nirvana García Vásquez",
     cardNumber: "4532123456789012",
     network: "visa",
@@ -71,6 +84,7 @@ export const mockCreditCards: ICreditCard[] = [
   },
   {
     id: "card-2",
+    bankName: "Interbank",
     cardholderName: "Nirvana García Vásquez",
     cardNumber: "5425987654321098",
     network: "mastercard",
@@ -88,6 +102,7 @@ export const mockCreditCards: ICreditCard[] = [
   },
   {
     id: "card-3",
+    bankName: "BBVA Perú",
     cardholderName: "Nirvana García Vásquez",
     cardNumber: "378282246310005",
     network: "amex",
