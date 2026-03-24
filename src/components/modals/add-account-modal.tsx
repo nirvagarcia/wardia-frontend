@@ -2,47 +2,59 @@
 
 /**
  * Add Account Modal Component
- * Form for adding new bank accounts or credit cards
+ * Form for adding/editing bank accounts or credit cards
  */
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { usePreferencesStore } from "@/store/preferences-store";
 import { getTranslation } from "@/lib/i18n";
 import { X, Building2, CreditCard, Hash, Key, Wallet } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { IAccount, ICreditCard } from "@/types/finance";
+import type { IAccount, ICreditCard, AccountType, CardNetwork } from "@/types/finance";
 
 interface AddAccountModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAddAccount: (account: Omit<IAccount, "id" | "lastUpdated">) => void;
   onAddCard: (card: Omit<ICreditCard, "id" | "lastStatementDate" | "nextPaymentDate" | "minimumPayment">) => void;
+  editingAccount?: IAccount | null;
+  editingCard?: ICreditCard | null;
+  onUpdateAccount?: (id: string, account: Omit<IAccount, "id" | "lastUpdated">) => void;
+  onUpdateCard?: (id: string, card: Omit<ICreditCard, "id" | "lastStatementDate" | "nextPaymentDate" | "minimumPayment">) => void;
 }
 
-type AccountType = "debit" | "credit";
+type ModalAccountType = "debit" | "credit";
 
-export function AddAccountModal({ isOpen, onClose, onAddAccount, onAddCard }: AddAccountModalProps): React.JSX.Element | null {
+export function AddAccountModal({ 
+  isOpen, 
+  onClose, 
+  onAddAccount, 
+  onAddCard,
+  editingAccount,
+  editingCard,
+  onUpdateAccount,
+  onUpdateCard
+}: AddAccountModalProps): React.JSX.Element | null {
   const { language, currency } = usePreferencesStore();
   const t = (key: string) => getTranslation(language, key);
 
-  const [accountType, setAccountType] = useState<AccountType>("debit");
+  const [accountType, setAccountType] = useState<ModalAccountType>(
+    editingAccount ? "debit" : editingCard ? "credit" : "debit"
+  );
   const [formData, setFormData] = useState({
-    // Common fields
     bankName: "",
     
-    // Debit fields
     accountNumber: "",
     cci: "",
     balance: "",
-    accountSubType: "checking" as "checking" | "savings",
+    accountSubType: "checking" as AccountType,
     isDefault: false,
     
-    // Credit card fields
     cardholderName: "",
     cardNumber: "",
     expiryMonth: "",
     expiryYear: "",
-    network: "visa" as "visa" | "mastercard" | "amex",
+    network: "visa" as CardNetwork,
     creditLimit: "",
     usedCredit: "",
     cutoffDay: "",
@@ -51,7 +63,77 @@ export function AddAccountModal({ isOpen, onClose, onAddAccount, onAddCard }: Ad
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  const resetForm = () => {
+    setFormData({
+      bankName: "",
+      accountNumber: "",
+      cci: "",
+      balance: "",
+      accountSubType: "checking" as AccountType,
+      isDefault: false,
+      cardholderName: "",
+      cardNumber: "",
+      expiryMonth: "",
+      expiryYear: "",
+      network: "visa" as CardNetwork,
+      creditLimit: "",
+      usedCredit: "",
+      cutoffDay: "",
+      paymentDueDay: "",
+    });
+    setErrors({});
+  };
+
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    if (editingAccount) {
+      setAccountType("debit");
+      setFormData({
+        bankName: editingAccount.bankName,
+        accountNumber: editingAccount.accountNumber,
+        cci: editingAccount.cci,
+        balance: editingAccount.balance.value.toString(),
+        accountSubType: editingAccount.accountType,
+        isDefault: editingAccount.isDefault,
+        cardholderName: "",
+        cardNumber: "",
+        expiryMonth: "",
+        expiryYear: "",
+        network: "visa",
+        creditLimit: "",
+        usedCredit: "",
+        cutoffDay: "",
+        paymentDueDay: "",
+      });
+    } else if (editingCard) {
+      setAccountType("credit");
+      setFormData({
+        bankName: "",
+        accountNumber: "",
+        cci: "",
+        balance: "",
+        accountSubType: "checking",
+        isDefault: false,
+        cardholderName: editingCard.cardholderName,
+        cardNumber: editingCard.cardNumber,
+        expiryMonth: editingCard.expiryMonth.toString(),
+        expiryYear: editingCard.expiryYear.toString(),
+        network: editingCard.network,
+        creditLimit: editingCard.creditLimit.value.toString(),
+        usedCredit: editingCard.usedCredit.value.toString(),
+        cutoffDay: editingCard.cutoffDay.toString(),
+        paymentDueDay: editingCard.paymentDueDay.toString(),
+      });
+    } else {
+      resetForm();
+    }
+  }, [isOpen, editingAccount, editingCard]);
+
   if (!isOpen) return null;
+
+  const isEditMode = !!(editingAccount || editingCard);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,14 +141,14 @@ export function AddAccountModal({ isOpen, onClose, onAddAccount, onAddCard }: Ad
     const newErrors: Record<string, string> = {};
     
     if (!formData.bankName.trim()) {
-      newErrors.bankName = language === "es" ? "Nombre del banco requerido" : "Bank name required";
+      newErrors.bankName = t("forms.bankNameRequired");
     }
 
     if (accountType === "debit") {
-      if (!formData.accountNumber) newErrors.accountNumber = language === "es" ? "Número de cuenta requerido" : "Account number required";
-      if (!formData.cci) newErrors.cci = language === "es" ? "CCI requerido" : "CCI required";
+      if (!formData.accountNumber) newErrors.accountNumber = t("forms.accountNumberRequired");
+      if (!formData.cci) newErrors.cci = t("forms.cciRequired");
       if (!formData.balance || parseFloat(formData.balance) < 0) {
-        newErrors.balance = language === "es" ? "Balance inválido" : "Invalid balance";
+        newErrors.balance = t("forms.invalidBalance");
       }
 
       if (Object.keys(newErrors).length > 0) {
@@ -86,21 +168,24 @@ export function AddAccountModal({ isOpen, onClose, onAddAccount, onAddCard }: Ad
         isDefault: formData.isDefault,
       };
 
-      onAddAccount(newAccount);
+      if (isEditMode && editingAccount && onUpdateAccount) {
+        onUpdateAccount(editingAccount.id, newAccount);
+      } else {
+        onAddAccount(newAccount);
+      }
     } else {
-      // Credit card validation
-      if (!formData.cardholderName) newErrors.cardholderName = language === "es" ? "Nombre del titular requerido" : "Cardholder name required";
+      if (!formData.cardholderName) newErrors.cardholderName = t("forms.cardholderNameRequired");
       if (!formData.cardNumber || formData.cardNumber.length < 15) {
-        newErrors.cardNumber = language === "es" ? "Número de tarjeta inválido" : "Invalid card number";
+        newErrors.cardNumber = t("forms.invalidCardNumber");
       }
       if (!formData.expiryMonth || !formData.expiryYear) {
-        newErrors.expiry = language === "es" ? "Fecha de expiración requerida" : "Expiry date required";
+        newErrors.expiry = t("forms.expiryRequired");
       }
       if (!formData.creditLimit || parseFloat(formData.creditLimit) <= 0) {
-        newErrors.creditLimit = language === "es" ? "Límite inválido" : "Invalid limit";
+        newErrors.creditLimit = t("forms.invalidCreditLimit");
       }
       if (!formData.usedCredit || parseFloat(formData.usedCredit) < 0) {
-        newErrors.usedCredit = language === "es" ? "Crédito usado inválido" : "Invalid used credit";
+        newErrors.usedCredit = t("forms.invalidUsedCredit");
       }
 
       if (Object.keys(newErrors).length > 0) {
@@ -134,33 +219,15 @@ export function AddAccountModal({ isOpen, onClose, onAddAccount, onAddCard }: Ad
         paymentDueDay: parseInt(formData.paymentDueDay) || 5,
       };
 
-      onAddCard(newCard);
+      if (isEditMode && editingCard && onUpdateCard) {
+        onUpdateCard(editingCard.id, newCard);
+      } else {
+        onAddCard(newCard);
+      }
     }
 
-    // Reset and close
     resetForm();
     onClose();
-  };
-
-  const resetForm = () => {
-    setFormData({
-      bankName: "",
-      accountNumber: "",
-      cci: "",
-      balance: "",
-      accountSubType: "checking",
-      isDefault: false,
-      cardholderName: "",
-      cardNumber: "",
-      expiryMonth: "",
-      expiryYear: "",
-      network: "visa",
-      creditLimit: "",
-      usedCredit: "",
-      cutoffDay: "",
-      paymentDueDay: "",
-    });
-    setErrors({});
   };
 
   return (
@@ -169,10 +236,12 @@ export function AddAccountModal({ isOpen, onClose, onAddAccount, onAddCard }: Ad
         className="bg-white dark:bg-zinc-900 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-slide-up" 
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
         <div className="sticky top-0 bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 p-6 flex items-center justify-between">
           <h2 className="text-2xl font-bold text-zinc-900 dark:text-white">
-            {language === "es" ? "Agregar Cuenta" : "Add Account"}
+            {isEditMode 
+              ? t("forms.editAccount")
+              : t("forms.addAccount")
+            }
           </h2>
           <button
             onClick={onClose}
@@ -182,18 +251,18 @@ export function AddAccountModal({ isOpen, onClose, onAddAccount, onAddCard }: Ad
           </button>
         </div>
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {/* Account Type Selection */}
           <div className="grid grid-cols-2 gap-4">
             <button
               type="button"
-              onClick={() => setAccountType("debit")}
+              onClick={() => !isEditMode && setAccountType("debit")}
+              disabled={isEditMode}
               className={cn(
                 "p-4 rounded-xl border-2 transition-all flex flex-col items-center gap-2",
                 accountType === "debit"
                   ? "border-emerald-500 bg-emerald-500/10"
-                  : "border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600"
+                  : "border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600",
+                isEditMode && "opacity-50 cursor-not-allowed"
               )}
             >
               <Wallet className={cn("w-8 h-8", accountType === "debit" ? "text-emerald-500" : "text-zinc-400")} />
@@ -207,12 +276,14 @@ export function AddAccountModal({ isOpen, onClose, onAddAccount, onAddCard }: Ad
 
             <button
               type="button"
-              onClick={() => setAccountType("credit")}
+              onClick={() => !isEditMode && setAccountType("credit")}
+              disabled={isEditMode}
               className={cn(
                 "p-4 rounded-xl border-2 transition-all flex flex-col items-center gap-2",
                 accountType === "credit"
                   ? "border-emerald-500 bg-emerald-500/10"
-                  : "border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600"
+                  : "border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600",
+                isEditMode && "opacity-50 cursor-not-allowed"
               )}
             >
               <CreditCard className={cn("w-8 h-8", accountType === "credit" ? "text-emerald-500" : "text-zinc-400")} />
@@ -225,17 +296,16 @@ export function AddAccountModal({ isOpen, onClose, onAddAccount, onAddCard }: Ad
             </button>
           </div>
 
-          {/* Bank Name */}
           <div>
             <label className="block text-sm font-medium text-zinc-700 dark:text-gray-300 mb-2">
               <Building2 className="w-4 h-4 inline mr-2" />
-              {language === "es" ? "Nombre del Banco" : "Bank Name"}
+              {t("forms.bankName")}
             </label>
             <input
               type="text"
               value={formData.bankName}
               onChange={(e) => setFormData({ ...formData, bankName: e.target.value })}
-              placeholder={language === "es" ? "Ej: BCP, Interbank" : "e.g. BCP, Interbank"}
+              placeholder={t("forms.bankNamePlaceholder")}
               className={cn(
                 "w-full px-4 py-3 rounded-xl border bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white",
                 errors.bankName
@@ -247,26 +317,25 @@ export function AddAccountModal({ isOpen, onClose, onAddAccount, onAddCard }: Ad
           </div>
 
           {accountType === "debit" ? (
-            // Debit Account Fields
             <>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-zinc-700 dark:text-gray-300 mb-2">
-                    {language === "es" ? "Tipo de Cuenta" : "Account Type"}
+                    {t("forms.accountType")}
                   </label>
                   <select
                     value={formData.accountSubType}
-                    onChange={(e) => setFormData({ ...formData, accountSubType: e.target.value as "checking" | "savings" })}
+                    onChange={(e) => setFormData({ ...formData, accountSubType: e.target.value as AccountType })}
                     className="w-full px-4 py-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white"
                   >
-                    <option value="checking">{language === "es" ? "Corriente" : "Checking"}</option>
-                    <option value="savings">{language === "es" ? "Ahorros" : "Savings"}</option>
+                    <option value="checking">{t("forms.accountTypeChecking")}</option>
+                    <option value="savings">{t("forms.accountTypeSavings")}</option>
                   </select>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-zinc-700 dark:text-gray-300 mb-2">
-                    {language === "es" ? "Balance Actual" : "Current Balance"}
+                    {t("forms.currentBalance")}
                   </label>
                   <input
                     type="number"
@@ -286,7 +355,7 @@ export function AddAccountModal({ isOpen, onClose, onAddAccount, onAddCard }: Ad
               <div>
                 <label className="block text-sm font-medium text-zinc-700 dark:text-gray-300 mb-2">
                   <Hash className="w-4 h-4 inline mr-2" />
-                  {language === "es" ? "Número de Cuenta" : "Account Number"}
+                  {t("accounts.accountNumber")}
                 </label>
                 <input
                   type="text"
@@ -328,16 +397,15 @@ export function AddAccountModal({ isOpen, onClose, onAddAccount, onAddCard }: Ad
                   className="w-5 h-5 rounded border-zinc-300 text-emerald-600 focus:ring-emerald-500"
                 />
                 <span className="text-zinc-900 dark:text-white font-medium">
-                  {language === "es" ? "Establecer como cuenta predeterminada" : "Set as default account"}
+                  {t("forms.setAsDefault")}
                 </span>
               </label>
             </>
           ) : (
-            // Credit Card Fields
             <>
               <div>
                 <label className="block text-sm font-medium text-zinc-700 dark:text-gray-300 mb-2">
-                  {language === "es" ? "Nombre del Titular" : "Cardholder Name"}
+                  {t("forms.cardholderName")}
                 </label>
                 <input
                   type="text"
@@ -355,7 +423,7 @@ export function AddAccountModal({ isOpen, onClose, onAddAccount, onAddCard }: Ad
               <div className="grid grid-cols-3 gap-4">
                 <div className="col-span-2">
                   <label className="block text-sm font-medium text-zinc-700 dark:text-gray-300 mb-2">
-                    {language === "es" ? "Número de Tarjeta" : "Card Number"}
+                    {t("forms.cardNumber")}
                   </label>
                   <input
                     type="text"
@@ -373,7 +441,7 @@ export function AddAccountModal({ isOpen, onClose, onAddAccount, onAddCard }: Ad
 
                 <div>
                   <label className="block text-sm font-medium text-zinc-700 dark:text-gray-300 mb-2">
-                    {language === "es" ? "Red" : "Network"}
+                    {t("forms.network")}
                   </label>
                   <select
                     value={formData.network}
@@ -390,7 +458,7 @@ export function AddAccountModal({ isOpen, onClose, onAddAccount, onAddCard }: Ad
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-zinc-700 dark:text-gray-300 mb-2">
-                    {language === "es" ? "Mes de Expiración" : "Expiry Month"}
+                    {t("forms.expiryMonth")}
                   </label>
                   <input
                     type="number"
@@ -408,7 +476,7 @@ export function AddAccountModal({ isOpen, onClose, onAddAccount, onAddCard }: Ad
 
                 <div>
                   <label className="block text-sm font-medium text-zinc-700 dark:text-gray-300 mb-2">
-                    {language === "es" ? "Año de Expiración" : "Expiry Year"}
+                    {t("forms.expiryYear")}
                   </label>
                   <input
                     type="number"
@@ -429,7 +497,7 @@ export function AddAccountModal({ isOpen, onClose, onAddAccount, onAddCard }: Ad
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-zinc-700 dark:text-gray-300 mb-2">
-                    {language === "es" ? "Límite de Crédito" : "Credit Limit"}
+                    {t("forms.creditLimit")}
                   </label>
                   <input
                     type="number"
@@ -447,7 +515,7 @@ export function AddAccountModal({ isOpen, onClose, onAddAccount, onAddCard }: Ad
 
                 <div>
                   <label className="block text-sm font-medium text-zinc-700 dark:text-gray-300 mb-2">
-                    {language === "es" ? "Crédito Usado" : "Used Credit"}
+                    {t("forms.usedCredit")}
                   </label>
                   <input
                     type="number"
@@ -466,20 +534,22 @@ export function AddAccountModal({ isOpen, onClose, onAddAccount, onAddCard }: Ad
             </>
           )}
 
-          {/* Submit Buttons */}
           <div className="flex gap-3 pt-4">
             <button
               type="button"
               onClick={onClose}
               className="flex-1 px-6 py-3 rounded-xl border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors font-medium"
             >
-              {language === "es" ? "Cancelar" : "Cancel"}
+              {t("common.cancel")}
             </button>
             <button
               type="submit"
               className="flex-1 px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white transition-colors font-medium"
             >
-              {language === "es" ? "Agregar" : "Add"}
+              {isEditMode
+                ? t("forms.saveChanges")
+                : t("common.add")
+              }
             </button>
           </div>
         </form>

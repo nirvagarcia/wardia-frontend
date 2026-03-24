@@ -30,12 +30,10 @@ export function useClipboard(): UseClipboardReturn {
       setCopied(true);
       setError(null);
 
-      // Reset copied state after 2 seconds
       setTimeout(() => {
         setCopied(false);
       }, 2000);
 
-      // If sensitive data, clear clipboard after 60 seconds
       if (sensitive) {
         setTimeout(async () => {
           try {
@@ -44,7 +42,6 @@ export function useClipboard(): UseClipboardReturn {
               await navigator.clipboard.writeText("");
             }
           } catch (err) {
-            // Ignore errors when trying to clear clipboard
             console.warn("Could not clear clipboard:", err);
           }
         }, 60000);

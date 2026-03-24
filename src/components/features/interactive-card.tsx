@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 
 interface InteractiveCardProps {
   card: ICreditCard;
+  disableInteractive?: boolean;
 }
 
 const cardNetworkGradients: Record<string, string> = {
@@ -22,7 +23,7 @@ const cardNetworkGradients: Record<string, string> = {
   discover: "from-orange-500 to-amber-700",
 };
 
-export const InteractiveCard: React.FC<InteractiveCardProps> = ({ card }) => {
+export const InteractiveCard: React.FC<InteractiveCardProps> = ({ card, disableInteractive = false }) => {
   const x = useMotionValue(0);
   const y = useMotionValue(0);
 
@@ -30,6 +31,7 @@ export const InteractiveCard: React.FC<InteractiveCardProps> = ({ card }) => {
   const rotateY = useTransform(x, [-100, 100], [-10, 10]);
 
   const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>): void => {
+    if (disableInteractive) return;
     const rect = event.currentTarget.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
@@ -38,6 +40,7 @@ export const InteractiveCard: React.FC<InteractiveCardProps> = ({ card }) => {
   };
 
   const handleMouseLeave = (): void => {
+    if (disableInteractive) return;
     x.set(0);
     y.set(0);
   };
@@ -48,21 +51,20 @@ export const InteractiveCard: React.FC<InteractiveCardProps> = ({ card }) => {
     <div className="perspective-1000">
       <motion.div
         className={cn(
-          "relative w-full h-56 rounded-2xl p-6 shadow-2xl cursor-pointer",
-          "bg-gradient-to-br",
+          "relative w-full h-56 rounded-2xl p-6 shadow-2xl bg-gradient-to-br",
+          disableInteractive ? "cursor-default" : "cursor-pointer",
           gradient
         )}
         style={{
-          rotateX,
-          rotateY,
+          rotateX: disableInteractive ? 0 : rotateX,
+          rotateY: disableInteractive ? 0 : rotateY,
           transformStyle: "preserve-3d",
         }}
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
-        whileHover={{ scale: 1.02 }}
+        onMouseMove={!disableInteractive ? handleMouseMove : undefined}
+        onMouseLeave={!disableInteractive ? handleMouseLeave : undefined}
+        whileHover={!disableInteractive ? { scale: 1.02 } : undefined}
         transition={{ type: "spring", stiffness: 300, damping: 20 }}
       >
-        {/* Card Network Logo */}
         <div className="flex items-start justify-between mb-8">
           <div className="text-white/80 font-bold text-xl uppercase tracking-wider">
             {card.network}
@@ -75,14 +77,12 @@ export const InteractiveCard: React.FC<InteractiveCardProps> = ({ card }) => {
           </div>
         </div>
 
-        {/* Card Number */}
         <div className="mb-6">
           <p className="text-white font-mono text-lg tracking-widest">
             {maskCreditCard(card.cardNumber)}
           </p>
         </div>
 
-        {/* Cardholder Name & Expiry */}
         <div className="flex items-end justify-between">
           <div>
             <p className="text-white/60 text-xs mb-1">Cardholder</p>
@@ -98,7 +98,6 @@ export const InteractiveCard: React.FC<InteractiveCardProps> = ({ card }) => {
           </div>
         </div>
 
-        {/* Chip effect */}
         <div className="absolute top-20 left-6 w-12 h-10 bg-gradient-to-br from-amber-400 to-yellow-600 rounded opacity-80" />
       </motion.div>
     </div>

@@ -56,6 +56,7 @@ export const translations = {
       noCards: "No hay tarjetas de crédito",
       addFirst: "Agrega tu primera cuenta bancaria",
       addFirstCard: "Agrega tu primera tarjeta de crédito",
+      confirmDelete: "¿Estás seguro de que deseas eliminar {name}? Esta acción no se puede deshacer.",
     },
 
     // Services
@@ -121,6 +122,88 @@ export const translations = {
       logout: "Cerrar Sesión",
       version: "WARDIA v1.0.0",
       copyright: "© 2026 - Personal Finance Manager",
+    },
+
+    // Credentials
+    credentials: {
+      title: "Credenciales Bancarias",
+      accessCredentials: "Credenciales de acceso",
+      username: "Usuario",
+      password: "Contraseña",
+      digitalKey: "Clave Digital",
+      securityToken: "Token de Seguridad",
+      notes: "Notas",
+      optional: "Opcional",
+      showHide: "Mostrar/Ocultar",
+      copy: "Copiar",
+      noCredentials: "No hay credenciales bancarias registradas",
+      deleteTitle: "Eliminar Credenciales",
+      deleteMessage: "¿Estás seguro de que deseas eliminar las credenciales de {bank}? Esta acción no se puede deshacer.",
+      addCredentials: "Agregar Credenciales",
+      editCredentials: "Editar Credenciales",
+    },
+
+    // Credit Card
+    creditCard: {
+      creditUsage: "Uso de Crédito",
+      limit: "Límite",
+      nextPayment: "Próximo Pago",
+      minimum: "Mínimo",
+      cutoffDate: "Fecha de Corte",
+      day: "Día",
+      ofMonth: "del mes",
+      dueDay: "Vence: Día",
+      lastUpdated: "Última actualización",
+    },
+
+    // Modals & Forms
+    forms: {
+      bankName: "Nombre del Banco",
+      bankNamePlaceholder: "Ej: BCP, Interbank",
+      bankNameRequired: "Nombre del banco requerido",
+      usernamePlaceholder: "Tu usuario de acceso",
+      usernameRequired: "Usuario requerido",
+      passwordRequired: "Contraseña requerida",
+      notesPlaceholder: "Información adicional...",
+      accountType: "Tipo de Cuenta",
+      accountTypeChecking: "Corriente",
+      accountTypeSavings: "Ahorros",
+      currentBalance: "Balance Actual",
+      invalidBalance: "Balance inválido",
+      accountNumberRequired: "Número de cuenta requerido",
+      cciRequired: "CCI requerido",
+      setAsDefault: "Establecer como cuenta predeterminada",
+      cardholderName: "Nombre del Titular",
+      cardholderNameRequired: "Nombre del titular requerido",
+      cardNumber: "Número de Tarjeta",
+      invalidCardNumber: "Número de tarjeta inválido",
+      network: "Red",
+      expiryMonth: "Mes de Expiración",
+      expiryYear: "Año de Expiración",
+      expiryRequired: "Fecha de expiración requerida",
+      creditLimit: "Límite de Crédito",
+      invalidCreditLimit: "Límite inválido",
+      usedCredit: "Crédito Usado",
+      invalidUsedCredit: "Crédito usado inválido",
+      serviceName: "Nombre del Servicio",
+      serviceNamePlaceholder: "Ej: Netflix Premium",
+      nameRequired: "Nombre requerido",
+      description: "Descripción",
+      descriptionPlaceholder: "Detalles adicionales...",
+      amount: "Monto",
+      invalidAmount: "Monto inválido",
+      frequency: "Frecuencia",
+      nextPaymentDate: "Próximo Pago",
+      dateRequired: "Fecha requerida",
+      autoRenewal: "Auto-renovación",
+      renewsAutomatically: "Se renueva automáticamente",
+      category: "Categoría",
+      update: "Actualizar",
+      saveChanges: "Guardar Cambios",
+      addAccount: "Agregar Cuenta",
+      editAccount: "Editar Cuenta",
+      addService: "Agregar Servicio",
+      editService: "Editar Servicio",
     },
 
     // Common
@@ -190,6 +273,7 @@ export const translations = {
       noCards: "No credit cards",
       addFirst: "Add your first bank account",
       addFirstCard: "Add your first credit card",
+      confirmDelete: "Are you sure you want to delete {name}? This action cannot be undone.",
     },
 
     // Services
@@ -257,6 +341,88 @@ export const translations = {
       copyright: "© 2026 - Personal Finance Manager",
     },
 
+    // Credentials
+    credentials: {
+      title: "Bank Credentials",
+      accessCredentials: "Access credentials",
+      username: "Username",
+      password: "Password",
+      digitalKey: "Digital Key",
+      securityToken: "Security Token",
+      notes: "Notes",
+      optional: "Optional",
+      showHide: "Show/Hide",
+      copy: "Copy",
+      noCredentials: "No bank credentials registered",
+      deleteTitle: "Delete Credentials",
+      deleteMessage: "Are you sure you want to delete the credentials for {bank}? This action cannot be undone.",
+      addCredentials: "Add Credentials",
+      editCredentials: "Edit Credentials",
+    },
+
+    // Credit Card
+    creditCard: {
+      creditUsage: "Credit Usage",
+      limit: "Limit",
+      nextPayment: "Next Payment",
+      minimum: "Minimum",
+      cutoffDate: "Cut-off Date",
+      day: "Day",
+      ofMonth: "of month",
+      dueDay: "Due: Day",
+      lastUpdated: "Last updated",
+    },
+
+    // Modals & Forms
+    forms: {
+      bankName: "Bank Name",
+      bankNamePlaceholder: "e.g. BCP, Interbank",
+      bankNameRequired: "Bank name required",
+      usernamePlaceholder: "Your access username",
+      usernameRequired: "Username required",
+      passwordRequired: "Password required",
+      notesPlaceholder: "Additional information...",
+      accountType: "Account Type",
+      accountTypeChecking: "Checking",
+      accountTypeSavings: "Savings",
+      currentBalance: "Current Balance",
+      invalidBalance: "Invalid balance",
+      accountNumberRequired: "Account number required",
+      cciRequired: "CCI required",
+      setAsDefault: "Set as default account",
+      cardholderName: "Cardholder Name",
+      cardholderNameRequired: "Cardholder name required",
+      cardNumber: "Card Number",
+      invalidCardNumber: "Invalid card number",
+      network: "Network",
+      expiryMonth: "Expiry Month",
+      expiryYear: "Expiry Year",
+      expiryRequired: "Expiry date required",
+      creditLimit: "Credit Limit",
+      invalidCreditLimit: "Invalid limit",
+      usedCredit: "Used Credit",
+      invalidUsedCredit: "Invalid used credit",
+      serviceName: "Service Name",
+      serviceNamePlaceholder: "e.g. Netflix Premium",
+      nameRequired: "Name required",
+      description: "Description",
+      descriptionPlaceholder: "Additional details...",
+      amount: "Amount",
+      invalidAmount: "Invalid amount",
+      frequency: "Frequency",
+      nextPaymentDate: "Next Payment",
+      dateRequired: "Date required",
+      autoRenewal: "Auto-renewal",
+      renewsAutomatically: "Renews automatically",
+      category: "Category",
+      update: "Update",
+      saveChanges: "Save Changes",
+      addAccount: "Add Account",
+      editAccount: "Edit Account",
+      addService: "Add Service",
+      editService: "Edit Service",
+    },
+
     // Common
     common: {
       loading: "Loading...",
@@ -279,10 +445,12 @@ export type TranslationKeys = typeof translations.es;
 
 /**
  * Get translation for a key in the specified language
+ * Supports variable interpolation with {varName} syntax
  */
 export function getTranslation(
   language: Language,
-  path: string
+  path: string,
+  variables?: Record<string, string | number>
 ): string {
   const keys = path.split(".");
   let value: unknown = translations[language];
@@ -291,11 +459,19 @@ export function getTranslation(
     if (value && typeof value === "object" && key in value) {
       value = (value as Record<string, unknown>)[key];
     } else {
-      return path; // Return the path if translation not found
+      return path;
     }
   }
   
-  return typeof value === "string" ? value : path;
+  let result = typeof value === "string" ? value : path;
+  
+  if (variables) {
+    Object.entries(variables).forEach(([key, val]) => {
+      result = result.replace(`{${key}}`, String(val));
+    });
+  }
+  
+  return result;
 }
 
 /**

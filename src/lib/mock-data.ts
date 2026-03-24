@@ -13,13 +13,11 @@ import {
 } from "@/types/finance";
 import { IAmount } from "@/types";
 
-// Helper functions for creating amounts
 const createAmount = (value: number, currency: "PEN" | "USD" | "EUR" = "PEN"): IAmount => ({
   value,
   currency,
 });
 
-// Mock Bank Accounts
 export const mockAccounts: IAccount[] = [
   {
     id: "acc-1",
@@ -53,7 +51,6 @@ export const mockAccounts: IAccount[] = [
   },
 ];
 
-// Mock Credit Cards
 export const mockCreditCards: ICreditCard[] = [
   {
     id: "card-1",
@@ -108,9 +105,7 @@ export const mockCreditCards: ICreditCard[] = [
   },
 ];
 
-// Mock Subscriptions
 export const mockSubscriptions: ISubscription[] = [
-  // Entertainment
   {
     id: "sub-1",
     name: "Netflix Premium",
@@ -150,7 +145,6 @@ export const mockSubscriptions: ISubscription[] = [
     merchantUrl: "https://amazon.com",
     autoRenewal: true,
   },
-  // Productivity
   {
     id: "sub-3",
     name: "ChatGPT Plus",
@@ -177,7 +171,6 @@ export const mockSubscriptions: ISubscription[] = [
     merchantUrl: "https://github.com",
     autoRenewal: true,
   },
-  // Health & Fitness
   {
     id: "sub-4",
     name: "Gimnasio FitLife",
@@ -190,7 +183,6 @@ export const mockSubscriptions: ISubscription[] = [
     accountId: "acc-1",
     autoRenewal: true,
   },
-  // Utilities & Basic Services
   {
     id: "sub-7",
     name: "Luz del Sur",
@@ -240,7 +232,6 @@ export const mockSubscriptions: ISubscription[] = [
     cardId: "card-2",
     autoRenewal: true,
   },
-  // Housing
   {
     id: "sub-11",
     name: "Alquiler de Departamento",
@@ -267,7 +258,6 @@ export const mockSubscriptions: ISubscription[] = [
   },
 ];
 
-// Mock Upcoming Payments
 export const mockUpcomingPayments: IUpcomingPayment[] = [
   {
     id: "payment-1",
@@ -319,7 +309,6 @@ export const mockUpcomingPayments: IUpcomingPayment[] = [
   },
 ];
 
-// Mock Bank Credentials
 export const mockBankCredentials: IBankCredentials[] = [
   {
     id: "cred-1",
@@ -350,7 +339,6 @@ export const mockBankCredentials: IBankCredentials[] = [
   },
 ];
 
-// Calculate totals for financial summary
 const calculateTotalBalance = (): IAmount => {
   const total = mockAccounts.reduce((sum, acc) => sum + acc.balance.value, 0);
   return createAmount(total);
@@ -370,14 +358,12 @@ const calculateMonthlySubscriptionCost = (): IAmount => {
   const total = mockSubscriptions
     .filter((sub) => sub.frequency === "monthly" && sub.status === "active")
     .reduce((sum, sub) => {
-      // Convert USD to PEN for simplification (use hardcoded rate)
       const valueInPEN = sub.amount.currency === "USD" ? sub.amount.value * 3.75 : sub.amount.value;
       return sum + valueInPEN;
     }, 0);
   return createAmount(total);
 };
 
-// Mock Financial Summary
 export const mockFinancialSummary: IFinancialSummary = {
   totalBalance: calculateTotalBalance(),
   totalCreditCardDebt: calculateTotalCreditCardDebt(),

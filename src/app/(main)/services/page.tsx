@@ -9,12 +9,29 @@ import React, { useState } from "react";
 import { usePreferencesStore } from "@/store/preferences-store";
 import { getTranslation } from "@/lib/i18n";
 import { mockSubscriptions } from "@/lib/mock-data";
-import { Receipt, Calendar, DollarSign, TrendingUp, AlertCircle, Zap, Wifi, Home as HomeIcon, Sparkles, Plus } from "lucide-react";
+import { Receipt, Calendar, DollarSign, TrendingUp, AlertCircle, Zap, Wifi, Home as HomeIcon, Sparkles, Plus, Edit2, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AddServiceModal } from "@/components/modals/add-service-modal";
+import { ConfirmModal } from "@/components/modals/confirm-modal";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import type { ISubscription } from "@/types/finance";
 
-// Icon mapping for categories
 const categoryIcons: Record<string, React.ComponentType<{ className?: string }>> = {
   "entertainment": Sparkles,
   "productivity": DollarSign,
@@ -24,14 +41,162 @@ const categoryIcons: Record<string, React.ComponentType<{ className?: string }>>
   "housing": HomeIcon,
 };
 
+interface SortableServiceCardProps {
+  sub: ISubscription;
+  daysUntil: number;
+  isDueSoon: boolean;
+  language: string;
+  locale: string;
+  formatCurrency: (amount: { value: number; currency: string }) => string;
+  getFrequencyLabel: (freq: string) => string;
+  getStatusLabel: (status: string) => string;
+  onEdit: (service: ISubscription) => void;
+  onDelete: (id: string) => void;
+  t: (key: string) => string;
+}
+
+function SortableServiceCard(props: SortableServiceCardProps) {
+  const { sub, isDueSoon } = props;
+
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: sub.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition: isDragging ? transition : transition + ", transform 0.2s ease, box-shadow 0.2s ease",
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={cn(
+        "bg-zinc-100 dark:bg-zinc-900/50 backdrop-blur-sm border rounded-xl p-4 transition-all hover:bg-zinc-200 dark:hover:bg-zinc-800/50 cursor-grab active:cursor-grabbing",
+        isDueSoon ? "border-amber-500/50" : "border-zinc-200 dark:border-zinc-800",
+        isDragging && "scale-105 shadow-2xl z-50 opacity-90"
+      )}
+      {...attributes}
+      {...listeners}
+    >
+      <ServiceCardContent {...props} />
+    </div>
+  );
+}
+
+function ServiceCardContent(props: SortableServiceCardProps) {
+  const { sub, daysUntil, isDueSoon, language, locale, formatCurrency, getFrequencyLabel, getStatusLabel, onEdit, onDelete, t } = props;
+
+  return (
+    <div className="flex items-start justify-between gap-4">
+      <div className="flex-1" onPointerDown={(e) => e.stopPropagation()}>
+        <div className="flex items-center gap-3">
+          <div className={cn(
+            "w-10 h-10 rounded-xl flex items-center justify-center",
+            "bg-gradient-to-br from-purple-500/20 to-purple-600/20"
+          )}>
+            <DollarSign className="w-5 h-5 text-purple-500 dark:text-purple-400" />
+          </div>
+          <div className="flex-1">
+            <h3 className="font-semibold text-zinc-900 dark:text-white">{sub.name}</h3>
+            {sub.description && (
+              <p className="text-sm text-gray-600 dark:text-gray-400">{sub.description}</p>
+            )}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-4 mt-3 ml-13 text-xs text-gray-600 dark:text-gray-400">
+          <div className="flex items-center gap-1">
+            <Calendar className="w-3 h-3" />
+            <span>
+              {sub.nextPaymentDate.toLocaleDateString(locale, {
+                month: "short",
+                day: "numeric",
+              })}
+            </span>
+          </div>
+          {isDueSoon && (
+            <span className={cn("font-medium text-amber-500 dark:text-amber-400")}>
+              {daysUntil === 0
+                ? t("dashboard.dueToday")
+                : daysUntil === 1
+                ? t("dashboard.dueTomorrow")
+                : t("dashboard.inDays").replace("{days}", daysUntil.toString())}
+            </span>
+          )}
+          <span className="px-2 py-0.5 bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-full capitalize">
+            {getFrequencyLabel(sub.frequency)}
+          </span>
+          {sub.autoRenewal && (
+            <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-full">
+              {t("services.autoRenewal")}
+            </span>
+          )}
+        </div>
+      </div>
+
+      <div className="text-right" onPointerDown={(e) => e.stopPropagation()}>
+        <p className="text-xl font-bold text-zinc-900 dark:text-white">{formatCurrency(sub.amount)}</p>
+        <span
+          className={cn(
+            "text-xs px-2 py-1 rounded-full",
+            sub.status === "active"
+              ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400"
+              : "bg-gray-500/20 text-gray-600 dark:text-gray-400"
+          )}
+        >
+          {getStatusLabel(sub.status)}
+        </span>
+      </div>
+
+      <div className="flex flex-col gap-2" onPointerDown={(e) => e.stopPropagation()}>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onEdit(sub);
+          }}
+          className="p-2 hover:bg-blue-500/10 rounded-lg transition-colors group"
+          title={language === "es" ? "Editar" : "Edit"}
+        >
+          <Edit2 className="w-4 h-4 text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500" />
+        </button>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete(sub.id);
+          }}
+          className="p-2 hover:bg-red-500/10 rounded-lg transition-colors group"
+          title={language === "es" ? "Eliminar" : "Delete"}
+        >
+          <Trash2 className="w-4 h-4 text-zinc-600 dark:text-zinc-400 group-hover:text-red-500" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function ServicesPage(): React.JSX.Element {
   const { language, currency } = usePreferencesStore();
   const t = (key: string) => getTranslation(language, key);
   const locale = language === "es" ? "es-PE" : "en-US";
 
-  // Local state for services
   const [services, setServices] = useState<ISubscription[]>(mockSubscriptions);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [editingService, setEditingService] = useState<ISubscription | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<{
+    isOpen: boolean;
+    id: string | null;
+    name: string;
+  }>({
+    isOpen: false,
+    id: null,
+    name: "",
+  });
 
   const handleAddService = (newService: Omit<ISubscription, "id">) => {
     const serviceWithId: ISubscription = {
@@ -41,7 +206,60 @@ export default function ServicesPage(): React.JSX.Element {
     setServices([...services, serviceWithId]);
   };
 
-  // Translate category names
+  const handleUpdateService = (id: string, updatedService: Omit<ISubscription, "id">) => {
+    setServices(services.map(service => 
+      service.id === id 
+        ? { ...updatedService, id }
+        : service
+    ));
+  };
+
+  const handleEditService = (service: ISubscription) => {
+    setEditingService(service);
+    setIsAddModalOpen(true);
+  };
+
+  const handleDeleteService = (id: string) => {
+    const service = services.find(s => s.id === id);
+    if (service) {
+      setConfirmDelete({
+        isOpen: true,
+        id,
+        name: service.name,
+      });
+    }
+  };
+
+  const confirmDeletion = () => {
+    if (confirmDelete.id) {
+      setServices(services.filter(service => service.id !== confirmDelete.id));
+    }
+    setConfirmDelete({ isOpen: false, id: null, name: "" });
+  };
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        delay: 250,
+        tolerance: 5,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      setServices((items) => {
+        const oldIndex = items.findIndex((item) => item.id === active.id);
+        const newIndex = items.findIndex((item) => item.id === over.id);
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
+  };
+
   const getCategoryLabel = (categoryKey: string): string => {
     const map: Record<string, string> = {
       entertainment: t("services.categoryEntertainment"),
@@ -63,7 +281,6 @@ export default function ServicesPage(): React.JSX.Element {
     return formatter.format(amount.value);
   };
 
-  // Calculate total monthly cost (convert USD to PEN for aggregation)
   const totalMonthlyInPEN = services
     .filter((sub) => sub.frequency === "monthly" && sub.status === "active")
     .reduce((sum, sub) => {
@@ -71,14 +288,12 @@ export default function ServicesPage(): React.JSX.Element {
       return sum + valueInPEN;
     }, 0);
 
-  // Get upcoming subscriptions (within next 7 days)
   const now = new Date();
   const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
   const upcomingSubs = services.filter(
     (sub) => sub.nextPaymentDate >= now && sub.nextPaymentDate <= sevenDaysFromNow
   );
 
-  // Group subscriptions by category
   const categorizedSubs = services.reduce((acc, sub) => {
     if (!acc[sub.category]) {
       acc[sub.category] = [];
@@ -113,7 +328,6 @@ export default function ServicesPage(): React.JSX.Element {
 
   return (
     <div className="min-h-screen p-6 space-y-6 pb-24 bg-white dark:bg-zinc-950">
-      {/* Header */}
       <header className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
@@ -124,16 +338,17 @@ export default function ServicesPage(): React.JSX.Element {
             <p className="text-gray-600 dark:text-gray-400 mt-2">{t("services.subtitle")}</p>
           </div>
           
-          {/* Add Service Button */}
           <button
-            onClick={() => setIsAddModalOpen(true)}
+            onClick={() => {
+              setEditingService(null);
+              setIsAddModalOpen(true);
+            }}
             className="p-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl transition-colors shadow-lg hover:shadow-xl"
           >
             <Plus className="w-6 h-6" />
           </button>
         </div>
 
-        {/* Monthly Cost Summary */}
         <div className="bg-gradient-to-br from-purple-600 to-purple-800 rounded-2xl p-6 shadow-xl">
           <div className="flex items-start justify-between mb-4">
             <div>
@@ -151,7 +366,6 @@ export default function ServicesPage(): React.JSX.Element {
           </p>
         </div>
 
-        {/* Upcoming Payments Alert */}
         {upcomingSubs.length > 0 && (
           <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4">
             <div className="flex items-start gap-3">
@@ -169,105 +383,56 @@ export default function ServicesPage(): React.JSX.Element {
         )}
       </header>
 
-      {/* Services by Category */}
-      <section className="space-y-6">
-        {Object.entries(categorizedSubs).map(([category, subs]) => {
-          const IconComponent = categoryIcons[category] || DollarSign;
-          
-          return (
-            <div key={category} className="space-y-3">
-              <h2 className="text-lg font-semibold text-zinc-700 dark:text-gray-300 flex items-center gap-2">
-                <IconComponent className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
-                {getCategoryLabel(category)}
-              </h2>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext
+          items={services.map((s) => s.id)}
+          strategy={verticalListSortingStrategy}
+        >
+          <section className="space-y-6">
+            {Object.entries(categorizedSubs).map(([category, subs]) => {
+              const IconComponent = categoryIcons[category] || DollarSign;
+              
+              return (
+                <div key={category} className="space-y-3">
+                  <h2 className="text-lg font-semibold text-zinc-700 dark:text-gray-300 flex items-center gap-2">
+                    <IconComponent className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
+                    {getCategoryLabel(category)}
+                  </h2>
 
-              <div className="space-y-2">
-                {subs.map((sub) => {
-                  const daysUntil = getDaysUntil(sub.nextPaymentDate);
-                  const isDueSoon = daysUntil <= 3;
+                  <div className="space-y-2">
+                    {subs.map((sub) => {
+                      const daysUntil = getDaysUntil(sub.nextPaymentDate);
+                      const isDueSoon = daysUntil <= 3;
 
-                  return (
-                    <div
-                      key={sub.id}
-                      className={cn(
-                        "bg-zinc-100 dark:bg-zinc-900/50 backdrop-blur-sm border rounded-xl p-4 transition-all hover:bg-zinc-200 dark:hover:bg-zinc-800/50",
-                        isDueSoon ? "border-amber-500/50" : "border-zinc-200 dark:border-zinc-800"
-                      )}
-                    >
-                      <div className="flex items-start justify-between gap-4">
-                        {/* Subscription Info */}
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3">
-                            <div className={cn(
-                              "w-10 h-10 rounded-xl flex items-center justify-center",
-                              "bg-gradient-to-br from-purple-500/20 to-purple-600/20"
-                            )}>
-                              <DollarSign className="w-5 h-5 text-purple-500 dark:text-purple-400" />
-                            </div>
-                            <div className="flex-1">
-                              <h3 className="font-semibold text-zinc-900 dark:text-white">{sub.name}</h3>
-                              {sub.description && (
-                                <p className="text-sm text-gray-600 dark:text-gray-400">{sub.description}</p>
-                              )}
-                            </div>
-                          </div>
+                      return (
+                        <SortableServiceCard
+                          key={sub.id}
+                          sub={sub}
+                          daysUntil={daysUntil}
+                          isDueSoon={isDueSoon}
+                          language={language}
+                          locale={locale}
+                          formatCurrency={formatCurrency}
+                          getFrequencyLabel={getFrequencyLabel}
+                          getStatusLabel={getStatusLabel}
+                          onEdit={handleEditService}
+                          onDelete={handleDeleteService}
+                          t={t}
+                        />
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </section>
+        </SortableContext>
+      </DndContext>
 
-                          {/* Payment Details */}
-                          <div className="flex items-center gap-4 mt-3 ml-13 text-xs text-gray-600 dark:text-gray-400">
-                            <div className="flex items-center gap-1">
-                              <Calendar className="w-3 h-3" />
-                              <span>
-                                {sub.nextPaymentDate.toLocaleDateString(locale, {
-                                  month: "short",
-                                  day: "numeric",
-                                })}
-                              </span>
-                            </div>
-                            {isDueSoon && (
-                              <span className={cn("font-medium", language === "es" ? "text-amber-500 dark:text-amber-400" : "text-amber-500 dark:text-amber-400")}>
-                                {daysUntil === 0
-                                  ? t("dashboard.dueToday")
-                                  : daysUntil === 1
-                                  ? t("dashboard.dueTomorrow")
-                                  : t("dashboard.inDays").replace("{days}", daysUntil.toString())}
-                              </span>
-                            )}
-                            <span className="px-2 py-0.5 bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-full capitalize">
-                              {getFrequencyLabel(sub.frequency)}
-                            </span>
-                            {sub.autoRenewal && (
-                              <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-full">
-                                {t("services.autoRenewal")}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Amount */}
-                        <div className="text-right">
-                          <p className="text-xl font-bold text-zinc-900 dark:text-white">{formatCurrency(sub.amount)}</p>
-                          <span
-                            className={cn(
-                              "text-xs px-2 py-1 rounded-full",
-                              sub.status === "active"
-                                ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400"
-                                : "bg-gray-500/20 text-gray-600 dark:text-gray-400"
-                            )}
-                          >
-                            {getStatusLabel(sub.status)}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          );
-        })}
-      </section>
-
-      {/* Empty State */}
       {services.length === 0 && (
         <div className="text-center py-12">
           <Receipt className="w-16 h-16 text-gray-400 dark:text-gray-600 mx-auto mb-4" />
@@ -282,11 +447,30 @@ export default function ServicesPage(): React.JSX.Element {
         </div>
       )}
 
-      {/* Add Service Modal */}
       <AddServiceModal
         isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
+        onClose={() => {
+          setIsAddModalOpen(false);
+          setEditingService(null);
+        }}
         onAdd={handleAddService}
+        editingService={editingService}
+        onUpdate={handleUpdateService}
+      />
+
+      <ConfirmModal
+        isOpen={confirmDelete.isOpen}
+        onClose={() => setConfirmDelete({ isOpen: false, id: null, name: "" })}
+        onConfirm={confirmDeletion}
+        title={language === "es" ? "Confirmar Eliminación" : "Confirm Deletion"}
+        message={
+          language === "es"
+            ? `¿Estás seguro de que deseas eliminar el servicio "${confirmDelete.name}"? Esta acción no se puede deshacer.`
+            : `Are you sure you want to delete the service "${confirmDelete.name}"? This action cannot be undone.`
+        }
+        confirmText={language === "es" ? "Eliminar" : "Delete"}
+        cancelText={language === "es" ? "Cancelar" : "Cancel"}
+        variant="danger"
       />
     </div>
   );

@@ -46,7 +46,6 @@ export default function ProfilePage(): React.JSX.Element {
   const [showLanguageModal, setShowLanguageModal] = useState(false);
   const [showCurrencyModal, setShowCurrencyModal] = useState(false);
 
-  // Avoid hydration mismatch by only rendering theme-dependent content after mount
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -93,9 +92,7 @@ export default function ProfilePage(): React.JSX.Element {
     },
   ];
 
-  // Only show current values after hydration to avoid mismatch
   if (!mounted) {
-    // Render placeholder until mounted to avoid hydration mismatch
     return (
       <div className="min-h-screen p-6 space-y-6 pb-24 bg-white dark:bg-zinc-950">
         <header className="space-y-4">
@@ -120,7 +117,6 @@ export default function ProfilePage(): React.JSX.Element {
 
   return (
     <div className="min-h-screen p-6 space-y-6 pb-24 bg-white dark:bg-zinc-950">
-      {/* Header */}
       <header className="space-y-4">
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2 text-zinc-900 dark:text-white">
@@ -130,7 +126,6 @@ export default function ProfilePage(): React.JSX.Element {
           <p className="text-gray-600 dark:text-gray-400 mt-2">{t("profile.subtitle")}</p>
         </div>
 
-        {/* User Info Card */}
         <div className="bg-gradient-to-br from-emerald-600 to-emerald-800 rounded-2xl p-6 shadow-xl">
           <div className="flex items-center gap-4">
             <div className="w-20 h-20 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
@@ -147,7 +142,6 @@ export default function ProfilePage(): React.JSX.Element {
         </div>
       </header>
 
-      {/* Personal Information */}
       <section className="space-y-3">
         <h2 className="text-lg font-semibold text-zinc-700 dark:text-gray-300">{t("profile.personalInfo")}</h2>
         
@@ -197,7 +191,6 @@ export default function ProfilePage(): React.JSX.Element {
         </div>
       </section>
 
-      {/* Notification Settings */}
       <section className="space-y-3">
         <div className="flex items-center gap-2">
           <Bell className="w-5 h-5 text-emerald-400" />
@@ -234,7 +227,6 @@ export default function ProfilePage(): React.JSX.Element {
         </div>
       </section>
 
-      {/* App Settings */}
       <section className="space-y-3">
         <div className="flex items-center gap-2">
           <Settings className="w-5 h-5 text-emerald-400" />
@@ -242,7 +234,6 @@ export default function ProfilePage(): React.JSX.Element {
         </div>
 
         <div className="bg-zinc-50 dark:bg-zinc-900/50 backdrop-blur-sm border border-zinc-200 dark:border-zinc-800 rounded-2xl overflow-hidden">
-          {/* Theme Selector */}
           <button
             onClick={() => setShowThemeModal(true)}
             className="w-full flex items-center justify-between p-4 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 transition-colors"
@@ -263,7 +254,6 @@ export default function ProfilePage(): React.JSX.Element {
 
           <div className="border-t border-zinc-200 dark:border-zinc-800" />
 
-          {/* Language Selector */}
           <button
             onClick={() => setShowLanguageModal(true)}
             className="w-full flex items-center justify-between p-4 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 transition-colors"
@@ -284,7 +274,6 @@ export default function ProfilePage(): React.JSX.Element {
 
           <div className="border-t border-zinc-200 dark:border-zinc-800" />
 
-          {/* Currency Selector */}
           <button
             onClick={() => setShowCurrencyModal(true)}
             className="w-full flex items-center justify-between p-4 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 transition-colors"
@@ -305,7 +294,6 @@ export default function ProfilePage(): React.JSX.Element {
 
           <div className="border-t border-zinc-200 dark:border-zinc-800" />
 
-          {/* Currency Selector */}
           <button
             onClick={() => setShowCurrencyModal(true)}
             className="w-full flex items-center justify-between p-4 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 transition-colors"
@@ -324,7 +312,6 @@ export default function ProfilePage(): React.JSX.Element {
         </div>
       </section>
 
-      {/* Security */}
       <section className="space-y-3">
         <div className="flex items-center gap-2">
           <Shield className="w-5 h-5 text-emerald-400" />
@@ -356,7 +343,6 @@ export default function ProfilePage(): React.JSX.Element {
         </div>
       </section>
 
-      {/* Logout Button */}
       <section>
         <button className="w-full bg-red-600/10 hover:bg-red-600/20 border border-red-600/30 rounded-2xl p-4 flex items-center justify-center gap-3 transition-all group">
           <LogOut className="w-5 h-5 text-red-400 group-hover:translate-x-1 transition-transform" />
@@ -364,13 +350,11 @@ export default function ProfilePage(): React.JSX.Element {
         </button>
       </section>
 
-      {/* App Version */}
       <div className="text-center text-sm text-gray-500 pt-4">
         <p>{t("profile.version")}</p>
         <p className="mt-1">{t("profile.copyright")}</p>
       </div>
 
-      {/* Theme Selection Modal */}
       {showThemeModal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center p-4" onClick={() => setShowThemeModal(false)}>
           <div className="bg-white dark:bg-zinc-900 rounded-2xl p-6 w-full max-w-md animate-slide-up" onClick={(e) => e.stopPropagation()}>
@@ -413,7 +397,6 @@ export default function ProfilePage(): React.JSX.Element {
         </div>
       )}
 
-      {/* Language Selection Modal */}
       {showLanguageModal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center p-4" onClick={() => setShowLanguageModal(false)}>
           <div className="bg-white dark:bg-zinc-900 rounded-2xl p-6 w-full max-w-md animate-slide-up" onClick={(e) => e.stopPropagation()}>
@@ -452,7 +435,6 @@ export default function ProfilePage(): React.JSX.Element {
         </div>
       )}
 
-      {/* Currency Selection Modal */}
       {showCurrencyModal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center p-4" onClick={() => setShowCurrencyModal(false)}>
           <div className="bg-white dark:bg-zinc-900 rounded-2xl p-6 w-full max-w-md animate-slide-up" onClick={(e) => e.stopPropagation()}>

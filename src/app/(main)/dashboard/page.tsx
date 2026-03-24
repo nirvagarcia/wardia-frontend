@@ -38,7 +38,6 @@ export default function DashboardPage(): React.JSX.Element {
   const t = (key: string) => getTranslation(language, key);
   const summary = mockFinancialSummary;
   
-  // Get current date information
   const now = new Date();
   const locale = language === "es" ? "es-PE" : "en-US";
   const monthName = now.toLocaleDateString(locale, { month: "long" });
@@ -49,7 +48,6 @@ export default function DashboardPage(): React.JSX.Element {
 
   return (
     <div className="min-h-screen p-6 space-y-6 pb-24 bg-white dark:bg-zinc-950">
-      {/* Header */}
       <header className="space-y-3">
         <div>
           <h1 className="text-3xl font-bold text-zinc-900 dark:text-white">
@@ -64,9 +62,7 @@ export default function DashboardPage(): React.JSX.Element {
         </p>
       </header>
 
-      {/* Financial Summary Cards */}
       <div className="grid gap-4">
-        {/* Total Balance */}
         <div className="bg-gradient-to-br from-emerald-600 to-emerald-800 rounded-2xl p-6 shadow-xl">
           <div className="flex items-start justify-between mb-4">
             <div>
@@ -82,7 +78,6 @@ export default function DashboardPage(): React.JSX.Element {
           <p className="text-emerald-100 text-sm">{t("dashboard.acrossAccounts")}</p>
         </div>
 
-        {/* Credit Card Debt & Available Credit */}
         <div className="grid grid-cols-2 gap-4">
           <div className="bg-zinc-100 dark:bg-zinc-900/50 backdrop-blur-sm border border-zinc-200 dark:border-zinc-800 rounded-2xl p-5">
             <div className="flex items-center gap-2 mb-3">
@@ -109,7 +104,6 @@ export default function DashboardPage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* Monthly Subscriptions */}
         <div className="bg-zinc-100 dark:bg-zinc-900/50 backdrop-blur-sm border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-lg font-semibold text-zinc-900 dark:text-white">{t("dashboard.monthlyServices")}</h3>
@@ -123,7 +117,6 @@ export default function DashboardPage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* Upcoming Payments */}
       <section className="space-y-4">
         <div>
           <h2 className="text-xl font-semibold flex items-center gap-2 text-zinc-900 dark:text-white">
@@ -138,7 +131,6 @@ export default function DashboardPage(): React.JSX.Element {
             const daysUntil = getDaysUntil(payment.dueDate);
             const isUrgent = daysUntil <= 3;
 
-            // Determine due date text
             let dueText = "";
             if (daysUntil === 0) {
               dueText = t("dashboard.dueToday");

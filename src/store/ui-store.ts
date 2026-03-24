@@ -6,19 +6,16 @@
 import { create } from "zustand";
 
 interface UIState {
-  // Modal state
   isModalOpen: boolean;
   modalContent: React.ReactNode | null;
   openModal: (content: React.ReactNode) => void;
   closeModal: () => void;
 
-  // Active navigation state
   activeRoute: string;
   setActiveRoute: (route: string) => void;
 }
 
 export const useUIStore = create<UIState>((set) => ({
-  // Modal state
   isModalOpen: false,
   modalContent: null,
   openModal: (content: React.ReactNode): void =>
@@ -26,7 +23,6 @@ export const useUIStore = create<UIState>((set) => ({
   closeModal: (): void =>
     set({ isModalOpen: false, modalContent: null }),
 
-  // Navigation state
   activeRoute: "/dashboard",
   setActiveRoute: (route: string): void =>
     set({ activeRoute: route }),

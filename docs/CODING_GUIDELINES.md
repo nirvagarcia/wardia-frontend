@@ -34,3 +34,22 @@
 * **Functions & Variables:** Use `camelCase` (e.g., `calculateTotalBalance`, `isCardActive`).
 * **Constants:** Use `UPPER_SNAKE_CASE` for global constants (e.g., `MAX_RETRIES`, `DEFAULT_CURRENCY`).
 * **Comments:** Explain *why* something is done, not *what* is done. The TypeScript code should explain the *what*.
+
+## 7. Internationalization (i18n) - STRICT LAW
+* **NEVER use inline translations:** NEVER write `language === "es" ? "Texto en español" : "English text"` in components.
+* **ALWAYS use translation keys:** ALL user-facing text MUST use the `t(key)` function with a proper translation key.
+* **Translation key naming:** Use `camelCase` for translation keys (e.g., `t("deleteCredentials")`, `t("confirmDelete")`, `t("lastUpdated")`).
+* **No hardcoded strings:** Button labels, modal titles, error messages, placeholders, and ALL UI text must come from the translation system.
+* **Exceptions:** Only developer-facing content (like `console.log`, comments, or error stack traces) can have hardcoded English strings.
+
+### ❌ WRONG - NEVER DO THIS:
+```tsx
+<button>{language === "es" ? "Guardar" : "Save"}</button>
+<Modal title={language === "es" ? "Eliminar Cuenta" : "Delete Account"} />
+```
+
+### ✅ CORRECT - ALWAYS DO THIS:
+```tsx
+<button>{t("save")}</button>
+<Modal title={t("deleteAccount")} />
+```

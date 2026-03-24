@@ -2,20 +2,22 @@
 
 /**
  * Add Service Modal Component
- * Full-featured form for adding new services/subscriptions
+ * Full-featured form for adding/editing services/subscriptions
  */
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { usePreferencesStore } from "@/store/preferences-store";
 import { getTranslation } from "@/lib/i18n";
 import { X, Calendar, DollarSign, Tag, FileText, RefreshCw, CheckCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { ISubscription } from "@/types/finance";
+import type { ISubscription, PaymentFrequency, SubscriptionStatus } from "@/types/finance";
 
 interface AddServiceModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAdd: (service: Omit<ISubscription, "id">) => void;
+  editingService?: ISubscription | null;
+  onUpdate?: (id: string, service: Omit<ISubscription, "id">) => void;
 }
 
 const categories = [
@@ -27,18 +29,20 @@ const categories = [
   { key: "housing", icon: "🏠" },
 ];
 
-export function AddServiceModal({ isOpen, onClose, onAdd }: AddServiceModalProps): React.JSX.Element | null {
+export function AddServiceModal({ isOpen, onClose, onAdd, editingService, onUpdate }: AddServiceModalProps): React.JSX.Element | null {
   const { language, currency } = usePreferencesStore();
   const t = (key: string) => getTranslation(language, key);
+
+  const isEditMode = !!editingService;
 
   const [formData, setFormData] = useState<{
     name: string;
     description: string;
-    category: "entertainment" | "productivity" | "health" | "utilities" | "telecom" | "housing";
+    category: string;
     amount: string;
-    frequency: "monthly" | "yearly" | "weekly" | "quarterly";
+    frequency: PaymentFrequency;
     nextPaymentDate: string;
-    status: "active";
+    status: SubscriptionStatus;
     autoRenewal: boolean;
   }>({
     name: "",
@@ -53,19 +57,51 @@ export function AddServiceModal({ isOpen, onClose, onAdd }: AddServiceModalProps
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    if (editingService) {
+      
+      setFormData((prev) => ({
+        ...prev,
+        name: editingService.name,
+        description: editingService.description || "",
+        category: editingService.category,
+        amount: editingService.amount.value.toString(),
+        frequency: editingService.frequency,
+        nextPaymentDate: editingService.nextPaymentDate.toISOString().split('T')[0],
+        status: editingService.status,
+        autoRenewal: editingService.autoRenewal,
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        name: "",
+        description: "",
+        category: "entertainment",
+        amount: "",
+        frequency: "monthly",
+        nextPaymentDate: "",
+        status: "active",
+        autoRenewal: true,
+      }));
+    }
+    setErrors({});
+  }, [isOpen, editingService]);
+
   if (!isOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validation
     const newErrors: Record<string, string> = {};
-    if (!formData.name.trim()) newErrors.name = language === "es" ? "Nombre requerido" : "Name required";
+    if (!formData.name.trim()) newErrors.name = t("forms.nameRequired");
     if (!formData.amount || parseFloat(formData.amount) <= 0) {
-      newErrors.amount = language === "es" ? "Monto inválido" : "Invalid amount";
+      newErrors.amount = t("forms.invalidAmount");
     }
     if (!formData.nextPaymentDate) {
-      newErrors.nextPaymentDate = language === "es" ? "Fecha requerida" : "Date required";
+      newErrors.nextPaymentDate = t("forms.dateRequired");
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -73,7 +109,6 @@ export function AddServiceModal({ isOpen, onClose, onAdd }: AddServiceModalProps
       return;
     }
 
-    // Create service object
     const newService: Omit<ISubscription, "id"> = {
       name: formData.name,
       description: formData.description,
@@ -88,9 +123,12 @@ export function AddServiceModal({ isOpen, onClose, onAdd }: AddServiceModalProps
       autoRenewal: formData.autoRenewal,
     };
 
-    onAdd(newService);
+    if (isEditMode && editingService && onUpdate) {
+      onUpdate(editingService.id, newService);
+    } else {
+      onAdd(newService);
+    }
     
-    // Reset form
     setFormData({
       name: "",
       description: "",
@@ -111,10 +149,12 @@ export function AddServiceModal({ isOpen, onClose, onAdd }: AddServiceModalProps
         className="bg-white dark:bg-zinc-900 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-slide-up" 
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
         <div className="sticky top-0 bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 p-6 flex items-center justify-between">
           <h2 className="text-2xl font-bold text-zinc-900 dark:text-white">
-            {language === "es" ? "Agregar Servicio" : "Add Service"}
+            {isEditMode
+              ? t("forms.editService")
+              : t("forms.addService")
+            }
           </h2>
           <button
             onClick={onClose}
@@ -124,19 +164,17 @@ export function AddServiceModal({ isOpen, onClose, onAdd }: AddServiceModalProps
           </button>
         </div>
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {/* Category Selection */}
           <div>
             <label className="block text-sm font-medium text-zinc-700 dark:text-gray-300 mb-3">
-              {language === "es" ? "Categoría" : "Category"}
+              {t("forms.category")}
             </label>
             <div className="grid grid-cols-3 gap-3">
               {categories.map(({ key, icon }) => (
                 <button
                   key={key}
                   type="button"
-                  onClick={() => setFormData({ ...formData, category: key as "entertainment" | "productivity" | "health" | "utilities" | "telecom" | "housing" })}
+                  onClick={() => setFormData({ ...formData, category: key })}
                   className={cn(
                     "p-4 rounded-xl border-2 transition-all flex flex-col items-center gap-2",
                     formData.category === key
@@ -156,17 +194,16 @@ export function AddServiceModal({ isOpen, onClose, onAdd }: AddServiceModalProps
             </div>
           </div>
 
-          {/* Name */}
           <div>
             <label className="block text-sm font-medium text-zinc-700 dark:text-gray-300 mb-2">
               <Tag className="w-4 h-4 inline mr-2" />
-              {language === "es" ? "Nombre del Servicio" : "Service Name"}
+              {t("forms.serviceName")}
             </label>
             <input
               type="text"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              placeholder={language === "es" ? "Ej: Netflix Premium" : "e.g. Netflix Premium"}
+              placeholder={t("forms.serviceNamePlaceholder")}
               className={cn(
                 "w-full px-4 py-3 rounded-xl border bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white",
                 errors.name
@@ -177,27 +214,25 @@ export function AddServiceModal({ isOpen, onClose, onAdd }: AddServiceModalProps
             {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
           </div>
 
-          {/* Description */}
           <div>
             <label className="block text-sm font-medium text-zinc-700 dark:text-gray-300 mb-2">
               <FileText className="w-4 h-4 inline mr-2" />
-              {language === "es" ? "Descripción (Opcional)" : "Description (Optional)"}
+              {t("forms.description")} ({t("credentials.optional")})
             </label>
             <textarea
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              placeholder={language === "es" ? "Detalles adicionales..." : "Additional details..."}
+              placeholder={t("forms.descriptionPlaceholder")}
               rows={3}
               className="w-full px-4 py-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white focus:border-emerald-500 dark:focus:border-emerald-500"
             />
           </div>
 
-          {/* Amount & Frequency */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-zinc-700 dark:text-gray-300 mb-2">
                 <DollarSign className="w-4 h-4 inline mr-2" />
-                {language === "es" ? "Monto" : "Amount"}
+                {t("forms.amount")}
               </label>
               <div className="relative">
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 dark:text-zinc-400">
@@ -223,7 +258,7 @@ export function AddServiceModal({ isOpen, onClose, onAdd }: AddServiceModalProps
             <div>
               <label className="block text-sm font-medium text-zinc-700 dark:text-gray-300 mb-2">
                 <RefreshCw className="w-4 h-4 inline mr-2" />
-                {language === "es" ? "Frecuencia" : "Frequency"}
+                {t("forms.frequency")}
               </label>
               <select
                 value={formData.frequency}
@@ -238,11 +273,10 @@ export function AddServiceModal({ isOpen, onClose, onAdd }: AddServiceModalProps
             </div>
           </div>
 
-          {/* Next Payment Date */}
           <div>
             <label className="block text-sm font-medium text-zinc-700 dark:text-gray-300 mb-2">
               <Calendar className="w-4 h-4 inline mr-2" />
-              {language === "es" ? "Próximo Pago" : "Next Payment"}
+              {t("forms.nextPaymentDate")}
             </label>
             <input
               type="date"
@@ -258,17 +292,16 @@ export function AddServiceModal({ isOpen, onClose, onAdd }: AddServiceModalProps
             {errors.nextPaymentDate && <p className="text-red-500 text-sm mt-1">{errors.nextPaymentDate}</p>}
           </div>
 
-          {/* Auto-renewal & Status */}
           <div className="space-y-4">
             <label className="flex items-center justify-between p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl cursor-pointer">
               <div className="flex items-center gap-3">
                 <CheckCircle className="w-5 h-5 text-emerald-500" />
                 <div>
                   <p className="font-medium text-zinc-900 dark:text-white">
-                    {language === "es" ? "Auto-renovación" : "Auto-renewal"}
+                    {t("forms.autoRenewal")}
                   </p>
                   <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                    {language === "es" ? "Se renueva automáticamente" : "Renews automatically"}
+                    {t("forms.renewsAutomatically")}
                   </p>
                 </div>
               </div>
@@ -290,20 +323,21 @@ export function AddServiceModal({ isOpen, onClose, onAdd }: AddServiceModalProps
             </label>
           </div>
 
-          {/* Submit Buttons */}
           <div className="flex gap-3 pt-4">
             <button
               type="button"
               onClick={onClose}
               className="flex-1 px-6 py-3 rounded-xl border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors font-medium"
             >
-              {language === "es" ? "Cancelar" : "Cancel"}
+              {t("common.cancel")}
             </button>
             <button
               type="submit"
               className="flex-1 px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white transition-colors font-medium"
             >
-              {language === "es" ? "Agregar Servicio" : "Add Service"}
+              {isEditMode
+                ? t("forms.saveChanges")
+                : t("forms.addService")}
             </button>
           </div>
         </form>

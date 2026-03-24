@@ -13,22 +13,133 @@ import { AccountCard } from "@/components/features/account-card";
 import { CreditCardDisplay } from "@/components/features/credit-card-display";
 import { BankCredentialsSection } from "@/components/features/bank-credentials-section";
 import { AddAccountModal } from "@/components/modals/add-account-modal";
+import { AddCredentialsModal } from "@/components/modals/add-credentials-modal";
+import {ConfirmModal } from "@/components/modals/confirm-modal";
 import { Wallet, Plus, TrendingUp, AlertCircle, Shield } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import type { IAccount, ICreditCard, IBankCredentials } from "@/types/finance";
 
 type TabType = "debit" | "credit" | "credentials";
 
+function SortableAccountCard({ 
+  account, 
+  onEdit, 
+  onDelete 
+}: { 
+  account: IAccount; 
+  onEdit: (account: IAccount) => void; 
+  onDelete: (id: string) => void;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: account.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition: isDragging ? transition : transition + ", transform 0.2s ease, box-shadow 0.2s ease",
+  };
+
+  return (
+    <div 
+      ref={setNodeRef} 
+      style={style}
+      className={cn(
+        "relative cursor-grab active:cursor-grabbing transition-all",
+        isDragging && "scale-105 shadow-2xl z-50 opacity-90"
+      )}
+      {...attributes}
+      {...listeners}
+    >
+      <AccountCard account={account} onEdit={onEdit} onDelete={onDelete} />
+    </div>
+  );
+}
+
+function SortableCreditCard({ 
+  card, 
+  onEdit, 
+  onDelete 
+}: { 
+  card: ICreditCard; 
+  onEdit: (card: ICreditCard) => void; 
+  onDelete: (id: string) => void;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: card.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition: isDragging ? transition : transition + ", transform 0.2s ease, box-shadow 0.2s ease",
+  };
+
+  return (
+    <div 
+      ref={setNodeRef} 
+      style={style}
+      className={cn(
+        "relative cursor-grab active:cursor-grabbing transition-all",
+        isDragging && "scale-105 shadow-2xl z-50 opacity-90"
+      )}
+      {...attributes}
+      {...listeners}
+    >
+      <CreditCardDisplay card={card} onEdit={onEdit} onDelete={onDelete} />
+    </div>
+  );
+}
+
 export default function AccountsPage(): React.JSX.Element {
   const { language, currency } = usePreferencesStore();
-  const t = (key: string) => getTranslation(language, key);
+  const t = (key: string, vars?: Record<string, string | number>) => getTranslation(language, key, vars);
   const [activeTab, setActiveTab] = useState<TabType>("debit");
 
-  // Local state for accounts, cards, and credentials
   const [accounts, setAccounts] = useState<IAccount[]>(mockAccounts);
   const [cards, setCards] = useState<ICreditCard[]>(mockCreditCards);
-  const [credentials] = useState<IBankCredentials[]>(mockBankCredentials);
+  const [credentials, setCredentials] = useState<IBankCredentials[]>(mockBankCredentials);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isCredentialsModalOpen, setIsCredentialsModalOpen] = useState(false);
+  const [editingCredential, setEditingCredential] = useState<IBankCredentials | null>(null);
+  const [editingAccount, setEditingAccount] = useState<IAccount | null>(null);
+  const [editingCard, setEditingCard] = useState<ICreditCard | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<{
+    isOpen: boolean;
+    type: "account" | "card" | null;
+    id: string | null;
+    name: string;
+  }>({
+    isOpen: false,
+    type: null,
+    id: null,
+    name: "",
+  });
 
   const handleAddAccount = (newAccount: Omit<IAccount, "id" | "lastUpdated">) => {
     const accountWithId: IAccount = {
@@ -47,11 +158,142 @@ export default function AccountsPage(): React.JSX.Element {
       lastStatementDate: new Date(now.getFullYear(), now.getMonth(), newCard.cutoffDay),
       nextPaymentDate: new Date(now.getFullYear(), now.getMonth() + 1, newCard.paymentDueDay),
       minimumPayment: {
-        value: newCard.usedCredit.value * 0.05, // 5% minimum payment
+        value: newCard.usedCredit.value * 0.05,
         currency: newCard.usedCredit.currency,
       },
     };
     setCards([...cards, cardWithId]);
+  };
+
+  const handleUpdateAccount = (id: string, updatedAccount: Omit<IAccount, "id" | "lastUpdated">) => {
+    setAccounts(accounts.map(acc => 
+      acc.id === id 
+        ? { ...updatedAccount, id, lastUpdated: new Date() }
+        : acc
+    ));
+  };
+
+  const handleUpdateCard = (id: string, updatedCard: Omit<ICreditCard, "id" | "lastStatementDate" | "nextPaymentDate" | "minimumPayment">) => {
+    const now = new Date();
+    setCards(cards.map(card => 
+      card.id === id 
+        ? { 
+            ...updatedCard, 
+            id,
+            lastStatementDate: new Date(now.getFullYear(), now.getMonth(), updatedCard.cutoffDay),
+            nextPaymentDate: new Date(now.getFullYear(), now.getMonth() + 1, updatedCard.paymentDueDay),
+            minimumPayment: {
+              value: updatedCard.usedCredit.value * 0.05,
+              currency: updatedCard.usedCredit.currency,
+            },
+          }
+        : card
+    ));
+  };
+
+  const handleEditAccount = (account: IAccount) => {
+    setEditingAccount(account);
+    setEditingCard(null);
+    setIsAddModalOpen(true);
+  };
+
+  const handleEditCard = (card: ICreditCard) => {
+    setEditingCard(card);
+    setEditingAccount(null);
+    setIsAddModalOpen(true);
+  };
+
+  const handleAddCredentials = (newCred: Omit<IBankCredentials, "id" | "lastUpdated">) => {
+    const credWithId: IBankCredentials = {
+      ...newCred,
+      id: `cred-${Date.now()}`,
+      lastUpdated: new Date(),
+    };
+    setCredentials([...credentials, credWithId]);
+  };
+
+  const handleUpdateCredentials = (id: string, updatedCred: Omit<IBankCredentials, "id" | "lastUpdated">) => {
+    setCredentials(credentials.map(cred => 
+      cred.id === id 
+        ? { ...updatedCred, id, lastUpdated: new Date() }
+        : cred
+    ));
+  };
+
+  const handleEditCredentials = (credential: IBankCredentials) => {
+    setEditingCredential(credential);
+    setIsCredentialsModalOpen(true);
+  };
+
+  const handleDeleteCredentials = (id: string) => {
+    setCredentials(credentials.filter(cred => cred.id !== id));
+  };
+
+  const handleDeleteAccount = (id: string) => {
+    const account = accounts.find(acc => acc.id === id);
+    if (account) {
+      setConfirmDelete({
+        isOpen: true,
+        type: "account",
+        id,
+        name: account.bankName,
+      });
+    }
+  };
+
+  const handleDeleteCard = (id: string) => {
+    const card = cards.find(c => c.id === id);
+    if (card) {
+      setConfirmDelete({
+        isOpen: true,
+        type: "card",
+        id,
+        name: `${card.network.toUpperCase()} *${card.cardNumber.slice(-4)}`,
+      });
+    }
+  };
+
+  const confirmDeletion = () => {
+    if (confirmDelete.type === "account" && confirmDelete.id) {
+      setAccounts(accounts.filter(acc => acc.id !== confirmDelete.id));
+    } else if (confirmDelete.type === "card" && confirmDelete.id) {
+      setCards(cards.filter(card => card.id !== confirmDelete.id));
+    }
+    setConfirmDelete({ isOpen: false, type: null, id: null, name: "" });
+  };
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        delay: 250,
+        tolerance: 5,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEndAccounts = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      setAccounts((items) => {
+        const oldIndex = items.findIndex((item) => item.id === active.id);
+        const newIndex = items.findIndex((item) => item.id === over.id);
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
+  };
+
+  const handleDragEndCards = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      setCards((items) => {
+        const oldIndex = items.findIndex((item) => item.id === active.id);
+        const newIndex = items.findIndex((item) => item.id === over.id);
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
   };
 
   const totalBalance = accounts.reduce((sum, acc) => sum + acc.balance.value, 0);
@@ -70,7 +312,6 @@ export default function AccountsPage(): React.JSX.Element {
 
   return (
     <div className="min-h-screen p-6 space-y-6 pb-24 bg-white dark:bg-zinc-950">
-      {/* Header */}
       <header className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
@@ -81,14 +322,22 @@ export default function AccountsPage(): React.JSX.Element {
             <p className="text-gray-600 dark:text-gray-400 mt-2">{t("accounts.subtitle")}</p>
           </div>
           <button 
-            onClick={() => setIsAddModalOpen(true)}
+            onClick={() => {
+              if (activeTab === "credentials") {
+                setEditingCredential(null);
+                setIsCredentialsModalOpen(true);
+              } else {
+                setEditingAccount(null);
+                setEditingCard(null);
+                setIsAddModalOpen(true);
+              }
+            }}
             className="bg-emerald-600 hover:bg-emerald-700 p-3 rounded-xl transition-colors text-white"
           >
             <Plus className="w-6 h-6" />
           </button>
         </div>
 
-        {/* Tabs */}
         <div className="grid grid-cols-3 gap-2 bg-zinc-100 dark:bg-zinc-900/50 backdrop-blur-sm border border-zinc-200 dark:border-zinc-800 rounded-xl p-1">
           <button
             onClick={() => setActiveTab("debit")}
@@ -122,11 +371,10 @@ export default function AccountsPage(): React.JSX.Element {
             )}
           >
             <Shield className="w-4 h-4" />
-            {language === "es" ? "Credenciales" : "Credentials"}
+            {t("credentials.title")}
           </button>
         </div>
 
-        {/* Summary Cards Based on Active Tab */}
         {activeTab === "debit" ? (
           <div className="bg-gradient-to-br from-zinc-800 to-zinc-900 dark:from-zinc-900 dark:to-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded-2xl p-6">
             <p className="text-sm text-gray-200 dark:text-gray-400 mb-2">{t("accounts.totalBalance")}</p>
@@ -160,13 +408,28 @@ export default function AccountsPage(): React.JSX.Element {
         )}
       </header>
 
-      {/* Content Based on Active Tab */}
       <section className="space-y-4">
         {activeTab === "debit" ? (
           <>
-            {accounts.map((account) => (
-              <AccountCard key={account.id} account={account} />
-            ))}
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEndAccounts}
+            >
+              <SortableContext
+                items={accounts.map((acc) => acc.id)}
+                strategy={verticalListSortingStrategy}
+              >
+                {accounts.map((account) => (
+                  <SortableAccountCard
+                    key={account.id}
+                    account={account}
+                    onEdit={handleEditAccount}
+                    onDelete={handleDeleteAccount}
+                  />
+                ))}
+              </SortableContext>
+            </DndContext>
             
             {accounts.length === 0 && (
               <div className="text-center py-12">
@@ -184,9 +447,25 @@ export default function AccountsPage(): React.JSX.Element {
           </>
         ) : activeTab === "credit" ? (
           <>
-            {cards.map((card) => (
-              <CreditCardDisplay key={card.id} card={card} />
-            ))}
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEndCards}
+            >
+              <SortableContext
+                items={cards.map((c) => c.id)}
+                strategy={verticalListSortingStrategy}
+              >
+                {cards.map((card) => (
+                  <SortableCreditCard
+                    key={card.id}
+                    card={card}
+                    onEdit={handleEditCard}
+                    onDelete={handleDeleteCard}
+                  />
+                ))}
+              </SortableContext>
+            </DndContext>
             
             {cards.length === 0 && (
               <div className="text-center py-12">
@@ -203,25 +482,60 @@ export default function AccountsPage(): React.JSX.Element {
             )}
           </>
         ) : (
-          // Credentials Tab
           <div className="bg-white dark:bg-zinc-950 rounded-2xl p-6">
             <div className="flex items-center gap-2 mb-6">
               <Shield className="w-6 h-6 text-blue-500 dark:text-blue-400" />
               <h2 className="text-xl font-bold text-zinc-900 dark:text-white">
-                {language === "es" ? "Credenciales Bancarias" : "Bank Credentials"}
+                {t("credentials.accessCredentials")}
               </h2>
             </div>
-            <BankCredentialsSection credentials={credentials} />
+            <BankCredentialsSection 
+              credentials={credentials}
+              onEdit={handleEditCredentials}
+              onDelete={handleDeleteCredentials}
+              onReorder={setCredentials}
+            />
           </div>
         )}
       </section>
 
-      {/* Add Account/Card Modal */}
       <AddAccountModal
         isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
+        onClose={() => {
+          setIsAddModalOpen(false);
+          setEditingAccount(null);
+          setEditingCard(null);
+        }}
         onAddAccount={handleAddAccount}
         onAddCard={handleAddCard}
+        editingAccount={editingAccount}
+        editingCard={editingCard}
+        onUpdateAccount={handleUpdateAccount}
+        onUpdateCard={handleUpdateCard}
+      />
+
+      <AddCredentialsModal
+        isOpen={isCredentialsModalOpen}
+        onClose={() => {
+          setIsCredentialsModalOpen(false);
+          setEditingCredential(null);
+        }}
+        onSave={handleAddCredentials}
+        onUpdate={handleUpdateCredentials}
+        editingCredential={editingCredential}
+      />
+
+      <ConfirmModal
+        isOpen={confirmDelete.isOpen}
+        onClose={() => setConfirmDelete({ isOpen: false, type: null, id: null, name: "" })}
+        onConfirm={confirmDeletion}
+        title={t("common.delete")}
+        message={
+          t("accounts.confirmDelete", { name: confirmDelete.name })
+        }
+        confirmText={t("common.delete")}
+        cancelText={t("common.cancel")}
+        variant="danger"
       />
     </div>
   );

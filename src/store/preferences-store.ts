@@ -11,19 +11,15 @@ export type Language = "es" | "en";
 export type Currency = "PEN" | "USD" | "EUR";
 
 interface PreferencesState {
-  // Theme
   theme: Theme;
   setTheme: (theme: Theme) => void;
 
-  // Language
   language: Language;
   setLanguage: (language: Language) => void;
 
-  // Currency
   currency: Currency;
   setCurrency: (currency: Currency) => void;
 
-  // Notification Settings
   notifications: {
     paymentReminders: boolean;
     balanceAlerts: boolean;
@@ -36,19 +32,15 @@ interface PreferencesState {
 export const usePreferencesStore = create<PreferencesState>()(
   persist(
     (set) => ({
-      // Theme defaults
       theme: "dark",
       setTheme: (theme: Theme) => set({ theme }),
 
-      // Language defaults
       language: "es",
       setLanguage: (language: Language) => set({ language }),
 
-      // Currency defaults
       currency: "PEN",
       setCurrency: (currency: Currency) => set({ currency }),
 
-      // Notifications defaults
       notifications: {
         paymentReminders: true,
         balanceAlerts: true,
