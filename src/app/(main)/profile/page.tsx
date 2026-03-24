@@ -94,7 +94,7 @@ export default function ProfilePage(): React.JSX.Element {
 
   if (!mounted) {
     return (
-      <div className="min-h-screen p-6 space-y-6 pb-24 bg-white dark:bg-zinc-950">
+      <div className="space-y-6">
         <header className="space-y-4">
           <div>
             <h1 className="text-3xl font-bold flex items-center gap-2 text-zinc-900 dark:text-white">
@@ -116,7 +116,7 @@ export default function ProfilePage(): React.JSX.Element {
   const currentCurrencyLabel = currencyOptions.find((opt) => opt.value === currency)?.label || "Soles (PEN)";
 
   return (
-    <div className="min-h-screen p-6 space-y-6 pb-24 bg-white dark:bg-zinc-950">
+    <div className="space-y-6">
       <header className="space-y-4">
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2 text-zinc-900 dark:text-white">

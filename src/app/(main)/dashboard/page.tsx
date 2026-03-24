@@ -47,7 +47,7 @@ export default function DashboardPage(): React.JSX.Element {
   const dayOfMonth = now.getDate();
 
   return (
-    <div className="min-h-screen p-6 space-y-6 pb-24 bg-white dark:bg-zinc-950">
+    <div className="space-y-6">
       <header className="space-y-3">
         <div>
           <h1 className="text-3xl font-bold text-zinc-900 dark:text-white">
@@ -62,8 +62,8 @@ export default function DashboardPage(): React.JSX.Element {
         </p>
       </header>
 
-      <div className="grid gap-4">
-        <div className="bg-gradient-to-br from-emerald-600 to-emerald-800 rounded-2xl p-6 shadow-xl">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="bg-gradient-to-br from-emerald-600 to-emerald-800 rounded-2xl p-6 shadow-xl md:col-span-2 lg:col-span-1">
           <div className="flex items-start justify-between mb-4">
             <div>
               <p className="text-emerald-100 text-sm font-medium">{t("dashboard.totalBalance")}</p>
@@ -78,7 +78,7 @@ export default function DashboardPage(): React.JSX.Element {
           <p className="text-emerald-100 text-sm">{t("dashboard.acrossAccounts")}</p>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-4 md:col-span-2 lg:col-span-2">
           <div className="bg-zinc-100 dark:bg-zinc-900/50 backdrop-blur-sm border border-zinc-200 dark:border-zinc-800 rounded-2xl p-5">
             <div className="flex items-center gap-2 mb-3">
               <div className="bg-red-500/20 p-2 rounded-lg">
@@ -104,7 +104,7 @@ export default function DashboardPage(): React.JSX.Element {
           </div>
         </div>
 
-        <div className="bg-zinc-100 dark:bg-zinc-900/50 backdrop-blur-sm border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6">
+        <div className="bg-zinc-100 dark:bg-zinc-900/50 backdrop-blur-sm border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 md:col-span-2 lg:col-span-3">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-lg font-semibold text-zinc-900 dark:text-white">{t("dashboard.monthlyServices")}</h3>
             <span className="text-2xl font-bold text-purple-600 dark:text-purple-400">
@@ -126,7 +126,7 @@ export default function DashboardPage(): React.JSX.Element {
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{t("dashboard.stayOnTop")}</p>
         </div>
 
-        <div className="space-y-3">
+        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
           {summary.upcomingPayments.map((payment) => {
             const daysUntil = getDaysUntil(payment.dueDate);
             const isUrgent = daysUntil <= 3;

@@ -33,7 +33,7 @@ export const BottomNav: React.FC = () => {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/80 dark:bg-black/80 backdrop-blur-lg border-t border-zinc-200 dark:border-white/10">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/80 dark:bg-black/80 backdrop-blur-lg border-t border-zinc-200 dark:border-white/10">
       <div className="max-w-lg mx-auto px-4 py-2">
         <ul className="flex items-center justify-around">
           {navItems.map((item) => {

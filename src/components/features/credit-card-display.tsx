@@ -37,44 +37,40 @@ export const CreditCardDisplay: React.FC<CreditCardDisplayProps> = ({ card, onEd
   const isHighUsage = usagePercentage > 70;
 
   return (
-    <div className="space-y-4">
-      <div className="bg-zinc-100 dark:bg-zinc-900/50 backdrop-blur-sm border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center gap-3">
-            <div className="bg-blue-500/20 p-3 rounded-xl">
-              <CreditCard className="w-5 h-5 text-blue-500 dark:text-blue-400" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-lg text-zinc-900 dark:text-white">{card.cardholderName}</h3>
-              <span className="text-sm text-gray-600 dark:text-gray-400 capitalize">{card.network}</span>
-            </div>
+    <div className="bg-zinc-100 dark:bg-zinc-900/50 backdrop-blur-sm border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 space-y-6">
+      <div className="flex items-start justify-between">
+        <div className="flex items-center gap-3">
+          <div className="bg-blue-500/20 p-3 rounded-xl">
+            <CreditCard className="w-5 h-5 text-blue-500 dark:text-blue-400" />
           </div>
-          <div className="flex items-center gap-2">
-            {onEdit && (
-              <button
-                onClick={() => onEdit(card)}
-                className="p-2 hover:bg-blue-500/10 rounded-lg transition-colors group"
-                title={t("common.edit")}
-              >
-                <Edit2 className="w-4 h-4 text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500" />
-              </button>
-            )}
-            {onDelete && (
-              <button
-                onClick={() => onDelete(card.id)}
-                className="p-2 hover:bg-red-500/10 rounded-lg transition-colors group"
-                title={t("common.delete")}
-              >
-                <Trash2 className="w-4 h-4 text-zinc-600 dark:text-zinc-400 group-hover:text-red-500" />
-              </button>
-            )}
+          <div>
+            <h3 className="font-semibold text-lg text-zinc-900 dark:text-white">{card.cardholderName}</h3>
+            <span className="text-sm text-gray-600 dark:text-gray-400 capitalize">{card.network}</span>
           </div>
+        </div>
+        <div className="flex items-center gap-2">
+          {onEdit && (
+            <button
+              onClick={() => onEdit(card)}
+              className="p-2 hover:bg-blue-500/10 rounded-lg transition-colors group"
+              title={t("common.edit")}
+            >
+              <Edit2 className="w-4 h-4 text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500" />
+            </button>
+          )}
+          {onDelete && (
+            <button
+              onClick={() => onDelete(card.id)}
+              className="p-2 hover:bg-red-500/10 rounded-lg transition-colors group"
+              title={t("common.delete")}
+            >
+              <Trash2 className="w-4 h-4 text-zinc-600 dark:text-zinc-400 group-hover:text-red-500" />
+            </button>
+          )}
         </div>
       </div>
 
-      <InteractiveCard card={card} disableInteractive={true} />
-
-      <div className="bg-zinc-100 dark:bg-zinc-900/50 backdrop-blur-sm border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 space-y-4">
+      <div className="space-y-4">
         <div>
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm text-gray-600 dark:text-gray-400">{t("creditCard.creditUsage")}</span>
@@ -148,6 +144,8 @@ export const CreditCardDisplay: React.FC<CreditCardDisplayProps> = ({ card, onEd
           </p>
         </div>
       </div>
+
+      <InteractiveCard card={card} disableInteractive={true} />
     </div>
   );
 };

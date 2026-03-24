@@ -93,58 +93,73 @@ function ServiceCardContent(props: SortableServiceCardProps) {
   const { sub, daysUntil, isDueSoon, language, locale, formatCurrency, getFrequencyLabel, getStatusLabel, onEdit, onDelete, t } = props;
 
   return (
-    <div className="flex items-start justify-between gap-4">
-      <div className="flex-1" onPointerDown={(e) => e.stopPropagation()}>
-        <div className="flex items-center gap-3">
+    <div className="space-y-3">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-start gap-3 flex-1 min-w-0">
           <div className={cn(
-            "w-10 h-10 rounded-xl flex items-center justify-center",
+            "w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0",
             "bg-gradient-to-br from-purple-500/20 to-purple-600/20"
           )}>
             <DollarSign className="w-5 h-5 text-purple-500 dark:text-purple-400" />
           </div>
-          <div className="flex-1">
-            <h3 className="font-semibold text-zinc-900 dark:text-white">{sub.name}</h3>
+          <div className="flex-1 min-w-0">
+            <h3 className="font-semibold text-zinc-900 dark:text-white truncate">{sub.name}</h3>
             {sub.description && (
-              <p className="text-sm text-gray-600 dark:text-gray-400">{sub.description}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 truncate">{sub.description}</p>
             )}
           </div>
         </div>
 
-        <div className="flex items-center gap-4 mt-3 ml-13 text-xs text-gray-600 dark:text-gray-400">
-          <div className="flex items-center gap-1">
-            <Calendar className="w-3 h-3" />
-            <span>
-              {sub.nextPaymentDate.toLocaleDateString(locale, {
-                month: "short",
-                day: "numeric",
-              })}
-            </span>
-          </div>
-          {isDueSoon && (
-            <span className={cn("font-medium text-amber-500 dark:text-amber-400")}>
-              {daysUntil === 0
-                ? t("dashboard.dueToday")
-                : daysUntil === 1
-                ? t("dashboard.dueTomorrow")
-                : t("dashboard.inDays").replace("{days}", daysUntil.toString())}
-            </span>
-          )}
-          <span className="px-2 py-0.5 bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-full capitalize">
-            {getFrequencyLabel(sub.frequency)}
-          </span>
-          {sub.autoRenewal && (
-            <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-full">
-              {t("services.autoRenewal")}
-            </span>
-          )}
+        <div className="flex items-center gap-1 flex-shrink-0" onPointerDown={(e) => e.stopPropagation()}>
+          <button
+            onClick={() => onEdit(sub)}
+            className="p-2 hover:bg-blue-500/10 rounded-lg transition-colors group"
+          >
+            <Edit2 className="w-4 h-4 text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500" />
+          </button>
+          <button
+            onClick={() => onDelete(sub.id)}
+            className="p-2 hover:bg-red-500/10 rounded-lg transition-colors group"
+          >
+            <Trash2 className="w-4 h-4 text-zinc-600 dark:text-zinc-400 group-hover:text-red-500" />
+          </button>
         </div>
       </div>
 
-      <div className="text-right" onPointerDown={(e) => e.stopPropagation()}>
-        <p className="text-xl font-bold text-zinc-900 dark:text-white">{formatCurrency(sub.amount)}</p>
+      <div className="flex flex-wrap items-center gap-2 text-xs">
+        <div className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
+          <Calendar className="w-3 h-3 flex-shrink-0" />
+          <span className="whitespace-nowrap">
+            {sub.nextPaymentDate.toLocaleDateString(locale, {
+              month: "short",
+              day: "numeric",
+            })}
+          </span>
+        </div>
+        
+        {isDueSoon && (
+          <span className="font-medium text-amber-500 dark:text-amber-400 whitespace-nowrap">
+            {daysUntil === 0
+              ? t("dashboard.dueToday")
+              : daysUntil === 1
+              ? t("dashboard.dueTomorrow")
+              : t("dashboard.inDays").replace("{days}", daysUntil.toString())}
+          </span>
+        )}
+        
+        <span className="px-2 py-0.5 bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-full capitalize whitespace-nowrap">
+          {getFrequencyLabel(sub.frequency)}
+        </span>
+        
+        {sub.autoRenewal && (
+          <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-full whitespace-nowrap">
+            {t("services.autoRenewal")}
+          </span>
+        )}
+        
         <span
           className={cn(
-            "text-xs px-2 py-1 rounded-full",
+            "px-2 py-0.5 rounded-full whitespace-nowrap",
             sub.status === "active"
               ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400"
               : "bg-gray-500/20 text-gray-600 dark:text-gray-400"
@@ -154,27 +169,8 @@ function ServiceCardContent(props: SortableServiceCardProps) {
         </span>
       </div>
 
-      <div className="flex flex-col gap-2" onPointerDown={(e) => e.stopPropagation()}>
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onEdit(sub);
-          }}
-          className="p-2 hover:bg-blue-500/10 rounded-lg transition-colors group"
-          title={language === "es" ? "Editar" : "Edit"}
-        >
-          <Edit2 className="w-4 h-4 text-zinc-600 dark:text-zinc-400 group-hover:text-blue-500" />
-        </button>
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onDelete(sub.id);
-          }}
-          className="p-2 hover:bg-red-500/10 rounded-lg transition-colors group"
-          title={language === "es" ? "Eliminar" : "Delete"}
-        >
-          <Trash2 className="w-4 h-4 text-zinc-600 dark:text-zinc-400 group-hover:text-red-500" />
-        </button>
+      <div className="pt-2 border-t border-zinc-200 dark:border-zinc-800">
+        <p className="text-2xl font-bold text-zinc-900 dark:text-white">{formatCurrency(sub.amount)}</p>
       </div>
     </div>
   );
@@ -327,7 +323,7 @@ export default function ServicesPage(): React.JSX.Element {
   };
 
   return (
-    <div className="min-h-screen p-6 space-y-6 pb-24 bg-white dark:bg-zinc-950">
+    <div className="space-y-6">
       <header className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
@@ -403,7 +399,7 @@ export default function ServicesPage(): React.JSX.Element {
                     {getCategoryLabel(category)}
                   </h2>
 
-                  <div className="space-y-2">
+                  <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3">
                     {subs.map((sub) => {
                       const daysUntil = getDaysUntil(sub.nextPaymentDate);
                       const isDueSoon = daysUntil <= 3;

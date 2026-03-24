@@ -15,7 +15,7 @@ import { BankCredentialsSection } from "@/components/features/bank-credentials-s
 import { AddAccountModal } from "@/components/modals/add-account-modal";
 import { AddCredentialsModal } from "@/components/modals/add-credentials-modal";
 import {ConfirmModal } from "@/components/modals/confirm-modal";
-import { Wallet, Plus, TrendingUp, AlertCircle, Shield } from "lucide-react";
+import { Wallet, Plus, TrendingUp, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   DndContext,
@@ -311,7 +311,7 @@ export default function AccountsPage(): React.JSX.Element {
   };
 
   return (
-    <div className="min-h-screen p-6 space-y-6 pb-24 bg-white dark:bg-zinc-950">
+    <div className="space-y-6">
       <header className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
@@ -370,7 +370,6 @@ export default function AccountsPage(): React.JSX.Element {
                 : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
             )}
           >
-            <Shield className="w-4 h-4" />
             {t("credentials.title")}
           </button>
         </div>
@@ -408,7 +407,7 @@ export default function AccountsPage(): React.JSX.Element {
         )}
       </header>
 
-      <section className="space-y-4">
+      <section>
         {activeTab === "debit" ? (
           <>
             <DndContext
@@ -420,14 +419,16 @@ export default function AccountsPage(): React.JSX.Element {
                 items={accounts.map((acc) => acc.id)}
                 strategy={verticalListSortingStrategy}
               >
-                {accounts.map((account) => (
-                  <SortableAccountCard
-                    key={account.id}
-                    account={account}
-                    onEdit={handleEditAccount}
-                    onDelete={handleDeleteAccount}
-                  />
-                ))}
+                <div className="grid gap-4 md:grid-cols-2">
+                  {accounts.map((account) => (
+                    <SortableAccountCard
+                      key={account.id}
+                      account={account}
+                      onEdit={handleEditAccount}
+                      onDelete={handleDeleteAccount}
+                    />
+                  ))}
+                </div>
               </SortableContext>
             </DndContext>
             
@@ -456,14 +457,16 @@ export default function AccountsPage(): React.JSX.Element {
                 items={cards.map((c) => c.id)}
                 strategy={verticalListSortingStrategy}
               >
-                {cards.map((card) => (
-                  <SortableCreditCard
-                    key={card.id}
-                    card={card}
-                    onEdit={handleEditCard}
-                    onDelete={handleDeleteCard}
-                  />
-                ))}
+                <div className="grid gap-4 md:grid-cols-2">
+                  {cards.map((card) => (
+                    <SortableCreditCard
+                      key={card.id}
+                      card={card}
+                      onEdit={handleEditCard}
+                      onDelete={handleDeleteCard}
+                    />
+                  ))}
+                </div>
               </SortableContext>
             </DndContext>
             
@@ -483,8 +486,7 @@ export default function AccountsPage(): React.JSX.Element {
           </>
         ) : (
           <div className="bg-white dark:bg-zinc-950 rounded-2xl p-6">
-            <div className="flex items-center gap-2 mb-6">
-              <Shield className="w-6 h-6 text-blue-500 dark:text-blue-400" />
+            <div className="mb-6">
               <h2 className="text-xl font-bold text-zinc-900 dark:text-white">
                 {t("credentials.accessCredentials")}
               </h2>

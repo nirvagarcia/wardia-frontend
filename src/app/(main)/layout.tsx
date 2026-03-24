@@ -1,10 +1,14 @@
 /**
  * Layout for authenticated main app routes.
- * Includes the bottom navigation and proper spacing for mobile viewport.
+ * Responsive layout with:
+ * - Sidebar navigation for desktop (md+)
+ * - Bottom navigation for mobile (< md)
+ * - Adaptive content width based on screen size
  */
 
 import React from "react";
 import { BottomNav } from "@/components/layout/bottom-nav";
+import { Sidebar } from "@/components/layout/sidebar";
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -12,10 +16,15 @@ interface MainLayoutProps {
 
 export default function MainLayout({ children }: Readonly<MainLayoutProps>): React.JSX.Element {
   return (
-    <div className="min-h-screen pb-20 bg-white dark:bg-zinc-950">
-      <main className="max-w-lg mx-auto">
-        {children}
-      </main>
+    <div className="flex min-h-screen bg-white dark:bg-zinc-950">
+      <Sidebar />
+      
+      <div className="flex-1 min-w-0">
+        <main className="w-full max-w-[1400px] mx-auto px-4 md:px-6 lg:px-8 pt-6 md:pt-8 pb-24 md:pb-6">
+          {children}
+        </main>
+      </div>
+      
       <BottomNav />
     </div>
   );

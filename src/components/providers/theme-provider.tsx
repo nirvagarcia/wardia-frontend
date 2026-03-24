@@ -16,9 +16,9 @@ export function ThemeProvider({ children }: ThemeProviderProps): React.JSX.Eleme
   return (
     <NextThemesProvider
       attribute="class"
-      defaultTheme="system"
-      enableSystem
-      disableTransitionOnChange
+      defaultTheme="light"
+      enableSystem={false}
+      disableTransitionOnChange={false}
       storageKey="wardia-theme"
     >
       {children}

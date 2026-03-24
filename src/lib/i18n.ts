@@ -13,6 +13,8 @@ export const translations = {
       accounts: "Cuentas",
       services: "Servicios",
       profile: "Perfil",
+      appTagline: "Finanzas personales",
+      premiumUser: "Usuario Premium",
     },
     
     // Dashboard
@@ -230,6 +232,8 @@ export const translations = {
       accounts: "Accounts",
       services: "Services",
       profile: "Profile",
+      appTagline: "Personal finances",
+      premiumUser: "Premium User",
     },
     
     // Dashboard
