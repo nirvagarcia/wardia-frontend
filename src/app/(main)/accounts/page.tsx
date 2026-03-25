@@ -6,7 +6,7 @@
  */
 
 import React from "react";
-import { AccountsView } from "@/components/views/accounts-view";
+import { AccountsView } from "@/views/accounts";
 
 export default function Page(): React.JSX.Element {
   return <AccountsView />;

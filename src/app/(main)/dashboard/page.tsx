@@ -6,7 +6,7 @@
  */
 
 import React from "react";
-import { DashboardView } from "@/components/views/dashboard-view";
+import { DashboardView } from "@/views/dashboard";
 
 export default function Page(): React.JSX.Element {
   return <DashboardView />;

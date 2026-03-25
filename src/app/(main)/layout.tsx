@@ -7,8 +7,8 @@
  */
 
 import React from "react";
-import { BottomNav } from "@/components/layout/bottom-nav";
-import { Sidebar } from "@/components/layout/sidebar";
+import { BottomNav } from "@/shared/components/layout/bottom-nav";
+import { Sidebar } from "@/shared/components/layout/sidebar";
 
 interface MainLayoutProps {
   children: React.ReactNode;

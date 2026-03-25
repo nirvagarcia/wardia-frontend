@@ -6,7 +6,7 @@
  */
 
 import React from "react";
-import { ServicesView } from "@/components/views/services-view";
+import { ServicesView } from "@/views/services";
 
 export default function Page(): React.JSX.Element {
   return <ServicesView />;
