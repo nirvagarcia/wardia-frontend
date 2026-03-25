@@ -34,11 +34,11 @@ export function SelectionModal({
 
   return (
     <div
-      className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center p-4"
+      className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 sm:p-6"
       onClick={onClose}
     >
       <div
-        className="bg-white dark:bg-zinc-900 rounded-2xl p-6 w-full max-w-md animate-slide-up"
+        className="bg-white dark:bg-zinc-900 rounded-2xl p-4 sm:p-6 w-full max-w-md max-h-[85vh] overflow-y-auto animate-slide-up"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-4">

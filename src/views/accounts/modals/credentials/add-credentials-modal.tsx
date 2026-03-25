@@ -108,12 +108,12 @@ export function AddCredentialsModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center p-4" onClick={onClose}>
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-3 sm:p-4" onClick={onClose}>
       <div 
-        className="bg-white dark:bg-zinc-900 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-slide-up" 
+        className="bg-white dark:bg-zinc-900 rounded-2xl w-full max-w-2xl max-h-[92vh] flex flex-col animate-slide-up" 
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="sticky top-0 bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 p-6 flex items-center justify-between">
+        <div className="flex-shrink-0 bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 p-4 sm:p-6 flex items-center justify-between">
           <h2 className="text-2xl font-bold text-zinc-900 dark:text-white">
             {editingCredential 
               ? t("credentials.editCredentials")
@@ -128,7 +128,7 @@ export function AddCredentialsModal({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-6" autoComplete="off">
+        <form id="credentials-form" onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6" autoComplete="off">
           <div>
             <Label className="flex items-center gap-2 mb-2">
               <Building2 className="w-4 h-4" />
@@ -224,17 +224,21 @@ export function AddCredentialsModal({
             />
           </div>
 
-          <div className="flex gap-3 pt-4">
+        </form>
+        
+        <div className="flex-shrink-0 border-t border-zinc-200 dark:border-zinc-800 p-4 sm:p-6 bg-white dark:bg-zinc-900">
+          <div className="flex gap-3">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-6 py-3 rounded-xl border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors font-medium"
+              className="flex-1 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors font-medium text-sm sm:text-base"
             >
               {t("common.cancel")}
             </button>
             <button
               type="submit"
-              className="flex-1 px-6 py-3 rounded-xl bg-cyan-500 hover:bg-cyan-600 text-white transition-colors font-medium shadow-sm"
+              form="credentials-form"
+              className="flex-1 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl bg-cyan-500 hover:bg-cyan-600 text-white transition-colors font-medium shadow-sm text-sm sm:text-base"
             >
               {editingCredential 
                 ? t("forms.update")
@@ -242,7 +246,7 @@ export function AddCredentialsModal({
               }
             </button>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );

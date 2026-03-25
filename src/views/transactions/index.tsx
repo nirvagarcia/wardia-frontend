@@ -13,9 +13,9 @@ import { useInitializeTransactions } from "@/shared/hooks/use-initialize-transac
 import { getTranslation } from "@/shared/langs";
 import { formatCurrency } from "@/shared/utils/currency";
 import { LoadingState } from "@/shared/components/loading-state";
-import { Receipt, Plus } from "lucide-react";
+import { Receipt, Plus, Filter } from "lucide-react";
+import { cn } from "@/shared/utils/cn";
 import { TransactionStats } from "./components/transaction-stats";
-import { TransactionFilters } from "./components/transaction-filters";
 import { TransactionCard } from "./components/transaction-card";
 import { AddTransactionModal } from "./modals/add-transaction-modal";
 import { ConfirmModal } from "@/shared/components/modals/confirm-modal";
@@ -141,16 +141,11 @@ export function TransactionsView(): React.JSX.Element {
 
   const hasActiveFilters = filterType !== "all" || selectedCategories.length > 0;
 
-  const currentFilterCategories = (filterType === "income" 
+  const currentFilterCategories = filterType === "income" 
     ? incomeCategories 
     : filterType === "expense" 
     ? expenseCategories 
-    : [...incomeCategories, ...expenseCategories]
-  ).map(cat => ({
-    id: cat.key,
-    label: t(cat.labelKey),
-    icon: cat.icon,
-  }));
+    : [...incomeCategories, ...expenseCategories];
 
   const formatAmount = (value: number) =>
     formatCurrency(value, currency, language);
@@ -182,32 +177,141 @@ export function TransactionsView(): React.JSX.Element {
         thisMonthLabel={t("transactions.thisMonth")}
       />
 
-      <div className="flex justify-between items-center">
-        <TransactionFilters
-          filterType={filterType}
-          selectedCategories={selectedCategories}
-          showFilters={showFilters}
-          hasActiveFilters={hasActiveFilters}
-          currentFilterCategories={currentFilterCategories}
-          onFilterTypeChange={setFilterType}
-          onToggleCategory={toggleCategory}
-          onClearFilters={clearFilters}
-          onToggleFilters={() => setShowFilters(!showFilters)}
-          allLabel={t("transactions.all")}
-          incomeLabel={t("transactions.income")}
-          expensesLabel={t("transactions.expenses")}
-          filtersLabel={t("transactions.filters")}
-          filterByCategoryLabel={t("transactions.filterByCategory")}
-          clearFiltersLabel={t("transactions.clearFilters")}
-        />
+      {/* Filters and Actions Bar */}
+      <div className="flex gap-2 justify-end">
+        <button
+          onClick={() => setShowFilters(!showFilters)}
+          className={cn(
+            "px-3 md:px-4 py-1.5 md:py-2 rounded-xl text-xs md:text-sm font-medium transition-colors flex items-center gap-2",
+            showFilters || hasActiveFilters
+              ? "bg-cyan-500 text-white"
+              : "bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-gray-300 hover:bg-zinc-200 dark:hover:bg-zinc-700"
+          )}
+        >
+          <Filter className="w-3 h-3 md:w-4 md:h-4" />
+          {t("transactions.filters")}
+          {hasActiveFilters && (
+            <span className="bg-white/20 px-2 py-0.5 rounded-full text-xs font-bold">
+              {(filterType !== "all" ? 1 : 0) + selectedCategories.length}
+            </span>
+          )}
+        </button>
         <button
           onClick={() => setIsAddModalOpen(true)}
-          className="px-4 py-2 rounded-xl text-sm bg-cyan-500 hover:bg-cyan-600 text-white font-medium transition-colors flex items-center gap-2"
+          className="px-3 md:px-4 py-1.5 md:py-2 rounded-xl text-xs md:text-sm bg-cyan-500 hover:bg-cyan-600 text-white font-medium transition-colors flex items-center gap-2"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-4 h-4 md:w-5 md:h-5" />
           {t("transactions.addTransaction")}
         </button>
       </div>
+
+      {showFilters && (
+        <div className="bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-4 space-y-4">
+          {/* Type Filters */}
+          <div>
+            <h3 className="font-semibold text-zinc-900 dark:text-white mb-3">
+              {t("transactions.filters")}
+            </h3>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setFilterType("all")}
+                className={cn(
+                  "px-4 py-2 rounded-lg text-sm font-medium transition-colors",
+                  filterType === "all"
+                    ? "bg-cyan-500 text-white"
+                    : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700"
+                )}
+              >
+                {t("transactions.all")}
+              </button>
+              <button
+                onClick={() => setFilterType("income")}
+                className={cn(
+                  "px-4 py-2 rounded-lg text-sm font-medium transition-colors",
+                  filterType === "income"
+                    ? "bg-emerald-500 text-white"
+                    : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700"
+                )}
+              >
+                {t("transactions.income")}
+              </button>
+              <button
+                onClick={() => setFilterType("expense")}
+                className={cn(
+                  "px-4 py-2 rounded-lg text-sm font-medium transition-colors",
+                  filterType === "expense"
+                    ? "bg-red-500 text-white"
+                    : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700"
+                )}
+              >
+                {t("transactions.expenses")}
+              </button>
+            </div>
+          </div>
+
+          {/* Category Filters */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-semibold text-zinc-900 dark:text-white">
+                {t("transactions.filterByCategory")}
+              </h3>
+              {hasActiveFilters && (
+                <button
+                  onClick={clearFilters}
+                  className="text-sm text-cyan-500 hover:text-cyan-600 font-medium"
+                >
+                  {t("transactions.clearFilters")}
+                </button>
+              )}
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+              {currentFilterCategories.map((category) => {
+                const isActive = selectedCategories.includes(category.key);
+                const categoryCount = transactions.filter(
+                  tr => tr.category === category.key
+                ).length;
+
+                return (
+                  <button
+                    key={category.key}
+                    onClick={() => toggleCategory(category.key)}
+                    className={cn(
+                      "flex items-center justify-between gap-2 p-4 rounded-xl border-2 transition-all",
+                      isActive
+                        ? "border-cyan-500 bg-cyan-50 dark:bg-cyan-950/30"
+                        : "border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600"
+                    )}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">{category.icon}</span>
+                      <span
+                        className={cn(
+                          "text-sm font-medium",
+                          isActive
+                            ? "text-cyan-600 dark:text-cyan-400"
+                            : "text-zinc-600 dark:text-zinc-400"
+                        )}
+                      >
+                        {t(category.labelKey)}
+                      </span>
+                    </div>
+                    <span
+                      className={cn(
+                        "px-2 py-0.5 rounded-full text-xs font-bold",
+                        isActive
+                          ? "bg-cyan-500 text-white"
+                          : "bg-zinc-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-400"
+                      )}
+                    >
+                      {categoryCount}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
 
       <section className="space-y-3">
         <div className="flex items-center justify-between">
