@@ -1,6 +1,7 @@
 /**
  * Layout for authentication routes (login, register, etc.).
  * Minimal layout without bottom navigation.
+ * The actual styling is handled by the AuthLayout component in views.
  */
 
 import React from "react";
@@ -10,11 +11,5 @@ interface AuthLayoutProps {
 }
 
 export default function AuthLayout({ children }: Readonly<AuthLayoutProps>): React.JSX.Element {
-  return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        {children}
-      </div>
-    </div>
-  );
+  return <>{children}</>;
 }

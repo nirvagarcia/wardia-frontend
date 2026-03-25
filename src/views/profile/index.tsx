@@ -7,6 +7,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useTheme } from "next-themes";
+import { useRouter } from "next/navigation";
 import { usePreferencesStore, type Theme, type Language, type Currency } from "@/shared/stores/preferences-store";
 import { getTranslation } from "@/shared/langs";
 import {
@@ -32,9 +33,11 @@ import {
   getNotificationSettings,
 } from "./utils/helpers";
 import { SelectionModal, type SelectionOption } from "./modals/selection-modal";
+import { ProfileAvatar } from "./components/profile-avatar";
 
 export function ProfileView(): React.JSX.Element {
   const { theme, setTheme } = useTheme();
+  const router = useRouter();
   const {
     language,
     setLanguage,
@@ -66,13 +69,19 @@ export function ProfileView(): React.JSX.Element {
         <header className="space-y-4">
           <div>
             <h1 className="text-3xl font-bold flex items-center gap-2 text-zinc-900 dark:text-white">
-              <User className="w-8 h-8 text-emerald-400" />
+              <User className="w-8 h-8 text-cyan-500" />
               {t("profile.title")}
             </h1>
             <p className="text-gray-600 dark:text-gray-400 mt-2">{t("profile.subtitle")}</p>
           </div>
-          <div className="bg-gradient-to-br from-emerald-600 to-emerald-800 rounded-2xl p-6 shadow-xl animate-pulse">
-            <div className="h-20 bg-white/10 rounded-full"></div>
+          <div className="bg-white dark:bg-zinc-900/50 backdrop-blur-sm border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 shadow-sm animate-pulse">
+            <div className="flex flex-col items-center text-center">
+              <div className="w-20 h-20 rounded-full bg-zinc-200 dark:bg-zinc-700"></div>
+              <div className="mt-4 space-y-3">
+                <div className="h-6 w-32 bg-zinc-200 dark:bg-zinc-700 rounded mx-auto"></div>
+                <div className="h-4 w-24 bg-zinc-200 dark:bg-zinc-700 rounded mx-auto"></div>
+              </div>
+            </div>
           </div>
         </header>
       </div>
@@ -99,85 +108,57 @@ export function ProfileView(): React.JSX.Element {
     label: opt.label,
   }));
 
+  const handleLogout = () => {
+    router.push('/login');
+  };
+
   return (
     <div className="space-y-6">
       <header className="space-y-4">
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2 text-zinc-900 dark:text-white">
-            <User className="w-8 h-8 text-emerald-400" />
+            <User className="w-8 h-8 text-cyan-500" />
             {t("profile.title")}
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-2">{t("profile.subtitle")}</p>
         </div>
 
-        <div className="bg-gradient-to-br from-emerald-600 to-emerald-800 rounded-2xl p-6 shadow-xl">
-          <div className="flex items-center gap-4">
-            <div className="w-20 h-20 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
-              <User className="w-10 h-10 text-white" />
+        <div className="bg-white dark:bg-zinc-900/50 backdrop-blur-sm border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 shadow-sm">
+          <div className="flex flex-col items-center text-center mb-6">
+            <ProfileAvatar name="Nirvana Garcia" />
+            <div className="mt-4">
+              <h2 className="text-2xl font-bold text-zinc-900 dark:text-white">Nirvana Garcia</h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{t("profile.memberSince")} Marzo 2026</p>
             </div>
-            <div className="flex-1">
-              <h2 className="text-2xl font-bold text-white">Nirvana</h2>
-              <p className="text-emerald-100 text-sm mt-1">Usuario Premium</p>
+          </div>
+
+          <div className="space-y-3 pt-4 border-t border-zinc-200 dark:border-zinc-800">
+            <div className="flex items-center gap-3">
+              <div className="bg-cyan-500/10 p-2 rounded-lg">
+                <Mail className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-gray-500 dark:text-gray-400">{t("profile.email")}</p>
+                <p className="text-sm font-medium text-zinc-900 dark:text-white truncate">nirvana@wardia.app</p>
+              </div>
             </div>
-            <button className="bg-white/20 backdrop-blur-sm p-2 rounded-lg hover:bg-white/30 transition-colors">
-              <Eye className="w-5 h-5 text-white" />
-            </button>
+
+            <div className="flex items-center gap-3">
+              <div className="bg-purple-500/10 p-2 rounded-lg">
+                <Phone className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-gray-500 dark:text-gray-400">{t("profile.phone")}</p>
+                <p className="text-sm font-medium text-zinc-900 dark:text-white">+51 986 689 120</p>
+              </div>
+            </div>
           </div>
         </div>
       </header>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-semibold text-zinc-700 dark:text-gray-300">{t("profile.personalInfo")}</h2>
-
-        <div className="bg-zinc-50 dark:bg-zinc-900/50 backdrop-blur-sm border border-zinc-200 dark:border-zinc-800 rounded-2xl overflow-hidden">
-          <button className="w-full flex items-center justify-between p-4 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 transition-colors">
-            <div className="flex items-center gap-3">
-              <div className="bg-blue-500/20 p-2 rounded-lg">
-                <Mail className="w-5 h-5 text-blue-400" />
-              </div>
-              <div className="text-left">
-                <p className="text-sm text-gray-500 dark:text-gray-400">{t("profile.email")}</p>
-                <p className="font-medium text-zinc-900 dark:text-white">nirvana@wardia.app</p>
-              </div>
-            </div>
-            <ChevronRight className="w-5 h-5 text-gray-400" />
-          </button>
-
-          <div className="border-t border-zinc-200 dark:border-zinc-800" />
-
-          <button className="w-full flex items-center justify-between p-4 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 transition-colors">
-            <div className="flex items-center gap-3">
-              <div className="bg-purple-500/20 p-2 rounded-lg">
-                <Phone className="w-5 h-5 text-purple-400" />
-              </div>
-              <div className="text-left">
-                <p className="text-sm text-gray-500 dark:text-gray-400">{t("profile.phone")}</p>
-                <p className="font-medium text-zinc-900 dark:text-white">+51 986 689 120</p>
-              </div>
-            </div>
-            <ChevronRight className="w-5 h-5 text-gray-400" />
-          </button>
-
-          <div className="border-t border-zinc-200 dark:border-zinc-800" />
-
-          <button className="w-full flex items-center justify-between p-4 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 transition-colors">
-            <div className="flex items-center gap-3">
-              <div className="bg-emerald-500/20 p-2 rounded-lg">
-                <Calendar className="w-5 h-5 text-emerald-400" />
-              </div>
-              <div className="text-left">
-                <p className="text-sm text-gray-500 dark:text-gray-400">{t("profile.memberSince")}</p>
-                <p className="font-medium text-zinc-900 dark:text-white">Marzo 2026</p>
-              </div>
-            </div>
-            <ChevronRight className="w-5 h-5 text-gray-400" />
-          </button>
-        </div>
-      </section>
-
-      <section className="space-y-3">
         <div className="flex items-center gap-2">
-          <Bell className="w-5 h-5 text-emerald-400" />
+          <Bell className="w-5 h-5 text-cyan-500" />
           <h2 className="text-lg font-semibold text-zinc-700 dark:text-gray-300">{t("profile.notifications")}</h2>
         </div>
 
@@ -194,7 +175,7 @@ export function ProfileView(): React.JSX.Element {
                   onClick={() => toggleNotification(setting.key)}
                   className={cn(
                     "relative w-12 h-7 rounded-full transition-colors",
-                    notifications[setting.key] ? "bg-emerald-600" : "bg-zinc-300 dark:bg-zinc-700"
+                    notifications[setting.key] ? "bg-cyan-500" : "bg-zinc-300 dark:bg-zinc-700"
                   )}
                   aria-label={`Toggle ${setting.label}`}
                 >
@@ -213,7 +194,7 @@ export function ProfileView(): React.JSX.Element {
 
       <section className="space-y-3">
         <div className="flex items-center gap-2">
-          <Settings className="w-5 h-5 text-emerald-400" />
+          <Settings className="w-5 h-5 text-cyan-500" />
           <h2 className="text-lg font-semibold text-zinc-700 dark:text-gray-300">{t("profile.appPreferences")}</h2>
         </div>
 
@@ -280,7 +261,7 @@ export function ProfileView(): React.JSX.Element {
 
       <section className="space-y-3">
         <div className="flex items-center gap-2">
-          <Shield className="w-5 h-5 text-emerald-400" />
+          <Shield className="w-5 h-5 text-cyan-500" />
           <h2 className="text-lg font-semibold text-zinc-700 dark:text-gray-300">{t("profile.security")}</h2>
         </div>
 
@@ -310,7 +291,10 @@ export function ProfileView(): React.JSX.Element {
       </section>
 
       <section>
-        <button className="w-full bg-red-600/10 hover:bg-red-600/20 border border-red-600/30 rounded-2xl p-4 flex items-center justify-center gap-3 transition-all group">
+        <button
+          onClick={handleLogout}
+          className="w-full bg-red-600/10 hover:bg-red-600/20 border border-red-600/30 rounded-2xl p-4 flex items-center justify-center gap-3 transition-all group"
+        >
           <LogOut className="w-5 h-5 text-red-400 group-hover:translate-x-1 transition-transform" />
           <span className="font-semibold text-red-400">{t("profile.logout")}</span>
         </button>

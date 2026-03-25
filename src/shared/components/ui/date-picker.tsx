@@ -26,10 +26,8 @@ export function DatePicker({
   className,
   disabled = false
 }: DatePickerProps) {
-  // Normalize date to avoid timezone issues
   const handleDateChange = (date: Date | undefined) => {
     if (date && onChange) {
-      // Create a new date at noon local time to avoid timezone issues
       const normalizedDate = new Date(
         date.getFullYear(),
         date.getMonth(),
