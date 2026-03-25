@@ -6,6 +6,7 @@
     <a href="#features">Features</a> •
     <a href="#tech-stack">Tech Stack</a> •
     <a href="#getting-started">Getting Started</a> •
+    <a href="#architecture">Architecture</a> •
     <a href="#project-structure">Structure</a>
   </p>
 </div>
@@ -22,7 +23,8 @@
 - 💱 **Multi-currency** - PEN, USD, EUR support
 - 📱 **PWA Ready** - Install as a native app
 - 🔒 **Security First** - Credential management with clipboard utilities
-- ⚡ **Performance** - Next.js 15 with App Router
+- ⚡ **Performance** - Next.js 16 with App Router & Turbopack
+- 🏗️ **Modular Architecture** - Clean, maintainable component structure
 
 ---
 
@@ -52,10 +54,46 @@
 
 ---
 
+## 🏗️ Architecture
+
+WARDIA follows a **modular, component-based architecture** designed for maintainability and scalability.
+
+### Design Principles
+- **Thin page wrappers** - Next.js pages delegate to view components (9-15 lines)
+- **View components** - Core business logic components (200-500 lines)
+- **Feature components** - Reusable, single-responsibility components (50-200 lines)
+- **Helper utilities** - Separated data structures and utilities (50-150 lines)
+- **UI variants** - Tailwind utility functions to reduce repetition
+
+### Refactoring Results (January 2025)
+
+**Before:**
+- 4 page files: 2,156 lines of mixed routing + business logic
+- Large monolithic files (400-600 lines)
+- Repeated Tailwind patterns
+- Translation dictionaries in code
+
+**After:**
+- 4 page files: **104 lines** (95.2% reduction) - thin wrappers only
+- Modular components averaging 150-250 lines
+- Reusable UI utility variants
+- JSON-based translations
+
+**Key Modularizations:**
+- `add-account-modal.tsx`: 584 → **189 lines** + 6 sub-components
+- `bank-credentials-section.tsx`: 412 → **158 lines** + 3 sub-components
+- `sidebar.tsx`: 251 → **90 lines** + 4 sub-components
+- `i18n.ts`: 479 → **50 lines** + 2 JSON files
+- `mock-data.ts`: 376 → **15 lines** + 5 modules
+
+**📖 Complete guide:** See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+
+---
+
 ## 🛠 Tech Stack
 
 ### Core
-- **[Next.js 15.2](https://nextjs.org/)** - React framework with App Router
+- **[Next.js 16.2](https://nextjs.org/)** - React framework with App Router & Turbopack
 - **[TypeScript](https://www.typescriptlang.org/)** - Strict typing
 - **[Tailwind CSS 4](https://tailwindcss.com/)** - Utility-first styling
 - **[React 19](https://react.dev/)** - UI library

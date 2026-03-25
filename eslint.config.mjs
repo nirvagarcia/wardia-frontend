@@ -13,7 +13,6 @@ const eslintConfig = defineConfig([
   ]),
   {
     rules: {
-      // Disable setState in useEffect warnings
       "react-hooks/set-state-in-effect": "off",
     },
   },
