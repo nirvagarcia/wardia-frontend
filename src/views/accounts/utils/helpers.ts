@@ -6,23 +6,6 @@
 import { IAccount, ICreditCard, IBankCredentials } from "@/shared/types/finance";
 
 /**
- * Format currency for display.
- */
-export function formatCurrency(
-  value: number,
-  currency: string,
-  language: string
-): string {
-  const locale = language === "es" ? "es-PE" : "en-US";
-  const formatter = new Intl.NumberFormat(locale, {
-    style: "currency",
-    currency: currency,
-    minimumFractionDigits: 2,
-  });
-  return formatter.format(value);
-}
-
-/**
  * Calculate total balance from accounts.
  */
 export function calculateTotalBalance(accounts: IAccount[]): number {

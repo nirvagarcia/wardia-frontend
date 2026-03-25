@@ -4,10 +4,8 @@
  */
 
 export const badgeVariants = {
-  // Base badge classes
   base: "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition-colors",
 
-  // Style variants
   variant: {
     default: "bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300",
     cyan: "bg-cyan-100 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-400",
@@ -17,7 +15,6 @@ export const badgeVariants = {
     purple: "bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400",
   },
 
-  // Size variants
   size: {
     sm: "px-2 py-0.5 text-[10px]",
     md: "px-2.5 py-1 text-xs",

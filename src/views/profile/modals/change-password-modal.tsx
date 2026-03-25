@@ -18,6 +18,12 @@ interface ChangePasswordModalProps {
   onClose: () => void;
 }
 
+interface PasswordFormErrors {
+  currentPassword?: string;
+  newPassword?: string;
+  confirmPassword?: string;
+}
+
 export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProps): React.JSX.Element | null {
   const { language } = usePreferencesStore();
   const t = (key: string) => getTranslation(language, key);
@@ -34,7 +40,7 @@ export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProp
     confirm: false,
   });
 
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [errors, setErrors] = useState<PasswordFormErrors>({});
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
@@ -58,7 +64,7 @@ export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProp
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    const newErrors: Record<string, string> = {};
+    const newErrors: PasswordFormErrors = {};
 
     if (!formData.currentPassword) {
       newErrors.currentPassword = t("security.currentPasswordRequired");
@@ -85,7 +91,6 @@ export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProp
       return;
     }
 
-    // Simulate API call
     setTimeout(() => {
       setSuccess(true);
       setTimeout(() => {

@@ -5,7 +5,8 @@
 
 import { ITransaction } from "@/shared/types/finance";
 import { Currency } from "@/shared/types";
-import { formatCurrency, convertCurrency } from "@/shared/utils/currency";
+import { convertCurrency } from "@/shared/utils/currency";
+import { getDateKey } from "@/shared/utils/date";
 
 export type TransactionCategory = 
   | "salary"
@@ -135,33 +136,13 @@ export const sortTransactionsByDate = (
   });
 };
 
-export const formatTransactionDate = (date: Date, locale: string): string => {
-  const options: Intl.DateTimeFormatOptions = {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  };
-  return new Intl.DateTimeFormat(locale, options).format(date);
-};
-
-export const formatTransactionAmount = (
-  amount: { value: number; currency: Currency },
-  locale: string
-): string => {
-  const language: "es" | "en" = locale.startsWith("es") ? "es" : "en";
-  return formatCurrency(amount.value, {
-    currency: amount.currency,
-    language: language,
-  });
-};
-
 export const groupTransactionsByDate = (
   transactions: ITransaction[]
 ): Record<string, ITransaction[]> => {
   const grouped: Record<string, ITransaction[]> = {};
   
   transactions.forEach(transaction => {
-    const dateKey = transaction.date.toISOString().split('T')[0];
+    const dateKey = getDateKey(transaction.date);
     if (!grouped[dateKey]) {
       grouped[dateKey] = [];
     }
@@ -217,10 +198,7 @@ export const getCategoryExpenseBreakdown = (
   transactions
     .filter(t => t.type === "expense" && t.status === "completed" && t.amount.currency === currency)
     .forEach(t => {
-      if (!breakdown[t.category]) {
-        breakdown[t.category] = 0;
-      }
-      breakdown[t.category] += t.amount.value;
+      breakdown[t.category] = (breakdown[t.category] ?? 0) + t.amount.value;
     });
   
   return breakdown;

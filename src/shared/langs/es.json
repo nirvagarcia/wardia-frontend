@@ -77,7 +77,8 @@
     "categoryHealth": "Salud y Fitness",
     "categoryUtilities": "Servicios Básicos",
     "categoryTelecom": "Telecomunicaciones",
-    "categoryHousing": "Vivienda"
+    "categoryHousing": "Vivienda",
+    "confirmDelete": "¿Estás seguro de que deseas eliminar el servicio \"{name}\"? Esta acción no se puede deshacer."
   },
   "profile": {
     "title": "Mi Perfil",
@@ -213,6 +214,7 @@
     "showHide": "Mostrar/Ocultar",
     "copy": "Copiar",
     "noCredentials": "No hay credenciales bancarias registradas",
+    "addFirstCredential": "Agrega tus primeras credenciales bancarias",
     "deleteTitle": "Eliminar Credenciales",
     "deleteMessage": "¿Estás seguro de que deseas eliminar las credenciales de {bank}? Esta acción no se puede deshacer.",
     "addCredentials": "Agregar Credenciales",
@@ -304,7 +306,13 @@
     "sort": "Ordenar",
     "close": "Cerrar",
     "confirm": "Confirmar",
-    "back": "Volver"
+    "back": "Volver",
+    "confirmDeletion": "Confirmar Eliminación",
+    "confirmDelete": "Confirmar Eliminación",
+    "confirmDeleteMessage": "¿Estás seguro de que deseas eliminar {name}? Esta acción no se puede deshacer.",
+    "de": "de",
+    "switchToEnglish": "English",
+    "switchToSpanish": "Español"
   },
   "auth": {
     "appTagline": "WARDIA",

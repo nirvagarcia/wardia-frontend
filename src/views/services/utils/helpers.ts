@@ -59,31 +59,6 @@ export function getUpcomingServices(services: ISubscription[]): ISubscription[] 
 }
 
 /**
- * Calculate days until a payment date.
- */
-export function getDaysUntil(date: Date): number {
-  const now = new Date();
-  const diff = date.getTime() - now.getTime();
-  return Math.ceil(diff / (1000 * 60 * 60 * 24));
-}
-
-/**
- * Format currency for display.
- */
-export function formatServiceCurrency(
-  amount: { value: number; currency: string },
-  displayCurrency: string,
-  locale: string
-): string {
-  const formatter = new Intl.NumberFormat(locale, {
-    style: "currency",
-    currency: displayCurrency,
-    minimumFractionDigits: 2,
-  });
-  return formatter.format(amount.value);
-}
-
-/**
  * Get localized frequency label.
  */
 export function getFrequencyLabel(freq: string, language: string): string {

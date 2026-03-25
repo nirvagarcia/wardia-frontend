@@ -4,6 +4,7 @@
  */
 
 import { Currency, Language } from "@/shared/stores/preferences-store";
+import { IAmount } from "@/shared/types";
 
 export interface FormatCurrencyOptions {
   currency: Currency;
@@ -13,22 +14,57 @@ export interface FormatCurrencyOptions {
 }
 
 /**
+ * Get locale string from language
+ */
+export function getLocale(language: Language): string {
+  return language === "es" ? "es-PE" : "en-US";
+}
+
+export function formatCurrency(amount: number, options: FormatCurrencyOptions): string;
+export function formatCurrency(amount: IAmount, language: Language): string;
+export function formatCurrency(value: number, currency: string, language: string): string;
+
+/**
  * Format a number as currency based on user preferences
+ * Supports multiple signatures for flexibility across the codebase
  */
 export function formatCurrency(
-  amount: number,
-  options: FormatCurrencyOptions
+  amountOrValue: number | IAmount,
+  optionsOrCurrencyOrLanguage: FormatCurrencyOptions | Language | string,
+  languageOrUndefined?: string
 ): string {
-  const locale = options.language === "es" ? "es-PE" : "en-US";
+  let value: number;
+  let currency: string;
+  let language: Language;
+
+  if (typeof amountOrValue === "number") {
+    if (typeof optionsOrCurrencyOrLanguage === "object") {
+      value = amountOrValue;
+      currency = optionsOrCurrencyOrLanguage.currency;
+      language = optionsOrCurrencyOrLanguage.language;
+    } else if (languageOrUndefined !== undefined) {
+      value = amountOrValue;
+      currency = optionsOrCurrencyOrLanguage as string;
+      language = languageOrUndefined as Language;
+    } else {
+      throw new Error("Invalid formatCurrency arguments");
+    }
+  } else {
+    value = amountOrValue.value;
+    currency = amountOrValue.currency;
+    language = optionsOrCurrencyOrLanguage as Language;
+  }
+
+  const locale = getLocale(language as Language);
   
   const formatter = new Intl.NumberFormat(locale, {
     style: "currency",
-    currency: options.currency,
-    minimumFractionDigits: options.minimumFractionDigits ?? 2,
-    maximumFractionDigits: options.maximumFractionDigits ?? 2,
+    currency: currency,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   });
 
-  return formatter.format(amount);
+  return formatter.format(value);
 }
 
 /**

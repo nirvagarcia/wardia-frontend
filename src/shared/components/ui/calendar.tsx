@@ -9,14 +9,13 @@ import {
 import { DayButton, DayPicker, getDefaultClassNames } from "react-day-picker"
 
 import { cn } from "@/shared/utils/cn"
-import { Button, buttonVariants } from "@/shared/components/ui/button"
+import { Button } from "@/shared/components/ui/button"
 
 function Calendar({
   className,
   classNames,
   showOutsideDays = true,
   captionLayout = "label",
-  buttonVariant = "ghost",
   formatters,
   components,
   ...props
@@ -174,12 +173,10 @@ function CalendarDayButton({
   modifiers,
   ...props
 }: React.ComponentProps<typeof DayButton>) {
-  const defaultClassNames = getDefaultClassNames()
-
   const ref = React.useRef<HTMLButtonElement>(null)
   React.useEffect(() => {
-    if (modifiers.focused) ref.current?.focus()
-  }, [modifiers.focused])
+    if (modifiers["focused"]) ref.current?.focus()
+  }, [modifiers])
 
   return (
     <Button
@@ -188,21 +185,21 @@ function CalendarDayButton({
       size="icon"
       data-day={day.date.toLocaleDateString()}
       data-selected-single={
-        modifiers.selected &&
-        !modifiers.range_start &&
-        !modifiers.range_end &&
-        !modifiers.range_middle
+        modifiers["selected"] &&
+        !modifiers["range_start"] &&
+        !modifiers["range_end"] &&
+        !modifiers["range_middle"]
       }
-      data-range-start={modifiers.range_start}
-      data-range-end={modifiers.range_end}
-      data-range-middle={modifiers.range_middle}
+      data-range-start={modifiers["range_start"]}
+      data-range-end={modifiers["range_end"]}
+      data-range-middle={modifiers["range_middle"]}
       className={cn(
         "h-10 w-10 rounded-lg font-normal transition-all",
         "hover:bg-cyan-50 dark:hover:bg-cyan-950/30 hover:text-cyan-600 dark:hover:text-cyan-400",
-        modifiers.selected && "bg-cyan-500 text-white hover:bg-cyan-600 hover:text-white font-semibold",
-        modifiers.today && !modifiers.selected && "bg-cyan-50 dark:bg-cyan-950/30 text-cyan-600 dark:text-cyan-400 font-semibold",
-        modifiers.outside && "text-zinc-300 dark:text-zinc-700",
-        modifiers.disabled && "text-zinc-300 dark:text-zinc-700 opacity-50 cursor-not-allowed",
+        modifiers["selected"] && "bg-cyan-500 text-white hover:bg-cyan-600 hover:text-white font-semibold",
+        modifiers["today"] && !modifiers["selected"] && "bg-cyan-50 dark:bg-cyan-950/30 text-cyan-600 dark:text-cyan-400 font-semibold",
+        modifiers["outside"] && "text-zinc-300 dark:text-zinc-700",
+        modifiers["disabled"] && "text-zinc-300 dark:text-zinc-700 opacity-50 cursor-not-allowed",
         className
       )}
       {...props}

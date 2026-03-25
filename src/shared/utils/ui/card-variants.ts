@@ -4,16 +4,12 @@
  */
 
 export const cardVariants = {
-  // Base card surface (matches existing card-surface class)
   base: "bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200/60 dark:border-zinc-800/60 shadow-sm",
 
-  // Elevated card (matches existing card-elevated class)
   elevated: "shadow-lg shadow-zinc-900/5 dark:shadow-zinc-950/20",
 
-  // Interactive card
   interactive: "hover:shadow-md transition-shadow cursor-pointer",
 
-  // Padding variants
   padding: {
     none: "",
     sm: "p-4",
@@ -22,10 +18,8 @@ export const cardVariants = {
     xl: "p-8",
   },
 
-  // Header with border
   header: "border-b border-zinc-200/60 dark:border-zinc-800/60 pb-4 mb-4",
 
-  // Footer with border
   footer: "border-t border-zinc-200/60 dark:border-zinc-800/60 pt-4 mt-4",
 };
 

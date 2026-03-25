@@ -1,15 +1,19 @@
 /**
  * ServicesView - Service & Subscriptions management component.
  * Extracted from page.tsx for better modularity and maintainability.
- * Now with full i18n support and proper light/dark mode styling.
+ * Now with full i18n support, proper light/dark mode styling, and Zustand store integration.
  */
 
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { usePreferencesStore } from "@/shared/stores/preferences-store";
+import { useServicesStore } from "@/shared/stores/services-store";
+import { useInitializeServices } from "@/shared/hooks/use-initialize-services";
 import { getTranslation } from "@/shared/langs";
-import { mockSubscriptions } from "@/shared/utils/mock";
+import { getLocale, formatCurrency } from "@/shared/utils/currency";
+import { getDaysUntil } from "@/shared/utils/date";
+import { LoadingState } from "@/shared/components/loading-state";
 import {
   Receipt,
   DollarSign,
@@ -41,17 +45,12 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import type { ISubscription } from "@/shared/types/finance";
+import type { IAmount } from "@/shared/types";
 import { SortableServiceCard } from "./components/sortable-service-card";
 import {
-  calculateMonthlyTotal,
-  getUpcomingServices,
-  getDaysUntil,
-  formatServiceCurrency,
   getFrequencyLabel,
   getStatusLabel,
   getCategoryLabel,
-  createNewService,
-  updateService,
 } from "./utils/helpers";
 
 const categoryIcons: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -64,15 +63,33 @@ const categoryIcons: Record<string, React.ComponentType<{ className?: string }>>
 };
 
 export function ServicesView(): React.JSX.Element {
+  const [mounted, setMounted] = useState(false);
   const { language, currency } = usePreferencesStore();
   const t = (key: string) => getTranslation(language, key);
-  const locale = language === "es" ? "es-PE" : "en-US";
+  const locale = getLocale(language);
 
-  const [services, setServices] = useState<ISubscription[]>(mockSubscriptions);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const { isLoading, error } = useInitializeServices();
+  
+  const {
+    services,
+    addService,
+    updateService,
+    deleteService,
+    reorderServices,
+    getMonthlyTotal,
+    getUpcomingPayments,
+  } = useServicesStore();
+  
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingService, setEditingService] = useState<ISubscription | null>(null);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
+  const [totalInUserCurrency, setTotalInUserCurrency] = useState(0);
+  const [upcomingSubs, setUpcomingSubs] = useState<ISubscription[]>([]);
   const [confirmDelete, setConfirmDelete] = useState<{
     isOpen: boolean;
     id: string | null;
@@ -82,6 +99,43 @@ export function ServicesView(): React.JSX.Element {
     id: null,
     name: "",
   });
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        delay: 250,
+        tolerance: 5,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  useEffect(() => {
+    setTotalInUserCurrency(getMonthlyTotal());
+    setUpcomingSubs(getUpcomingPayments(7));
+  }, [services, getMonthlyTotal, getUpcomingPayments]);
+
+  if (!mounted || isLoading) {
+    return <LoadingState message={t("common.loading")} fullScreen />;
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center space-y-4">
+          <p className="text-red-500 dark:text-red-400">Error: {error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600"
+          >
+            {t("common.back")}
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const toggleCategory = (category: string) => {
     setSelectedCategories((prev) =>
@@ -94,16 +148,11 @@ export function ServicesView(): React.JSX.Element {
   };
 
   const handleAddService = (newServiceData: Omit<ISubscription, "id">) => {
-    const newService = createNewService(newServiceData);
-    setServices([...services, newService]);
+    addService(newServiceData);
   };
 
   const handleUpdateService = (id: string, updatedServiceData: Omit<ISubscription, "id">) => {
-    setServices(
-      services.map((service) =>
-        service.id === id ? updateService(id, updatedServiceData) : service
-      )
-    );
+    updateService(id, updatedServiceData);
   };
 
   const handleEditService = (service: ISubscription) => {
@@ -124,49 +173,33 @@ export function ServicesView(): React.JSX.Element {
 
   const confirmDeletion = () => {
     if (confirmDelete.id) {
-      setServices(services.filter((service) => service.id !== confirmDelete.id));
+      deleteService(confirmDelete.id);
     }
     setConfirmDelete({ isOpen: false, id: null, name: "" });
   };
 
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        delay: 250,
-        tolerance: 5,
-      },
-    }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
-
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (over && active.id !== over.id) {
-      setServices((items) => {
-        const oldIndex = items.findIndex((item) => item.id === active.id);
-        const newIndex = items.findIndex((item) => item.id === over.id);
-        return arrayMove(items, oldIndex, newIndex);
-      });
+      const oldIndex = services.findIndex((item) => item.id === active.id);
+      const newIndex = services.findIndex((item) => item.id === over.id);
+      const reordered = arrayMove(services, oldIndex, newIndex);
+      reorderServices(reordered);
     }
   };
 
-  const filteredServices =
-    selectedCategories.length > 0
+  const filteredServices = selectedCategories.length > 0
       ? services.filter((s) => selectedCategories.includes(s.category))
       : services;
 
   const allCategories = Array.from(new Set(services.map((s) => s.category)));
-  const totalInUserCurrency = calculateMonthlyTotal(filteredServices, currency, true);
-  
-  const upcomingSubs = getUpcomingServices(services);
-
-  const formatCurrency = (amount: { value: number; currency: string }): string =>
-    formatServiceCurrency(amount, currency, locale);
 
   const getFreqLabel = (freq: string): string => getFrequencyLabel(freq, language);
   const getStatLabel = (status: string): string => getStatusLabel(status, language);
+  
+  const formatCurrencyAmount = (amount: { value: number; currency: string }): string => {
+    return formatCurrency(amount as IAmount, language);
+  };
 
   return (
     <div className="space-y-8">
@@ -346,7 +379,7 @@ export function ServicesView(): React.JSX.Element {
                       daysUntil={daysUntil}
                       isDueSoon={isDueSoon}
                       locale={locale}
-                      formatCurrency={formatCurrency}
+                      formatCurrency={formatCurrencyAmount}
                       getFrequencyLabel={getFreqLabel}
                       getStatusLabel={getStatLabel}
                       onEdit={handleEditService}
@@ -376,14 +409,10 @@ export function ServicesView(): React.JSX.Element {
         isOpen={confirmDelete.isOpen}
         onClose={() => setConfirmDelete({ isOpen: false, id: null, name: "" })}
         onConfirm={confirmDeletion}
-        title={language === "es" ? "Confirmar Eliminación" : "Confirm Deletion"}
-        message={
-          language === "es"
-            ? `¿Estás seguro de que deseas eliminar el servicio "${confirmDelete.name}"? Esta acción no se puede deshacer.`
-            : `Are you sure you want to delete the service "${confirmDelete.name}"? This action cannot be undone.`
-        }
-        confirmText={language === "es" ? "Eliminar" : "Delete"}
-        cancelText={language === "es" ? "Cancelar" : "Cancel"}
+        title={t("common.confirmDeletion")}
+        message={t("services.confirmDelete").replace("{name}", confirmDelete.name)}
+        confirmText={t("common.delete")}
+        cancelText={t("common.cancel")}
         variant="danger"
       />
     </div>

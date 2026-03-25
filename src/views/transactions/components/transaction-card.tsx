@@ -7,13 +7,13 @@ import React from "react";
 import { ITransaction } from "@/shared/types/finance";
 import { usePreferencesStore } from "@/shared/stores/preferences-store";
 import { getTranslation } from "@/shared/langs";
+import { getLocale, formatCurrency } from "@/shared/utils/currency";
+import { formatDate } from "@/shared/utils/date";
 import { ArrowUpCircle, ArrowDownCircle, Clock } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import {
   getCategoryIcon,
   getCategoryLabel,
-  formatTransactionDate,
-  formatTransactionAmount,
 } from "../utils/helpers";
 
 interface TransactionCardProps {
@@ -24,15 +24,15 @@ interface TransactionCardProps {
 export function TransactionCard({ transaction, onClick }: TransactionCardProps): React.JSX.Element {
   const { language } = usePreferencesStore();
   const t = (key: string) => getTranslation(language, key);
-  const locale = language === "es" ? "es-PE" : "en-US";
+  const locale = getLocale(language);
 
   const isIncome = transaction.type === "income";
   const isPending = transaction.status === "pending";
 
   const categoryIcon = getCategoryIcon(transaction.category);
   const categoryLabel = getCategoryLabel(t, transaction.category);
-  const formattedDate = formatTransactionDate(transaction.date, locale);
-  const formattedAmount = formatTransactionAmount(transaction.amount, locale);
+  const formattedDate = formatDate(transaction.date, locale);
+  const formattedAmount = formatCurrency(transaction.amount, language);
 
   return (
     <button

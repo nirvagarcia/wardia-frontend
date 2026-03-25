@@ -4,17 +4,14 @@
  */
 
 export const buttonVariants = {
-  // Base classes for all buttons
   base: "rounded-xl transition-all duration-200 font-medium focus:outline-none focus:ring-2 focus:ring-offset-2",
 
-  // Size variants
   size: {
     sm: "px-3 py-1.5 text-sm",
     md: "px-4 py-2 text-sm",
     lg: "px-6 py-3 text-base",
   },
 
-  // Style variants
   variant: {
     primary: "bg-cyan-500 hover:bg-cyan-600 text-white shadow-md shadow-cyan-500/20 focus:ring-cyan-500",
     secondary:
@@ -26,7 +23,6 @@ export const buttonVariants = {
     success: "bg-green-500 hover:bg-green-600 text-white shadow-md shadow-green-500/20 focus:ring-green-500",
   },
 
-  // State variants
   disabled: "opacity-50 cursor-not-allowed",
   loading: "relative pointer-events-none opacity-70",
 };

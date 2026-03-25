@@ -13,6 +13,7 @@ import { useClipboard } from "@/shared/hooks/use-clipboard";
 import { useMask } from "@/shared/hooks/use-mask";
 import { usePreferencesStore } from "@/shared/stores/preferences-store";
 import { getTranslation } from "@/shared/langs";
+import { getLocale } from "@/shared/utils/currency";
 import { Copy, Check, Eye, EyeOff, Building2, Edit2, Trash2 } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import { DebitCardVisual } from "./debit-card-visual";
@@ -35,7 +36,7 @@ export const AccountCard: React.FC<AccountCardProps> = ({ account, onEdit, onDel
   };
 
   const formatCurrency = (amount: { value: number; currency: string }): string => {
-    const locale = language === "es" ? "es-PE" : "en-US";
+    const locale = getLocale(language);
     const formatter = new Intl.NumberFormat(locale, {
       style: "currency",
       currency: currency,
@@ -44,7 +45,7 @@ export const AccountCard: React.FC<AccountCardProps> = ({ account, onEdit, onDel
     return formatter.format(amount.value);
   };
 
-  const locale = language === "es" ? "es-PE" : "en-US";
+  const locale = getLocale(language);
 
   return (
     <div className="card-surface rounded-2xl p-6 space-y-5">

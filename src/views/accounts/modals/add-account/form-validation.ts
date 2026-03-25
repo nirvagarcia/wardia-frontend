@@ -39,19 +39,19 @@ export function validateAccountForm(
   const errors: Record<string, string> = {};
 
   if (!formData.bankName.trim()) {
-    errors.bankName = t("forms.bankNameRequired");
+    errors['bankName'] = t("forms.bankNameRequired");
   }
 
   if (!formData.accountNumber) {
-    errors.accountNumber = t("forms.accountNumberRequired");
+    errors['accountNumber'] = t("forms.accountNumberRequired");
   }
 
   if (!formData.cci) {
-    errors.cci = t("forms.cciRequired");
+    errors['cci'] = t("forms.cciRequired");
   }
 
   if (!formData.balance || parseFloat(formData.balance) < 0) {
-    errors.balance = t("forms.invalidBalance");
+    errors['balance'] = t("forms.invalidBalance");
   }
 
   return errors;
@@ -64,27 +64,27 @@ export function validateCreditCardForm(
   const errors: Record<string, string> = {};
 
   if (!formData.bankName.trim()) {
-    errors.bankName = t("forms.bankNameRequired");
+    errors['bankName'] = t("forms.bankNameRequired");
   }
 
   if (!formData.cardholderName) {
-    errors.cardholderName = t("forms.cardholderNameRequired");
+    errors['cardholderName'] = t("forms.cardholderNameRequired");
   }
 
   if (!formData.cardNumber || formData.cardNumber.length < 15) {
-    errors.cardNumber = t("forms.invalidCardNumber");
+    errors['cardNumber'] = t("forms.invalidCardNumber");
   }
 
   if (!formData.expiryMonth || !formData.expiryYear) {
-    errors.expiry = t("forms.expiryRequired");
+    errors['expiry'] = t("forms.expiryRequired");
   }
 
   if (!formData.creditLimit || parseFloat(formData.creditLimit) <= 0) {
-    errors.creditLimit = t("forms.invalidCreditLimit");
+    errors['creditLimit'] = t("forms.invalidCreditLimit");
   }
 
   if (!formData.usedCredit || parseFloat(formData.usedCredit) < 0) {
-    errors.usedCredit = t("forms.invalidUsedCredit");
+    errors['usedCredit'] = t("forms.invalidUsedCredit");
   }
 
   return errors;
@@ -104,10 +104,13 @@ export function buildAccountFromForm(
       currency: currency,
     },
     isDefault: formData.isDefault,
-    network: formData.network,
-    cvv: formData.cvv || "000",
-    expiryMonth: parseInt(formData.expiryMonth) || 12,
-    expiryYear: parseInt(formData.expiryYear) || 2030,
+    debitCard: {
+      cardNumber: formData.accountNumber,
+      network: formData.network,
+      cvv: formData.cvv || "000",
+      expiryMonth: parseInt(formData.expiryMonth) || 12,
+      expiryYear: parseInt(formData.expiryYear) || 2030,
+    },
   };
 }
 

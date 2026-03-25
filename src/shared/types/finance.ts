@@ -16,6 +16,17 @@ export type SubscriptionStatus = "active" | "cancelled" | "paused";
 export type PaymentFrequency = "monthly" | "yearly" | "weekly" | "quarterly";
 
 /**
+ * Represents a debit card associated with a bank account.
+ */
+export interface IDebitCard {
+  cardNumber: string;
+  network: CardNetwork;
+  cvv: string;
+  expiryMonth: number;
+  expiryYear: number;
+}
+
+/**
  * Represents a bank account with CCI (Código de Cuenta Interbancaria).
  */
 export interface IAccount {
@@ -27,10 +38,7 @@ export interface IAccount {
   balance: IAmount;
   lastUpdated: Date;
   isDefault: boolean;
-  network: CardNetwork;
-  cvv: string;
-  expiryMonth: number;
-  expiryYear: number;
+  debitCard?: IDebitCard;
 }
 
 /**

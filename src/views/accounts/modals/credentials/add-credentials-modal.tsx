@@ -23,7 +23,22 @@ interface AddCredentialsModalProps {
   editingCredential?: IBankCredentials | null;
 }
 
-const getInitialFormData = (credential?: IBankCredentials | null) => ({
+interface CredentialsFormData {
+  bankName: string;
+  username: string;
+  password: string;
+  digitalKey: string;
+  securityToken: string;
+  notes: string;
+}
+
+interface CredentialsFormErrors {
+  bankName?: string;
+  username?: string;
+  password?: string;
+}
+
+const getInitialFormData = (credential?: IBankCredentials | null): CredentialsFormData => ({
   bankName: credential?.bankName || "",
   username: credential?.username || "",
   password: credential?.password || "",
@@ -42,8 +57,8 @@ export function AddCredentialsModal({
   const { language } = usePreferencesStore();
   const t = (key: string) => getTranslation(language, key);
 
-  const [formData, setFormData] = useState(getInitialFormData(editingCredential));
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [formData, setFormData] = useState<CredentialsFormData>(getInitialFormData(editingCredential));
+  const [errors, setErrors] = useState<CredentialsFormErrors>({});
 
   useEffect(() => {
     if (isOpen) {
@@ -58,7 +73,7 @@ export function AddCredentialsModal({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    const newErrors: Record<string, string> = {};
+    const newErrors: CredentialsFormErrors = {};
     if (!formData.bankName.trim()) {
       newErrors.bankName = t("forms.bankNameRequired");
     }

@@ -27,6 +27,12 @@ interface AddTransactionModalProps {
   onUpdate?: (id: string, transaction: Omit<ITransaction, "id">) => void;
 }
 
+interface TransactionFormErrors {
+  description?: string;
+  amount?: string;
+  date?: string;
+}
+
 export function AddTransactionModal({
   isOpen,
   onClose,
@@ -61,7 +67,7 @@ export function AddTransactionModal({
     status: "completed",
   });
 
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [errors, setErrors] = useState<TransactionFormErrors>({});
 
   useEffect(() => {
     if (!isOpen) return;
@@ -74,7 +80,7 @@ export function AddTransactionModal({
         amount: editingTransaction.amount.value.toString(),
         currency: editingTransaction.amount.currency,
         merchant: editingTransaction.merchant || "",
-        date: editingTransaction.date.toISOString().split("T")[0],
+        date: editingTransaction.date.toISOString().split("T")[0] || "",
         notes: editingTransaction.notes || "",
         status: editingTransaction.status === "pending" ? "pending" : "completed",
       });
@@ -86,7 +92,7 @@ export function AddTransactionModal({
         amount: "",
         currency: "PEN",
         merchant: "",
-        date: new Date().toISOString().split("T")[0],
+        date: new Date().toISOString().split("T")[0] || "",
         notes: "",
         status: "completed",
       });
@@ -101,7 +107,7 @@ export function AddTransactionModal({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const newErrors: Record<string, string> = {};
+    const newErrors: TransactionFormErrors = {};
     if (!formData.description.trim()) newErrors.description = t("forms.nameRequired");
     if (!formData.amount || parseFloat(formData.amount) <= 0) {
       newErrors.amount = t("forms.invalidAmount");
@@ -116,7 +122,7 @@ export function AddTransactionModal({
     }
 
     const newTransaction: Omit<ITransaction, "id"> = {
-      accountId: "acc-001", // Default account
+      accountId: "acc-001", 
       type: formData.type,
       status: formData.status,
       amount: {
@@ -324,7 +330,7 @@ export function AddTransactionModal({
             <DatePicker
               value={formData.date ? new Date(formData.date) : undefined}
               onChange={(date) => {
-                setFormData({ ...formData, date: date ? date.toISOString().split("T")[0] : "" });
+                setFormData({ ...formData, date: date ? (date.toISOString().split("T")[0] || "") : "" });
                 setErrors({ ...errors, date: "" });
               }}
               placeholder={t("forms.selectDate")}

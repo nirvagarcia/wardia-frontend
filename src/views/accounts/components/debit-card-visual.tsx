@@ -30,7 +30,11 @@ const getBankGradient = (bankName: string): string => {
 };
 
 export const DebitCardVisual: React.FC<DebitCardVisualProps> = ({ account }) => {
-  const networkDisplay = account.network.toUpperCase();
+  if (!account.debitCard) {
+    return null;
+  }
+
+  const networkDisplay = account.debitCard.network.toUpperCase();
   const gradientClasses = getBankGradient(account.bankName);
 
   return (
@@ -64,7 +68,7 @@ export const DebitCardVisual: React.FC<DebitCardVisualProps> = ({ account }) => 
           <div>
             <p className="text-white/70 text-xs mb-1 font-medium">Expires</p>
             <p className="text-white font-mono text-sm drop-shadow-md">
-              {String(account.expiryMonth).padStart(2, "0")}/{String(account.expiryYear).slice(-2)}
+              {String(account.debitCard.expiryMonth).padStart(2, "0")}/{String(account.debitCard.expiryYear).slice(-2)}
             </p>
           </div>
           <div className="text-center">

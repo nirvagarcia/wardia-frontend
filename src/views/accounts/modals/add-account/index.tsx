@@ -95,10 +95,10 @@ export function AddAccountModal({
         balance: editingAccount.balance.value.toString(),
         accountSubType: editingAccount.accountType,
         isDefault: editingAccount.isDefault,
-        network: editingAccount.network,
-        cvv: editingAccount.cvv,
-        expiryMonth: editingAccount.expiryMonth.toString(),
-        expiryYear: editingAccount.expiryYear.toString(),
+        network: editingAccount.debitCard?.network || "visa",
+        cvv: editingAccount.debitCard?.cvv || "",
+        expiryMonth: editingAccount.debitCard?.expiryMonth.toString() || "",
+        expiryYear: editingAccount.debitCard?.expiryYear.toString() || "",
       });
     } else if (editingCard) {
       setAccountType("credit");

@@ -2,33 +2,66 @@
  * DashboardView - Main financial overview component.
  * Extracted from page.tsx for better modularity and maintainability.
  * Premium enterprise financial dashboard with visual hierarchy.
+ * Now with Zustand store integration for real-time data.
  */
 
 "use client";
 
-import React, { useMemo, useCallback } from "react";
+import React, { useMemo, useCallback, useState, useEffect } from "react";
 import { usePreferencesStore } from "@/shared/stores/preferences-store";
+import { useAccountsStore } from "@/shared/stores/accounts-store";
+import { useServicesStore } from "@/shared/stores/services-store";
+import { useTransactionsStore } from "@/shared/stores/transactions-store";
+import { useInitializeAccounts } from "@/shared/hooks/use-initialize-accounts";
+import { useInitializeServices } from "@/shared/hooks/use-initialize-services";
+import { useInitializeTransactions } from "@/shared/hooks/use-initialize-transactions";
 import { getTranslation } from "@/shared/langs";
-import { mockFinancialSummary, mockTransactions } from "@/shared/utils/mock";
+import { getLocale, formatCurrency } from "@/shared/utils/currency";
+import { getDaysUntil } from "@/shared/utils/date";
+import { LoadingState } from "@/shared/components/loading-state";
 import { IUpcomingPayment, ITransaction } from "@/shared/types/finance";
 import { ArrowUpRight, ArrowDownRight, TrendingUp, Calendar, Layers, Receipt } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
-import { formatCurrency, getDaysUntilPayment, getMiniDonutSegments } from "./utils/helpers";
+import { getMiniDonutSegments } from "./utils/helpers";
 import { MiniDonutChart } from "./components/mini-donut-chart";
 import { StatBar } from "./components/stat-bar";
 
 export function DashboardView(): React.JSX.Element {
-  const { language } = usePreferencesStore();
+  const [mounted, setMounted] = useState(false);
+  const { language, currency } = usePreferencesStore();
   const t = useCallback((key: string) => getTranslation(language, key), [language]);
-  const summary = mockFinancialSummary;
-  
-  const now = new Date();
-  const locale = language === "es" ? "es-PE" : "en-US";
-  const monthName = now.toLocaleDateString(locale, { month: "long" });
-  const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
-  const year = now.getFullYear();
-  const dayOfWeek = now.toLocaleDateString(locale, { weekday: "long" });
-  const dayOfMonth = now.getDate();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const accountsInit = useInitializeAccounts();
+  const servicesInit = useInitializeServices();
+  const transactionsInit = useInitializeTransactions();
+
+  const { getTotalBalance, getTotalCreditUsed, getTotalCreditAvailable } = useAccountsStore();
+  const { getMonthlyTotal, getUpcomingPayments } = useServicesStore();
+  const { transactions } = useTransactionsStore();
+
+  const totalBalance = getTotalBalance();
+  const totalCreditCardDebt = getTotalCreditUsed();
+  const totalAvailableCredit = getTotalCreditAvailable();
+  const monthlySubscriptionCost = getMonthlyTotal();
+  const upcomingPayments = getUpcomingPayments(30);
+
+  const summary = useMemo(() => ({
+    totalBalance: { value: totalBalance, currency },
+    totalCreditCardDebt: { value: totalCreditCardDebt, currency },
+    totalAvailableCredit: { value: totalAvailableCredit, currency },
+    monthlySubscriptionCost: { value: monthlySubscriptionCost, currency },
+    upcomingPayments: upcomingPayments.map((service) => ({
+      id: service.id,
+      name: service.name,
+      amount: service.amount,
+      dueDate: service.nextPaymentDate,
+      type: "subscription" as const,
+    })),
+  }), [totalBalance, totalCreditCardDebt, totalAvailableCredit, monthlySubscriptionCost, upcomingPayments, currency]);
 
   const donutSegments = useMemo(
     () => getMiniDonutSegments(summary, t),
@@ -36,11 +69,42 @@ export function DashboardView(): React.JSX.Element {
   );
 
   const recentTransactions = useMemo(
-    () => mockTransactions
+    () => transactions
       .sort((a, b) => b.date.getTime() - a.date.getTime())
       .slice(0, 5),
-    []
+    [transactions]
   );
+
+  const isLoading = !mounted || accountsInit.isLoading || servicesInit.isLoading || transactionsInit.isLoading;
+  const error = accountsInit.error || servicesInit.error || transactionsInit.error;
+
+  if (isLoading) {
+    return <LoadingState message={t("common.loading")} fullScreen />;
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center space-y-4">
+          <p className="text-red-500 dark:text-red-400">Error: {error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600"
+          >
+            {t("common.back")}
+          </button>
+        </div>
+      </div>
+    );
+  }
+  
+  const now = new Date();
+  const locale = getLocale(language);
+  const monthName = now.toLocaleDateString(locale, { month: "long" });
+  const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+  const year = now.getFullYear();
+  const dayOfWeek = now.toLocaleDateString(locale, { weekday: "long" });
+  const dayOfMonth = now.getDate();
 
   return (
     <div className="space-y-8">
@@ -49,7 +113,7 @@ export function DashboardView(): React.JSX.Element {
           {t("dashboard.greeting")} Nirvana
         </h1>
         <p className="text-xs md:text-sm text-zinc-500 dark:text-zinc-500">
-          {dayOfWeek}, {dayOfMonth} {language === "es" ? "de" : ""} {monthName} {year}
+          {dayOfWeek}, {dayOfMonth} {t("common.de")} {monthName} {year}
         </p>
         <p className="text-xs md:text-sm text-zinc-600 dark:text-zinc-400 pt-1">
           {t("dashboard.summary")} {capitalizedMonth}
@@ -162,7 +226,7 @@ export function DashboardView(): React.JSX.Element {
 
         <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
           {summary.upcomingPayments.map((payment: IUpcomingPayment) => {
-            const daysUntil = getDaysUntilPayment(payment.dueDate);
+            const daysUntil = getDaysUntil(payment.dueDate);
             const isUrgent = daysUntil <= 3;
 
             let dueText = "";
@@ -182,7 +246,6 @@ export function DashboardView(): React.JSX.Element {
                   "card-surface rounded-xl p-4 transition-all duration-300 hover:card-elevated hover:scale-[1.02] group",
                   isUrgent && "ring-1 ring-amber-500/30"
                 )}
-                style={{ animationDelay: `${payment.id.split('-')[1] ? parseInt(payment.id.split('-')[1]) * 50 : 0}ms` }}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex-1">

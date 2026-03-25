@@ -8,6 +8,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { usePreferencesStore } from "@/shared/stores/preferences-store";
 import { getTranslation } from "@/shared/langs";
+import { getLocale } from "@/shared/utils/currency";
 import {
   DndContext,
   closestCenter,
@@ -34,7 +35,7 @@ interface BankCredentialsSectionProps {
 export function BankCredentialsSection({ credentials, onEdit, onDelete, onReorder }: BankCredentialsSectionProps): React.JSX.Element {
   const { language } = usePreferencesStore();
   const t = (key: string, variables?: Record<string, string | number>) => getTranslation(language, key, variables);
-  const locale = language === "es" ? "es-PE" : "en-US";
+  const locale = getLocale(language);
 
   const [expandedBank, setExpandedBank] = useState<string | null>(null);
   const [visiblePasswords, setVisiblePasswords] = useState<Set<string>>(new Set());

@@ -6,6 +6,7 @@
 import React from "react";
 import { Sun, Moon, Globe } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
+import { getTranslation } from "@/shared/langs";
 
 interface SidebarControlsProps {
   isCollapsed: boolean;
@@ -24,6 +25,8 @@ export function SidebarControls({
   onToggleTheme,
   onToggleLanguage,
 }: SidebarControlsProps): React.JSX.Element {
+  const t = (key: string) => getTranslation(language, key);
+  
   return (
     <div className="px-3 py-3 border-b border-zinc-200/80 dark:border-zinc-800/80">
       <div className={cn("flex gap-1", isCollapsed ? "flex-col items-center" : "justify-center")}>
@@ -51,7 +54,7 @@ export function SidebarControls({
             "bg-zinc-100/80 hover:bg-zinc-200/80 dark:bg-zinc-800/50 dark:hover:bg-zinc-700/50",
             "ring-1 ring-black/[0.04] dark:ring-white/[0.06]"
           )}
-          title={language === "es" ? "English" : "Español"}
+          title={language === "es" ? t("common.switchToEnglish") : t("common.switchToSpanish")}
         >
           <Globe className="w-[18px] h-[18px] text-zinc-500 dark:text-zinc-400 group-hover:text-zinc-700 dark:group-hover:text-zinc-200 transition-colors" />
           {!isCollapsed && (

@@ -11,6 +11,7 @@ import { ICreditCard } from "@/shared/types/finance";
 import { InteractiveCard } from "./interactive-card";
 import { usePreferencesStore } from "@/shared/stores/preferences-store";
 import { getTranslation } from "@/shared/langs";
+import { getLocale } from "@/shared/utils/currency";
 import { Calendar, AlertCircle, Edit2, Trash2, Building2 } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import { getBankLogo } from "@/shared/utils/bank-logos";
@@ -24,7 +25,7 @@ interface CreditCardDisplayProps {
 export const CreditCardDisplay: React.FC<CreditCardDisplayProps> = ({ card, onEdit, onDelete }) => {
   const { language, currency } = usePreferencesStore();
   const t = (key: string) => getTranslation(language, key);
-  const locale = language === "es" ? "es-PE" : "en-US";
+  const locale = getLocale(language);
 
   const formatCurrency = (amount: { value: number; currency: string }): string => {
     const formatter = new Intl.NumberFormat(locale, {
