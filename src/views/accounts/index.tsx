@@ -219,13 +219,13 @@ export function AccountsView(): React.JSX.Element {
       <header className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold flex items-center gap-2.5 text-zinc-900 dark:text-white tracking-tight">
+            <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2.5 text-zinc-900 dark:text-white tracking-tight">
               <div className="bg-cyan-500/10 p-2 rounded-xl ring-1 ring-cyan-500/10">
-                <Wallet className="w-6 h-6 text-cyan-500 dark:text-cyan-400" />
+                <Wallet className="w-5 h-5 md:w-6 md:h-6 text-cyan-500 dark:text-cyan-400" />
               </div>
               {t("accounts.title")}
             </h1>
-            <p className="text-zinc-500 dark:text-zinc-500 mt-1">{t("accounts.subtitle")}</p>
+            <p className="text-sm md:text-base text-zinc-500 dark:text-zinc-500 mt-1">{t("accounts.subtitle")}</p>
           </div>
           <button
             onClick={() => {
@@ -238,10 +238,10 @@ export function AccountsView(): React.JSX.Element {
                 setIsAddModalOpen(true);
               }
             }}
-            className="relative group bg-gradient-to-br from-cyan-500 via-cyan-600 to-teal-600 hover:from-cyan-600 hover:via-cyan-700 hover:to-teal-700 p-4 rounded-2xl transition-all text-white hover:scale-105 active:scale-95 ring-1 ring-white/20 overflow-hidden"
+            className="relative group bg-gradient-to-br from-cyan-500 via-cyan-600 to-teal-600 hover:from-cyan-600 hover:via-cyan-700 hover:to-teal-700 p-3 md:p-4 rounded-2xl transition-all text-white hover:scale-105 active:scale-95 ring-1 ring-white/20 overflow-hidden"
           >
             <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            <Plus className="w-6 h-6 relative z-10 drop-shadow-lg" />
+            <Plus className="w-5 h-5 md:w-6 md:h-6 relative z-10 drop-shadow-lg" />
           </button>
         </div>
 
@@ -250,7 +250,7 @@ export function AccountsView(): React.JSX.Element {
           <button
             onClick={() => setActiveTab("debit")}
             className={cn(
-              "flex-1 py-3 px-5 rounded-xl text-sm font-bold transition-all duration-300",
+              "flex-1 py-2.5 md:py-3 px-3 md:px-5 rounded-xl text-xs md:text-sm font-bold transition-all duration-300",
               activeTab === "debit"
                 ? "bg-gradient-to-br from-cyan-500 to-cyan-600 text-white shadow-lg hover:shadow-xl"
                 : "bg-white/50 dark:bg-zinc-800/50 text-zinc-600 dark:text-zinc-400 hover:bg-white/80 dark:hover:bg-zinc-800/80 hover:text-zinc-900 dark:hover:text-zinc-100"
@@ -261,7 +261,7 @@ export function AccountsView(): React.JSX.Element {
           <button
             onClick={() => setActiveTab("credit")}
             className={cn(
-              "flex-1 py-3 px-5 rounded-xl text-sm font-bold transition-all duration-300",
+              "flex-1 py-2.5 md:py-3 px-3 md:px-5 rounded-xl text-xs md:text-sm font-bold transition-all duration-300",
               activeTab === "credit"
                 ? "bg-gradient-to-br from-cyan-500 to-cyan-600 text-white shadow-lg hover:shadow-xl"
                 : "bg-white/50 dark:bg-zinc-800/50 text-zinc-600 dark:text-zinc-400 hover:bg-white/80 dark:hover:bg-zinc-800/80 hover:text-zinc-900 dark:hover:text-zinc-100"
@@ -272,7 +272,7 @@ export function AccountsView(): React.JSX.Element {
           <button
             onClick={() => setActiveTab("credentials")}
             className={cn(
-              "flex-1 py-3 px-5 rounded-xl text-sm font-bold transition-all duration-300",
+              "flex-1 py-2.5 md:py-3 px-3 md:px-5 rounded-xl text-xs md:text-sm font-bold transition-all duration-300",
               activeTab === "credentials"
                 ? "bg-gradient-to-br from-cyan-500 to-cyan-600 text-white shadow-lg hover:shadow-xl"
                 : "bg-white/50 dark:bg-zinc-800/50 text-zinc-600 dark:text-zinc-400 hover:bg-white/80 dark:hover:bg-zinc-800/80 hover:text-zinc-900 dark:hover:text-zinc-100"
@@ -283,65 +283,65 @@ export function AccountsView(): React.JSX.Element {
         </div>
 
         {activeTab === "debit" ? (
-          <div className="grid grid-cols-2 gap-4">
-            <div className="relative overflow-hidden rounded-2xl p-6 bg-gradient-to-br from-cyan-50 to-teal-100 dark:from-cyan-600/30 dark:to-teal-600/30 shadow-sm dark:shadow-[0_8px_16px_rgba(0,0,0,0.3)] border border-cyan-200/40 dark:border-white/5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="relative overflow-hidden rounded-2xl p-5 md:p-6 bg-gradient-to-br from-cyan-50 to-teal-100 dark:from-cyan-600/30 dark:to-teal-600/30 shadow-sm dark:shadow-[0_8px_16px_rgba(0,0,0,0.3)] border border-cyan-200/40 dark:border-white/5">
               <div className="absolute inset-0 shadow-[inset_0_1px_2px_rgba(255,255,255,0.5)] dark:shadow-[inset_0_2px_8px_rgba(255,255,255,0.05)]" />
               <div className="relative">
-                <p className="text-cyan-700 dark:text-cyan-300 text-sm font-semibold mb-1">
+                <p className="text-cyan-700 dark:text-cyan-300 text-xs md:text-sm font-semibold mb-1">
                   Balance de Cuentas
                 </p>
-                <p className="text-[2.5rem] leading-tight font-bold text-cyan-900 dark:text-white tracking-tight">
+                <p className="text-3xl md:text-[2.5rem] leading-tight font-bold text-cyan-900 dark:text-white tracking-tight">
                   {formatCurrencyValue(totalBalance)}
                 </p>
-                <p className="text-cyan-600 dark:text-cyan-400 text-sm mt-2 font-medium">
+                <p className="text-cyan-600 dark:text-cyan-400 text-xs md:text-sm mt-2 font-medium">
                   {accounts.length}{" "}
                   {accounts.length === 1 ? "tarjeta débito" : "tarjetas débito"}
                 </p>
               </div>
             </div>
 
-            <div className="relative overflow-hidden rounded-2xl p-6 bg-gradient-to-br from-red-50 to-rose-100 dark:from-red-600/30 dark:to-rose-600/30 shadow-sm dark:shadow-[0_8px_16px_rgba(0,0,0,0.3)] border border-red-200/40 dark:border-white/5">
+            <div className="relative overflow-hidden rounded-2xl p-5 md:p-6 bg-gradient-to-br from-red-50 to-rose-100 dark:from-red-600/30 dark:to-rose-600/30 shadow-sm dark:shadow-[0_8px_16px_rgba(0,0,0,0.3)] border border-red-200/40 dark:border-white/5">
               <div className="absolute inset-0 shadow-[inset_0_1px_2px_rgba(255,255,255,0.5)] dark:shadow-[inset_0_2px_8px_rgba(255,255,255,0.05)]" />
               <div className="relative">
-                <p className="text-red-700 dark:text-red-300 text-sm font-semibold mb-1">
+                <p className="text-red-700 dark:text-red-300 text-xs md:text-sm font-semibold mb-1">
                   {t("dashboard.spent")}
                 </p>
-                <p className="text-[2.5rem] leading-tight font-bold text-red-900 dark:text-white tracking-tight">
+                <p className="text-3xl md:text-[2.5rem] leading-tight font-bold text-red-900 dark:text-white tracking-tight">
                   {formatCurrencyValue(totalBalance * 0.15)}
                 </p>
-                <p className="text-red-600 dark:text-red-400 text-sm mt-2 font-medium">
+                <p className="text-red-600 dark:text-red-400 text-xs md:text-sm mt-2 font-medium">
                   {t("dashboard.thisMonth")}
                 </p>
               </div>
             </div>
           </div>
         ) : activeTab === "credit" ? (
-          <div className="grid grid-cols-2 gap-4">
-            <div className="relative overflow-hidden rounded-2xl p-6 bg-gradient-to-br from-cyan-50 to-teal-100 dark:from-cyan-600/30 dark:to-teal-600/30 shadow-sm dark:shadow-[0_8px_16px_rgba(0,0,0,0.3)] border border-cyan-200/40 dark:border-white/5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="relative overflow-hidden rounded-2xl p-5 md:p-6 bg-gradient-to-br from-cyan-50 to-teal-100 dark:from-cyan-600/30 dark:to-teal-600/30 shadow-sm dark:shadow-[0_8px_16px_rgba(0,0,0,0.3)] border border-cyan-200/40 dark:border-white/5">
               <div className="absolute inset-0 shadow-[inset_0_1px_2px_rgba(255,255,255,0.5)] dark:shadow-[inset_0_2px_8px_rgba(255,255,255,0.05)]" />
               <div className="relative">
-                <p className="text-cyan-700 dark:text-cyan-300 text-sm font-semibold mb-1">
+                <p className="text-cyan-700 dark:text-cyan-300 text-xs md:text-sm font-semibold mb-1">
                   {t("accounts.available")}
                 </p>
-                <p className="text-[2.5rem] leading-tight font-bold text-cyan-900 dark:text-white tracking-tight">
+                <p className="text-3xl md:text-[2.5rem] leading-tight font-bold text-cyan-900 dark:text-white tracking-tight">
                   {formatCurrencyValue(totalAvailable)}
                 </p>
-                <p className="text-cyan-600 dark:text-cyan-400 text-sm mt-2 font-medium">
+                <p className="text-cyan-600 dark:text-cyan-400 text-xs md:text-sm mt-2 font-medium">
                   {cards.length} {cards.length === 1 ? "tarjeta crédito" : "tarjetas crédito"}
                 </p>
               </div>
             </div>
 
-            <div className="relative overflow-hidden rounded-2xl p-6 bg-gradient-to-br from-red-50 to-rose-100 dark:from-red-600/30 dark:to-rose-600/30 shadow-sm dark:shadow-[0_8px_16px_rgba(0,0,0,0.3)] border border-red-200/40 dark:border-white/5">
+            <div className="relative overflow-hidden rounded-2xl p-5 md:p-6 bg-gradient-to-br from-red-50 to-rose-100 dark:from-red-600/30 dark:to-rose-600/30 shadow-sm dark:shadow-[0_8px_16px_rgba(0,0,0,0.3)] border border-red-200/40 dark:border-white/5">
               <div className="absolute inset-0 shadow-[inset_0_1px_2px_rgba(255,255,255,0.5)] dark:shadow-[inset_0_2px_8px_rgba(255,255,255,0.05)]" />
               <div className="relative">
-                <p className="text-red-700 dark:text-red-300 text-sm font-semibold mb-1">
+                <p className="text-red-700 dark:text-red-300 text-xs md:text-sm font-semibold mb-1">
                   {t("accounts.used")}
                 </p>
-                <p className="text-[2.5rem] leading-tight font-bold text-red-900 dark:text-white tracking-tight">
+                <p className="text-3xl md:text-[2.5rem] leading-tight font-bold text-red-900 dark:text-white tracking-tight">
                   {formatCurrencyValue(totalUsedCredit)}
                 </p>
-                <p className="text-red-600 dark:text-red-400 text-sm mt-2 font-medium">
+                <p className="text-red-600 dark:text-red-400 text-xs md:text-sm mt-2 font-medium">
                   {t("dashboard.thisMonth")}
                 </p>
               </div>

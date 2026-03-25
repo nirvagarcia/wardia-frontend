@@ -165,9 +165,9 @@ export function AddAccountModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center p-4" onClick={onClose}>
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center" onClick={onClose}>
       <div
-        className="bg-white dark:bg-zinc-900 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-slide-up"
+        className="bg-white dark:bg-zinc-900 rounded-t-2xl sm:rounded-2xl w-full max-w-md sm:max-w-2xl max-h-[80vh] sm:max-h-[85vh] overflow-y-auto animate-slide-up flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         <ModalHeader
@@ -175,7 +175,7 @@ export function AddAccountModal({
           onClose={onClose}
         />
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-6" autoComplete="off">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-5 sm:space-y-6 pb-20 sm:pb-6" autoComplete="off">
           <AccountTypeSelector
             selectedType={accountType}
             onTypeChange={setAccountType}

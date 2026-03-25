@@ -20,7 +20,7 @@ export default function MainLayout({ children }: Readonly<MainLayoutProps>): Rea
       <Sidebar />
       
       <div className="flex-1 min-w-0">
-        <main className="w-full max-w-[1400px] mx-auto px-4 md:px-6 lg:px-8 pt-[47px] md:pt-[55px] pb-24 md:pb-10">
+        <main className="w-full max-w-[1400px] mx-auto px-4 md:px-6 lg:px-8 pt-20 md:pt-8 pb-24 md:pb-10">
           {children}
         </main>
       </div>

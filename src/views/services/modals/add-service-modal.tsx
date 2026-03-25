@@ -35,7 +35,7 @@ const categories = [
 ];
 
 export function AddServiceModal({ isOpen, onClose, onAdd, editingService, onUpdate }: AddServiceModalProps): React.JSX.Element | null {
-  const { language, currency } = usePreferencesStore();
+  const { language } = usePreferencesStore();
   const t = (key: string) => getTranslation(language, key);
 
   const isEditMode = !!editingService;
@@ -45,6 +45,7 @@ export function AddServiceModal({ isOpen, onClose, onAdd, editingService, onUpda
     description: string;
     category: string;
     amount: string;
+    currency: "PEN" | "USD" | "EUR";
     frequency: PaymentFrequency;
     nextPaymentDate: string;
     status: SubscriptionStatus;
@@ -54,6 +55,7 @@ export function AddServiceModal({ isOpen, onClose, onAdd, editingService, onUpda
     description: "",
     category: "entertainment",
     amount: "",
+    currency: "PEN",
     frequency: "monthly",
     nextPaymentDate: "",
     status: "active",
@@ -74,6 +76,7 @@ export function AddServiceModal({ isOpen, onClose, onAdd, editingService, onUpda
         description: editingService.description || "",
         category: editingService.category,
         amount: editingService.amount.value.toString(),
+        currency: editingService.amount.currency,
         frequency: editingService.frequency,
         nextPaymentDate: editingService.nextPaymentDate.toISOString().split('T')[0],
         status: editingService.status,
@@ -86,6 +89,7 @@ export function AddServiceModal({ isOpen, onClose, onAdd, editingService, onUpda
         description: "",
         category: "entertainment",
         amount: "",
+        currency: "PEN",
         frequency: "monthly",
         nextPaymentDate: "",
         status: "active",
@@ -120,7 +124,7 @@ export function AddServiceModal({ isOpen, onClose, onAdd, editingService, onUpda
       category: formData.category,
       amount: {
         value: parseFloat(formData.amount),
-        currency: currency,
+        currency: formData.currency,
       },
       frequency: formData.frequency,
       nextPaymentDate: new Date(formData.nextPaymentDate),
@@ -139,6 +143,7 @@ export function AddServiceModal({ isOpen, onClose, onAdd, editingService, onUpda
       description: "",
       category: "entertainment",
       amount: "",
+      currency: "PEN",
       frequency: "monthly",
       nextPaymentDate: "",
       status: "active",
@@ -149,13 +154,13 @@ export function AddServiceModal({ isOpen, onClose, onAdd, editingService, onUpda
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center p-4" onClick={onClose}>
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center" onClick={onClose}>
       <div 
-        className="bg-white dark:bg-zinc-900 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-slide-up" 
+        className="bg-white dark:bg-zinc-900 rounded-t-2xl sm:rounded-2xl w-full max-w-md sm:max-w-2xl max-h-[80vh] sm:max-h-[85vh] overflow-y-auto animate-slide-up flex flex-col" 
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="sticky top-0 bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 p-6 flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-zinc-900 dark:text-white">
+        <div className="sticky top-0 bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 p-4 sm:p-6 flex items-center justify-between z-10">
+          <h2 className="text-xl sm:text-2xl font-bold text-zinc-900 dark:text-white">
             {isEditMode
               ? t("forms.editService")
               : t("forms.addService")
@@ -169,7 +174,7 @@ export function AddServiceModal({ isOpen, onClose, onAdd, editingService, onUpda
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-5 sm:space-y-6 pb-20 sm:pb-6">
           <div>
             <label className="block text-sm font-medium text-zinc-700 dark:text-gray-300 mb-3">
               {t("forms.category")}
@@ -227,15 +232,15 @@ export function AddServiceModal({ isOpen, onClose, onAdd, editingService, onUpda
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
+          <div className="grid grid-cols-3 gap-4">
+            <div className="col-span-2">
               <Label className="flex items-center gap-2 mb-2">
                 <DollarSign className="w-4 h-4" />
                 {t("forms.amount")}
               </Label>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                  {currency === "PEN" ? "S/" : currency === "USD" ? "$" : "€"}
+                  {formData.currency === "PEN" ? "S/" : formData.currency === "USD" ? "$" : "€"}
                 </span>
                 <Input
                   type="number"
@@ -249,6 +254,28 @@ export function AddServiceModal({ isOpen, onClose, onAdd, editingService, onUpda
               {errors.amount && <p className="text-red-500 text-sm mt-1">{errors.amount}</p>}
             </div>
 
+            <div>
+              <Label className="flex items-center gap-2 mb-2">
+                <DollarSign className="w-4 h-4" />
+                {t("forms.currency")}
+              </Label>
+              <Select
+                value={formData.currency}
+                onValueChange={(value) => setFormData({ ...formData, currency: value as "PEN" | "USD" | "EUR" })}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="PEN">PEN (S/)</SelectItem>
+                  <SelectItem value="USD">USD ($)</SelectItem>
+                  <SelectItem value="EUR">EUR (€)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
             <div>
               <Label className="flex items-center gap-2 mb-2">
                 <RefreshCw className="w-4 h-4" />

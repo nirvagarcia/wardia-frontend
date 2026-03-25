@@ -11,7 +11,7 @@ import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
 import { usePreferencesStore } from "@/shared/stores/preferences-store";
 import { getTranslation } from "@/shared/langs";
-import { Home, Wallet, Receipt } from "lucide-react";
+import { Home, Wallet, TrendingUp, Receipt } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import { SidebarHeader } from "./sidebar-header";
 import { SidebarControls } from "./sidebar-controls";
@@ -27,7 +27,7 @@ interface NavItem {
 export const Sidebar: React.FC = () => {
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
-  const { language, setLanguage, currency, setCurrency } = usePreferencesStore();
+  const { language, setLanguage } = usePreferencesStore();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -39,8 +39,9 @@ export const Sidebar: React.FC = () => {
 
   const navItems: NavItem[] = [
     { href: "/dashboard", labelKey: "nav.home", icon: Home },
-    { href: "/accounts", labelKey: "nav.accounts", icon: Wallet },
+    { href: "/transactions", labelKey: "nav.transactions", icon: TrendingUp },
     { href: "/services", labelKey: "nav.services", icon: Receipt },
+    { href: "/accounts", labelKey: "nav.accounts", icon: Wallet },
   ];
 
   const toggleTheme = () => {
@@ -49,13 +50,6 @@ export const Sidebar: React.FC = () => {
 
   const toggleLanguage = () => {
     setLanguage(language === "es" ? "en" : "es");
-  };
-
-  const rotateCurrency = () => {
-    const currencies: Array<"PEN" | "USD" | "EUR"> = ["PEN", "USD", "EUR"];
-    const currentIndex = currencies.indexOf(currency);
-    const nextIndex = (currentIndex + 1) % currencies.length;
-    setCurrency(currencies[nextIndex]);
   };
 
   return (
@@ -73,11 +67,9 @@ export const Sidebar: React.FC = () => {
         isCollapsed={isCollapsed}
         theme={theme}
         language={language}
-        currency={currency}
         mounted={mounted}
         onToggleTheme={toggleTheme}
         onToggleLanguage={toggleLanguage}
-        onRotateCurrency={rotateCurrency}
       />
 
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">

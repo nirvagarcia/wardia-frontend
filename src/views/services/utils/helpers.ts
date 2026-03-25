@@ -4,19 +4,46 @@
  */
 
 import { ISubscription } from "@/shared/types/finance";
+import { Currency } from "@/shared/types";
+import { convertCurrency } from "@/shared/utils/currency";
 
 /**
- * Calculate total monthly cost in PEN.
+ * Calculate total monthly cost in the preferred currency.
+ * Normalizes all frequencies to monthly equivalent and converts currencies.
  */
 export function calculateMonthlyTotal(
   services: ISubscription[],
+  preferredCurrency: Currency,
   onlyActive: boolean = true
 ): number {
   return services
-    .filter((sub) => sub.frequency === "monthly" && (!onlyActive || sub.status === "active"))
+    .filter((sub) => !onlyActive || sub.status === "active")
     .reduce((sum, sub) => {
-      const valueInPEN = sub.amount.currency === "USD" ? sub.amount.value * 3.75 : sub.amount.value;
-      return sum + valueInPEN;
+      const valueInPreferred = convertCurrency(
+        sub.amount.value,
+        sub.amount.currency as Currency,
+        preferredCurrency
+      );
+      
+      let monthlyEquivalent = 0;
+      switch (sub.frequency) {
+        case "monthly":
+          monthlyEquivalent = valueInPreferred;
+          break;
+        case "yearly":
+          monthlyEquivalent = valueInPreferred / 12;
+          break;
+        case "weekly":
+          monthlyEquivalent = valueInPreferred * 4.33;
+          break;
+        case "quarterly":
+          monthlyEquivalent = valueInPreferred / 3;
+          break;
+        default:
+          monthlyEquivalent = valueInPreferred;
+      }
+      
+      return sum + monthlyEquivalent;
     }, 0);
 }
 

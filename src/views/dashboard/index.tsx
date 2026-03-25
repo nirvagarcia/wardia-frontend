@@ -9,9 +9,9 @@
 import React, { useMemo, useCallback } from "react";
 import { usePreferencesStore } from "@/shared/stores/preferences-store";
 import { getTranslation } from "@/shared/langs";
-import { mockFinancialSummary } from "@/shared/utils/mock";
-import { IUpcomingPayment } from "@/shared/types/finance";
-import { ArrowUpRight, ArrowDownRight, TrendingUp, Calendar, Layers } from "lucide-react";
+import { mockFinancialSummary, mockTransactions } from "@/shared/utils/mock";
+import { IUpcomingPayment, ITransaction } from "@/shared/types/finance";
+import { ArrowUpRight, ArrowDownRight, TrendingUp, Calendar, Layers, Receipt } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import { formatCurrency, getDaysUntilPayment, getMiniDonutSegments } from "./utils/helpers";
 import { MiniDonutChart } from "./components/mini-donut-chart";
@@ -35,16 +35,23 @@ export function DashboardView(): React.JSX.Element {
     [summary, t]
   );
 
+  const recentTransactions = useMemo(
+    () => mockTransactions
+      .sort((a, b) => b.date.getTime() - a.date.getTime())
+      .slice(0, 5),
+    []
+  );
+
   return (
     <div className="space-y-8">
       <header className="space-y-1">
-        <h1 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-white">
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-zinc-900 dark:text-white">
           {t("dashboard.greeting")} Nirvana
         </h1>
-        <p className="text-zinc-500 dark:text-zinc-500 text-sm">
+        <p className="text-xs md:text-sm text-zinc-500 dark:text-zinc-500">
           {dayOfWeek}, {dayOfMonth} {language === "es" ? "de" : ""} {monthName} {year}
         </p>
-        <p className="text-zinc-600 dark:text-zinc-400 text-sm pt-1">
+        <p className="text-xs md:text-sm text-zinc-600 dark:text-zinc-400 pt-1">
           {t("dashboard.summary")} {capitalizedMonth}
         </p>
       </header>
@@ -213,6 +220,87 @@ export function DashboardView(): React.JSX.Element {
                       {payment.type === "loan" && t("dashboard.bill")}
                     </span>
                   </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      <section className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-xl font-semibold flex items-center gap-2.5 text-zinc-900 dark:text-white tracking-tight">
+              <div className="bg-emerald-500/10 p-2 rounded-lg ring-1 ring-emerald-500/10">
+                <Receipt className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
+              </div>
+              {t("dashboard.recentTransactions")}
+            </h2>
+            <p className="text-sm text-zinc-500 dark:text-zinc-500 mt-1.5 ml-11">{t("dashboard.lastMovements")}</p>
+          </div>
+          <a
+            href="/transactions"
+            className="text-sm font-medium text-cyan-500 hover:text-cyan-600 dark:text-cyan-400 dark:hover:text-cyan-300 transition-colors"
+          >
+            {t("dashboard.viewAll")}
+          </a>
+        </div>
+
+        <div className="space-y-3">
+          {recentTransactions.map((transaction: ITransaction) => {
+            const isIncome = transaction.type === "income";
+            const isPending = transaction.status === "pending";
+            
+            return (
+              <div
+                key={transaction.id}
+                className={cn(
+                  "card-surface rounded-xl p-4 transition-all duration-300 hover:card-elevated hover:scale-[1.01] group flex items-center gap-4",
+                  isPending && "opacity-70"
+                )}
+              >
+                <div
+                  className={cn(
+                    "w-10 h-10 rounded-lg flex items-center justify-center text-xl flex-shrink-0",
+                    isIncome
+                      ? "bg-emerald-100 dark:bg-emerald-950/30"
+                      : "bg-red-100 dark:bg-red-950/30"
+                  )}
+                >
+                  {isIncome ? "💰" : "💸"}
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-semibold text-zinc-900 dark:text-white text-sm truncate">
+                    {transaction.description}
+                  </h4>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-500 mt-1 flex items-center gap-2">
+                    <span>{transaction.date.toLocaleDateString(locale, { month: "short", day: "numeric" })}</span>
+                    {transaction.merchant && (
+                      <>
+                        <span>•</span>
+                        <span className="truncate">{transaction.merchant}</span>
+                      </>
+                    )}
+                  </p>
+                </div>
+
+                <div className="text-right flex-shrink-0">
+                  <p
+                    className={cn(
+                      "font-bold text-sm tracking-tight",
+                      isIncome
+                        ? "text-emerald-600 dark:text-emerald-400"
+                        : "text-red-600 dark:text-red-400"
+                    )}
+                  >
+                    {isIncome ? "+" : "-"} {formatCurrency(transaction.amount, language)}
+                  </p>
+                  {isPending && (
+                    <span className="text-xs text-amber-600 dark:text-amber-400 font-medium">
+                      {t("transactions.pending")}
+                    </span>
+                  )}
                 </div>
               </div>
             );

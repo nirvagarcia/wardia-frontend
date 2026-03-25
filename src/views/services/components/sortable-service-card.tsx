@@ -51,6 +51,7 @@ export function SortableServiceCard(props: SortableServiceCardProps): React.JSX.
         isDueSoon && "ring-1 ring-teal-500/30",
         isDragging && "scale-105 card-elevated z-50 opacity-90"
       )}
+      suppressHydrationWarning
       {...attributes}
       {...listeners}
     >

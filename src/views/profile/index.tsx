@@ -33,6 +33,8 @@ import {
   getNotificationSettings,
 } from "./utils/helpers";
 import { SelectionModal, type SelectionOption } from "./modals/selection-modal";
+import { ChangePasswordModal } from "./modals/change-password-modal";
+import { TwoFactorModal } from "./modals/two-factor-modal";
 import { ProfileAvatar } from "./components/profile-avatar";
 
 export function ProfileView(): React.JSX.Element {
@@ -51,6 +53,8 @@ export function ProfileView(): React.JSX.Element {
   const [showThemeModal, setShowThemeModal] = useState(false);
   const [showLanguageModal, setShowLanguageModal] = useState(false);
   const [showCurrencyModal, setShowCurrencyModal] = useState(false);
+  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
+  const [showTwoFactorModal, setShowTwoFactorModal] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -68,11 +72,13 @@ export function ProfileView(): React.JSX.Element {
       <div className="space-y-6">
         <header className="space-y-4">
           <div>
-            <h1 className="text-3xl font-bold flex items-center gap-2 text-zinc-900 dark:text-white">
-              <User className="w-8 h-8 text-cyan-500" />
+            <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2.5 text-zinc-900 dark:text-white tracking-tight">
+              <div className="bg-cyan-500/10 p-2 rounded-xl ring-1 ring-cyan-500/10">
+                <User className="w-5 h-5 md:w-6 md:h-6 text-cyan-500 dark:text-cyan-400" />
+              </div>
               {t("profile.title")}
             </h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-2">{t("profile.subtitle")}</p>
+            <p className="text-sm md:text-base text-zinc-500 dark:text-zinc-500 mt-1">{t("profile.subtitle")}</p>
           </div>
           <div className="bg-white dark:bg-zinc-900/50 backdrop-blur-sm border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 shadow-sm animate-pulse">
             <div className="flex flex-col items-center text-center">
@@ -116,11 +122,13 @@ export function ProfileView(): React.JSX.Element {
     <div className="space-y-6">
       <header className="space-y-4">
         <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2 text-zinc-900 dark:text-white">
-            <User className="w-8 h-8 text-cyan-500" />
+          <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2.5 text-zinc-900 dark:text-white tracking-tight">
+            <div className="bg-cyan-500/10 p-2 rounded-xl ring-1 ring-cyan-500/10">
+              <User className="w-5 h-5 md:w-6 md:h-6 text-cyan-500 dark:text-cyan-400" />
+            </div>
             {t("profile.title")}
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-2">{t("profile.subtitle")}</p>
+          <p className="text-sm md:text-base text-zinc-500 dark:text-zinc-500 mt-1">{t("profile.subtitle")}</p>
         </div>
 
         <div className="bg-white dark:bg-zinc-900/50 backdrop-blur-sm border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 shadow-sm">
@@ -266,7 +274,10 @@ export function ProfileView(): React.JSX.Element {
         </div>
 
         <div className="bg-zinc-50 dark:bg-zinc-900/50 backdrop-blur-sm border border-zinc-200 dark:border-zinc-800 rounded-2xl overflow-hidden">
-          <button className="w-full flex items-center justify-between p-4 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 transition-colors">
+          <button 
+            onClick={() => setShowChangePasswordModal(true)}
+            className="w-full flex items-center justify-between p-4 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 transition-colors"
+          >
             <div className="flex items-center gap-3">
               <div className="bg-amber-500/20 p-2 rounded-lg">
                 <Shield className="w-5 h-5 text-amber-400" />
@@ -278,7 +289,10 @@ export function ProfileView(): React.JSX.Element {
 
           <div className="border-t border-zinc-200 dark:border-zinc-800" />
 
-          <button className="w-full flex items-center justify-between p-4 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 transition-colors">
+          <button 
+            onClick={() => setShowTwoFactorModal(true)}
+            className="w-full flex items-center justify-between p-4 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 transition-colors"
+          >
             <div className="flex items-center gap-3">
               <div className="bg-blue-500/20 p-2 rounded-lg">
                 <Shield className="w-5 h-5 text-blue-400" />
@@ -330,6 +344,16 @@ export function ProfileView(): React.JSX.Element {
         selectedValue={currency}
         onSelect={(value) => setCurrency(value as Currency)}
         onClose={() => setShowCurrencyModal(false)}
+      />
+
+      <ChangePasswordModal
+        isOpen={showChangePasswordModal}
+        onClose={() => setShowChangePasswordModal(false)}
+      />
+
+      <TwoFactorModal
+        isOpen={showTwoFactorModal}
+        onClose={() => setShowTwoFactorModal(false)}
       />
     </div>
   );

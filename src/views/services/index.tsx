@@ -20,6 +20,7 @@ import {
   Sparkles,
   Plus,
   TrendingUp,
+  Filter,
 } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import { AddServiceModal } from "./modals/add-service-modal";
@@ -71,6 +72,7 @@ export function ServicesView(): React.JSX.Element {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingService, setEditingService] = useState<ISubscription | null>(null);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [showFilters, setShowFilters] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<{
     isOpen: boolean;
     id: string | null;
@@ -156,7 +158,8 @@ export function ServicesView(): React.JSX.Element {
       : services;
 
   const allCategories = Array.from(new Set(services.map((s) => s.category)));
-  const totalMonthlyInPEN = calculateMonthlyTotal(filteredServices, true);
+  const totalInUserCurrency = calculateMonthlyTotal(filteredServices, currency, true);
+  
   const upcomingSubs = getUpcomingServices(services);
 
   const formatCurrency = (amount: { value: number; currency: string }): string =>
@@ -168,39 +171,27 @@ export function ServicesView(): React.JSX.Element {
   return (
     <div className="space-y-8">
       <header className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold flex items-center gap-2.5 text-zinc-900 dark:text-white tracking-tight">
-              <div className="bg-cyan-500/10 p-2 rounded-xl ring-1 ring-cyan-500/10">
-                <Receipt className="w-6 h-6 text-cyan-500 dark:text-cyan-400" />
-              </div>
-              {t("services.title")}
-            </h1>
-            <p className="text-zinc-500 dark:text-zinc-500 mt-1">{t("services.subtitle")}</p>
-          </div>
-
-          <button
-            onClick={() => {
-              setEditingService(null);
-              setIsAddModalOpen(true);
-            }}
-            className="bg-cyan-500 hover:bg-cyan-600 p-3 rounded-xl transition-all text-white hover:scale-105 active:scale-95"
-          >
-            <Plus className="w-5 h-5" />
-          </button>
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2.5 text-zinc-900 dark:text-white tracking-tight">
+            <div className="bg-cyan-500/10 p-2 rounded-xl ring-1 ring-cyan-500/10">
+              <Receipt className="w-5 h-5 md:w-6 md:h-6 text-cyan-500 dark:text-cyan-400" />
+            </div>
+            {t("services.title")}
+          </h1>
+          <p className="text-sm md:text-base text-zinc-500 dark:text-zinc-500 mt-1">{t("services.subtitle")}</p>
         </div>
 
-        <div className="relative overflow-hidden rounded-2xl p-6 bg-gradient-to-br from-cyan-50 to-teal-100 dark:from-cyan-600/30 dark:to-teal-600/30 shadow-sm dark:shadow-[0_8px_16px_rgba(0,0,0,0.3)] border border-cyan-200/40 dark:border-white/5">
+        <div className="relative overflow-hidden rounded-2xl p-5 md:p-6 bg-gradient-to-br from-cyan-50 to-teal-100 dark:from-cyan-600/30 dark:to-teal-600/30 shadow-sm dark:shadow-[0_8px_16px_rgba(0,0,0,0.3)] border border-cyan-200/40 dark:border-white/5">
           <div className="absolute inset-0 shadow-[inset_0_1px_2px_rgba(255,255,255,0.5)] dark:shadow-[inset_0_2px_8px_rgba(255,255,255,0.05)]" />
           <div className="relative">
-            <p className="text-cyan-700 dark:text-cyan-300 text-sm font-semibold mb-1">
+            <p className="text-cyan-700 dark:text-cyan-300 text-xs md:text-sm font-semibold mb-1">
               {t("services.totalMonthlyCost")}
             </p>
-            <p className="text-[2.5rem] leading-tight font-bold text-cyan-900 dark:text-white tracking-tight">
+            <p className="text-3xl md:text-[2.5rem] leading-tight font-bold text-cyan-900 dark:text-white tracking-tight">
               {currency === "PEN" ? "S/" : currency === "USD" ? "$" : "€"}{" "}
-              {totalMonthlyInPEN.toLocaleString(locale, { minimumFractionDigits: 2 })}
+              {totalInUserCurrency.toLocaleString(locale, { minimumFractionDigits: 2 })}
             </p>
-            <p className="text-cyan-600 dark:text-cyan-400 text-sm mt-2 font-medium">
+            <p className="text-cyan-600 dark:text-cyan-400 text-xs md:text-sm mt-2 font-medium">
               {filteredServices.filter((s) => s.status === "active").length}{" "}
               {t("services.activeServices")}
             </p>
@@ -228,38 +219,97 @@ export function ServicesView(): React.JSX.Element {
             </div>
           </div>
         )}
-
-        <div className="flex flex-wrap gap-2 items-center">
-          {allCategories.map((category) => {
-            const IconComponent = categoryIcons[category] || DollarSign;
-            const isActive = selectedCategories.includes(category);
-
-            return (
-              <button
-                key={category}
-                onClick={() => toggleCategory(category)}
-                className={cn(
-                  "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all",
-                  isActive
-                    ? "bg-cyan-500 text-white shadow-md shadow-cyan-500/25"
-                    : "bg-white dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 border border-zinc-200 dark:border-zinc-700"
-                )}
-              >
-                <IconComponent className="w-3.5 h-3.5" />
-                {getCategoryLabel(category, t)}
-              </button>
-            );
-          })}
-          {selectedCategories.length > 0 && (
-            <button
-              onClick={clearFilters}
-              className="text-xs text-cyan-600 dark:text-cyan-400 hover:underline font-medium"
-            >
-              Limpiar filtros
-            </button>
-          )}
-        </div>
       </header>
+
+      {/* Filters and Actions Bar */}
+      <div className="flex gap-2 justify-end">
+        <button
+          onClick={() => setShowFilters(!showFilters)}
+          className={cn(
+            "px-3 md:px-4 py-1.5 md:py-2 rounded-xl text-xs md:text-sm font-medium transition-colors flex items-center gap-2",
+            showFilters || selectedCategories.length > 0
+              ? "bg-cyan-500 text-white"
+              : "bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-gray-300 hover:bg-zinc-200 dark:hover:bg-zinc-700"
+          )}
+        >
+          <Filter className="w-3 h-3 md:w-4 md:h-4" />
+          {t("transactions.filters")}
+          {selectedCategories.length > 0 && (
+            <span className="bg-white/20 px-2 py-0.5 rounded-full text-xs font-bold">
+              {selectedCategories.length}
+            </span>
+          )}
+        </button>
+        <button
+          onClick={() => {
+            setEditingService(null);
+            setIsAddModalOpen(true);
+          }}
+          className="px-3 md:px-4 py-1.5 md:py-2 rounded-xl text-xs md:text-sm bg-cyan-500 hover:bg-cyan-600 text-white font-medium transition-colors flex items-center gap-2"
+        >
+          <Plus className="w-4 h-4 md:w-5 md:h-5" />
+          {t("services.addService")}
+        </button>
+      </div>
+
+      {showFilters && (
+        <div className="bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-semibold text-zinc-900 dark:text-white">
+              {t("transactions.filterByCategory")}
+            </h3>
+            {selectedCategories.length > 0 && (
+              <button
+                onClick={clearFilters}
+                className="text-sm text-cyan-500 hover:text-cyan-600 font-medium"
+              >
+                {t("transactions.clearFilters")}
+              </button>
+            )}
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+            {allCategories.map((category) => {
+              const IconComponent = categoryIcons[category] || DollarSign;
+              const isActive = selectedCategories.includes(category);
+              const categoryCount = services.filter(s => s.category === category).length;
+
+              return (
+                <button
+                  key={category}
+                  onClick={() => toggleCategory(category)}
+                  className={cn(
+                    "flex items-center justify-between gap-2 p-4 rounded-xl border-2 transition-all",
+                    isActive
+                      ? "border-cyan-500 bg-cyan-50 dark:bg-cyan-950/30"
+                      : "border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600"
+                  )}
+                >
+                  <div className="flex items-center gap-2">
+                    <IconComponent className={cn(
+                      "w-4 h-4",
+                      isActive ? "text-cyan-600 dark:text-cyan-400" : "text-zinc-600 dark:text-zinc-400"
+                    )} />
+                    <span className={cn(
+                      "text-sm font-medium",
+                      isActive ? "text-cyan-600 dark:text-cyan-400" : "text-zinc-600 dark:text-zinc-400"
+                    )}>
+                      {getCategoryLabel(category, t)}
+                    </span>
+                  </div>
+                  <span className={cn(
+                    "px-2 py-0.5 rounded-full text-xs font-bold",
+                    isActive
+                      ? "bg-cyan-500 text-white"
+                      : "bg-zinc-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-400"
+                  )}>
+                    {categoryCount}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       <DndContext
         sensors={sensors}

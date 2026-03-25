@@ -10,6 +10,7 @@ export { mockSubscriptions } from "./subscriptions";
 export { mockBankCredentials } from "./credentials";
 export { mockUpcomingPayments } from "./payments";
 export { mockFinancialSummary } from "./summary";
+export { mockTransactions } from "./transactions";
 
 // Helper functions
 export { createAmount, convertToPEN } from "./helpers";
