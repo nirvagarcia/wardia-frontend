@@ -78,7 +78,7 @@ export function AddServiceModal({ isOpen, onClose, onAdd, editingService, onUpda
         amount: editingService.amount.value.toString(),
         currency: editingService.amount.currency,
         frequency: editingService.frequency,
-        nextPaymentDate: editingService.nextPaymentDate.toISOString().split('T')[0],
+        nextPaymentDate: editingService.nextPaymentDate.toISOString().split('T')[0] ?? "",
         status: editingService.status,
         autoRenewal: editingService.autoRenewal,
       }));
@@ -105,12 +105,12 @@ export function AddServiceModal({ isOpen, onClose, onAdd, editingService, onUpda
     e.preventDefault();
     
     const newErrors: Record<string, string> = {};
-    if (!formData.name.trim()) newErrors.name = t("forms.nameRequired");
+    if (!formData.name.trim()) newErrors['name'] = t("forms.nameRequired");
     if (!formData.amount || parseFloat(formData.amount) <= 0) {
-      newErrors.amount = t("forms.invalidAmount");
+      newErrors['amount'] = t("forms.invalidAmount");
     }
     if (!formData.nextPaymentDate) {
-      newErrors.nextPaymentDate = t("forms.dateRequired");
+      newErrors['nextPaymentDate'] = t("forms.dateRequired");
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -214,9 +214,9 @@ export function AddServiceModal({ isOpen, onClose, onAdd, editingService, onUpda
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               placeholder={t("forms.serviceNamePlaceholder")}
-              className={cn(errors.name && "border-red-500 focus-visible:ring-red-500")}
+              className={cn(errors['name'] && "border-red-500 focus-visible:ring-red-500")}
             />
-            {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
+            {errors['name'] && <p className="text-red-500 text-sm mt-1">{errors['name']}</p>}
           </div>
 
           <div>
@@ -248,10 +248,10 @@ export function AddServiceModal({ isOpen, onClose, onAdd, editingService, onUpda
                   value={formData.amount}
                   onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
                   placeholder="0.00"
-                  className={cn("pl-9", errors.amount && "border-red-500 focus-visible:ring-red-500")}
+                  className={cn("pl-9", errors['amount'] && "border-red-500 focus-visible:ring-red-500")}
                 />
               </div>
-              {errors.amount && <p className="text-red-500 text-sm mt-1">{errors.amount}</p>}
+              {errors['amount'] && <p className="text-red-500 text-sm mt-1">{errors['amount']}</p>}
             </div>
 
             <div>
@@ -305,11 +305,11 @@ export function AddServiceModal({ isOpen, onClose, onAdd, editingService, onUpda
             </Label>
             <DatePicker
               value={formData.nextPaymentDate ? new Date(formData.nextPaymentDate) : undefined}
-              onChange={(date) => setFormData({ ...formData, nextPaymentDate: date ? date.toISOString().split('T')[0] : "" })}
+              onChange={(date) => setFormData({ ...formData, nextPaymentDate: date ? date.toISOString().split('T')[0] ?? "" : "" })}
               placeholder={t("forms.selectDate")}
-              className={cn(errors.nextPaymentDate && "border-red-500")}
+              className={cn(errors['nextPaymentDate'] && "border-red-500")}
             />
-            {errors.nextPaymentDate && <p className="text-red-500 text-sm mt-1">{errors.nextPaymentDate}</p>}
+            {errors['nextPaymentDate'] && <p className="text-red-500 text-sm mt-1">{errors['nextPaymentDate']}</p>}
           </div>
 
           <div className="space-y-4">

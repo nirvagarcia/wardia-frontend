@@ -42,35 +42,35 @@ export function RegisterView(): React.JSX.Element {
     const newErrors: Record<string, string> = {};
 
     if (!formData.name) {
-      newErrors.name = t("auth.errors.nameRequired");
+      newErrors['name'] = t("auth.errors['nameRequired']");
     } else if (formData.name.length < 2) {
-      newErrors.name = t("auth.errors.nameMinLength");
+      newErrors['name'] = t("auth.errors['nameMinLength']");
     }
 
     if (!formData.email) {
-      newErrors.email = t("auth.errors.emailRequired");
+      newErrors['email'] = t("auth.errors['emailRequired']");
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = t("auth.errors.emailInvalid");
+      newErrors['email'] = t("auth.errors['emailInvalid']");
     }
 
     if (formData.phone && !/^\+?[\d\s\-()]+$/.test(formData.phone)) {
-      newErrors.phone = t("auth.errors.phoneInvalid");
+      newErrors['phone'] = t("auth.errors['phoneInvalid']");
     }
 
     if (!formData.password) {
-      newErrors.password = t("auth.errors.passwordRequired");
+      newErrors['password'] = t("auth.errors['passwordRequired']");
     } else if (formData.password.length < 6) {
-      newErrors.password = t("auth.errors.passwordMinLength");
+      newErrors['password'] = t("auth.errors['passwordMinLength']");
     }
 
     if (!formData.confirmPassword) {
-      newErrors.confirmPassword = t("auth.errors.confirmPasswordRequired");
+      newErrors['confirmPassword'] = t("auth.errors['confirmPasswordRequired']");
     } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = t("auth.errors.passwordMismatch");
+      newErrors['confirmPassword'] = t("auth.errors['passwordMismatch']");
     }
 
     if (!agreedToTerms) {
-      newErrors.terms = t("auth.errors.termsRequired");
+      newErrors['terms'] = t("auth.errors['termsRequired']");
     }
 
     setErrors(newErrors);
@@ -122,7 +122,7 @@ export function RegisterView(): React.JSX.Element {
           placeholder={t("auth.fullNamePlaceholder")}
           value={formData.name}
           onChange={handleChange("name")}
-          error={errors.name}
+          error={errors['name']}
           autoComplete="name"
         />
 
@@ -133,7 +133,7 @@ export function RegisterView(): React.JSX.Element {
           placeholder={t("auth.emailPlaceholder")}
           value={formData.email}
           onChange={handleChange("email")}
-          error={errors.email}
+          error={errors['email']}
           autoComplete="email"
         />
 
@@ -144,7 +144,7 @@ export function RegisterView(): React.JSX.Element {
           placeholder={t("auth.phonePlaceholder")}
           value={formData.phone}
           onChange={handleChange("phone")}
-          error={errors.phone}
+          error={errors['phone']}
           autoComplete="tel"
         />
 
@@ -156,7 +156,7 @@ export function RegisterView(): React.JSX.Element {
             placeholder={t("auth.passwordPlaceholder")}
             value={formData.password}
             onChange={handleChange("password")}
-            error={errors.password}
+            error={errors['password']}
             autoComplete="new-password"
           />
           
@@ -196,7 +196,7 @@ export function RegisterView(): React.JSX.Element {
           placeholder={t("auth.confirmPasswordPlaceholder")}
           value={formData.confirmPassword}
           onChange={handleChange("confirmPassword")}
-          error={errors.confirmPassword}
+          error={errors['confirmPassword']}
           autoComplete="new-password"
         />
 
@@ -227,8 +227,8 @@ export function RegisterView(): React.JSX.Element {
               </Link>
             </span>
           </label>
-          {errors.terms && (
-            <p className="text-sm text-red-600 dark:text-red-400">{errors.terms}</p>
+          {errors['terms'] && (
+            <p className="text-sm text-red-600 dark:text-red-400">{errors['terms']}</p>
           )}
         </div>
 

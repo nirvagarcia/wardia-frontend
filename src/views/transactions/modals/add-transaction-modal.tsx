@@ -108,12 +108,12 @@ export function AddTransactionModal({
     e.preventDefault();
 
     const newErrors: TransactionFormErrors = {};
-    if (!formData.description.trim()) newErrors.description = t("forms.nameRequired");
+    if (!formData.description.trim()) newErrors['description'] = t("forms.nameRequired");
     if (!formData.amount || parseFloat(formData.amount) <= 0) {
-      newErrors.amount = t("forms.invalidAmount");
+      newErrors['amount'] = t("forms.invalidAmount");
     }
     if (!formData.date) {
-      newErrors.date = t("forms.dateRequired");
+      newErrors['date'] = t("forms.dateRequired");
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -262,11 +262,11 @@ export function AddTransactionModal({
                 setFormData({ ...formData, description: e.target.value });
                 setErrors({ ...errors, description: "" });
               }}
-              className={cn(errors.description && "border-red-500 focus:ring-red-500")}
+              className={cn(errors['description'] && "border-red-500 focus:ring-red-500")}
               placeholder={t("transactions.descriptionPlaceholder")}
             />
-            {errors.description && (
-              <p className="text-sm text-red-500">{errors.description}</p>
+            {errors['description'] && (
+              <p className="text-sm text-red-500">{errors['description']}</p>
             )}
           </div>
 
@@ -288,11 +288,11 @@ export function AddTransactionModal({
                     setFormData({ ...formData, amount: e.target.value });
                     setErrors({ ...errors, amount: "" });
                   }}
-                  className={cn("pl-9", errors.amount && "border-red-500 focus:ring-red-500")}
+                  className={cn("pl-9", errors['amount'] && "border-red-500 focus:ring-red-500")}
                   placeholder="0.00"
                 />
               </div>
-              {errors.amount && <p className="text-sm text-red-500">{errors.amount}</p>}
+              {errors['amount'] && <p className="text-sm text-red-500">{errors['amount']}</p>}
             </div>
 
             <div className="space-y-2">
@@ -334,9 +334,9 @@ export function AddTransactionModal({
                 setErrors({ ...errors, date: "" });
               }}
               placeholder={t("forms.selectDate")}
-              className={cn(errors.date && "border-red-500 focus:ring-red-500")}
+              className={cn(errors['date'] && "border-red-500 focus:ring-red-500")}
             />
-            {errors.date && <p className="text-sm text-red-500">{errors.date}</p>}
+            {errors['date'] && <p className="text-sm text-red-500">{errors['date']}</p>}
           </div>
 
           <div>

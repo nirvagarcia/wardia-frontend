@@ -24,11 +24,11 @@ export function ForgotPasswordView(): React.JSX.Element {
 
   const validateEmail = (email: string) => {
     if (!email) {
-      setError(t("auth.errors.emailRequired"));
+      setError(t("auth.errors['emailRequired']"));
       return false;
     }
     if (!/\S+@\S+\.\S+/.test(email)) {
-      setError(t("auth.errors.emailInvalid"));
+      setError(t("auth.errors['emailInvalid']"));
       return false;
     }
     setError("");

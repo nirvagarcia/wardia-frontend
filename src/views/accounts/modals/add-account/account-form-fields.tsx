@@ -44,9 +44,9 @@ export function AccountFormFields({ formData, errors, onChange, t }: AccountForm
           value={formData.bankName}
           onChange={(e) => onChange({ bankName: e.target.value })}
           placeholder={t("forms.bankNamePlaceholder")}
-          className={cn(errors.bankName && "border-red-500 focus-visible:ring-red-500")}
+          className={cn(errors['bankName'] && "border-red-500 focus-visible:ring-red-500")}
         />
-        {errors.bankName && <p className="text-red-500 text-sm mt-1">{errors.bankName}</p>}
+        {errors['bankName'] && <p className="text-red-500 text-sm mt-1">{errors['bankName']}</p>}
       </div>
 
       <div className="grid grid-cols-2 gap-4">
@@ -101,9 +101,9 @@ export function AccountFormFields({ formData, errors, onChange, t }: AccountForm
           value={formData.balance}
           onChange={(e) => onChange({ balance: e.target.value })}
           placeholder="0.00"
-          className={cn(errors.balance && "border-red-500 focus-visible:ring-red-500")}
+          className={cn(errors['balance'] && "border-red-500 focus-visible:ring-red-500")}
         />
-        {errors.balance && <p className="text-red-500 text-sm mt-1">{errors.balance}</p>}
+        {errors['balance'] && <p className="text-red-500 text-sm mt-1">{errors['balance']}</p>}
       </div>
 
       <div>
@@ -121,10 +121,10 @@ export function AccountFormFields({ formData, errors, onChange, t }: AccountForm
           placeholder="194123456789"
           className={cn(
             "w-full px-4 py-3 rounded-xl border bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white font-mono",
-            errors.accountNumber ? "border-red-500" : "border-zinc-200 dark:border-zinc-700"
+            errors['accountNumber'] ? "border-red-500" : "border-zinc-200 dark:border-zinc-700"
           )}
         />
-        {errors.accountNumber && <p className="text-red-500 text-sm mt-1">{errors.accountNumber}</p>}
+        {errors['accountNumber'] && <p className="text-red-500 text-sm mt-1">{errors['accountNumber']}</p>}
       </div>
 
       <div>
@@ -143,10 +143,10 @@ export function AccountFormFields({ formData, errors, onChange, t }: AccountForm
           maxLength={20}
           className={cn(
             "w-full px-4 py-3 rounded-xl border bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white font-mono",
-            errors.cci ? "border-red-500" : "border-zinc-200 dark:border-zinc-700"
+            errors['cci'] ? "border-red-500" : "border-zinc-200 dark:border-zinc-700"
           )}
         />
-        {errors.cci && <p className="text-red-500 text-sm mt-1">{errors.cci}</p>}
+        {errors['cci'] && <p className="text-red-500 text-sm mt-1">{errors['cci']}</p>}
       </div>
 
       <div className="grid grid-cols-3 gap-4">

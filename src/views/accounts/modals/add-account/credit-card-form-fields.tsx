@@ -49,9 +49,9 @@ export function CreditCardFormFields({
           value={formData.bankName}
           onChange={(e) => onChange({ bankName: e.target.value })}
           placeholder={t("forms.bankNamePlaceholder")}
-          className={cn(errors.bankName && "border-red-500 focus-visible:ring-red-500")}
+          className={cn(errors['bankName'] && "border-red-500 focus-visible:ring-red-500")}
         />
-        {errors.bankName && <p className="text-red-500 text-sm mt-1">{errors.bankName}</p>}
+        {errors['bankName'] && <p className="text-red-500 text-sm mt-1">{errors['bankName']}</p>}
       </div>
 
       <div>
@@ -66,9 +66,9 @@ export function CreditCardFormFields({
           value={formData.cardholderName}
           onChange={(e) => onChange({ cardholderName: e.target.value.toUpperCase() })}
           placeholder="NIRVANA GARCIA"
-          className={cn("uppercase", errors.cardholderName && "border-red-500 focus-visible:ring-red-500")}
+          className={cn("uppercase", errors['cardholderName'] && "border-red-500 focus-visible:ring-red-500")}
         />
-        {errors.cardholderName && <p className="text-red-500 text-sm mt-1">{errors.cardholderName}</p>}
+        {errors['cardholderName'] && <p className="text-red-500 text-sm mt-1">{errors['cardholderName']}</p>}
       </div>
 
       <div className="grid grid-cols-3 gap-4">
@@ -85,9 +85,9 @@ export function CreditCardFormFields({
             onChange={(e) => onChange({ cardNumber: e.target.value.replace(/\s/g, "") })}
             placeholder="4532 1234 5678 9012"
             maxLength={19}
-            className={cn("font-mono", errors.cardNumber && "border-red-500 focus-visible:ring-red-500")}
+            className={cn("font-mono", errors['cardNumber'] && "border-red-500 focus-visible:ring-red-500")}
           />
-          {errors.cardNumber && <p className="text-red-500 text-sm mt-1">{errors.cardNumber}</p>}
+          {errors['cardNumber'] && <p className="text-red-500 text-sm mt-1">{errors['cardNumber']}</p>}
         </div>
 
         <div>
@@ -122,7 +122,7 @@ export function CreditCardFormFields({
             value={formData.expiryMonth}
             onChange={(e) => onChange({ expiryMonth: e.target.value })}
             placeholder="MM"
-            className={cn(errors.expiry && "border-red-500 focus-visible:ring-red-500")}
+            className={cn(errors['expiry'] && "border-red-500 focus-visible:ring-red-500")}
           />
         </div>
 
@@ -137,11 +137,11 @@ export function CreditCardFormFields({
             value={formData.expiryYear}
             onChange={(e) => onChange({ expiryYear: e.target.value })}
             placeholder="YYYY"
-            className={cn(errors.expiry && "border-red-500 focus-visible:ring-red-500")}
+            className={cn(errors['expiry'] && "border-red-500 focus-visible:ring-red-500")}
           />
         </div>
       </div>
-      {errors.expiry && <p className="text-red-500 text-sm mt-1">{errors.expiry}</p>}
+      {errors['expiry'] && <p className="text-red-500 text-sm mt-1">{errors['expiry']}</p>}
 
       <div className="grid grid-cols-2 gap-4">
         <div>
@@ -154,9 +154,9 @@ export function CreditCardFormFields({
             value={formData.creditLimit}
             onChange={(e) => onChange({ creditLimit: e.target.value })}
             placeholder="10000.00"
-            className={cn(errors.creditLimit && "border-red-500 focus-visible:ring-red-500")}
+            className={cn(errors['creditLimit'] && "border-red-500 focus-visible:ring-red-500")}
           />
-          {errors.creditLimit && <p className="text-red-500 text-sm mt-1">{errors.creditLimit}</p>}
+          {errors['creditLimit'] && <p className="text-red-500 text-sm mt-1">{errors['creditLimit']}</p>}
         </div>
 
         <div>
@@ -169,9 +169,9 @@ export function CreditCardFormFields({
             value={formData.usedCredit}
             onChange={(e) => onChange({ usedCredit: e.target.value })}
             placeholder="2500.00"
-            className={cn(errors.usedCredit && "border-red-500 focus-visible:ring-red-500")}
+            className={cn(errors['usedCredit'] && "border-red-500 focus-visible:ring-red-500")}
           />
-          {errors.usedCredit && <p className="text-red-500 text-sm mt-1">{errors.usedCredit}</p>}
+          {errors['usedCredit'] && <p className="text-red-500 text-sm mt-1">{errors['usedCredit']}</p>}
         </div>
       </div>
 

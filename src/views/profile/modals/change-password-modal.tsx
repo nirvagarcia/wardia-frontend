@@ -67,23 +67,23 @@ export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProp
     const newErrors: PasswordFormErrors = {};
 
     if (!formData.currentPassword) {
-      newErrors.currentPassword = t("security.currentPasswordRequired");
+      newErrors['currentPassword'] = t("security.currentPasswordRequired");
     }
 
     if (!formData.newPassword) {
-      newErrors.newPassword = t("security.newPasswordRequired");
+      newErrors['newPassword'] = t("security.newPasswordRequired");
     } else if (!validatePassword(formData.newPassword)) {
-      newErrors.newPassword = t("security.passwordRequirements");
+      newErrors['newPassword'] = t("security.passwordRequirements");
     }
 
     if (!formData.confirmPassword) {
-      newErrors.confirmPassword = t("security.confirmPasswordRequired");
+      newErrors['confirmPassword'] = t("security.confirmPasswordRequired");
     } else if (formData.newPassword !== formData.confirmPassword) {
-      newErrors.confirmPassword = t("security.passwordMismatch");
+      newErrors['confirmPassword'] = t("security.passwordMismatch");
     }
 
     if (formData.currentPassword === formData.newPassword) {
-      newErrors.newPassword = t("security.passwordMustBeDifferent");
+      newErrors['newPassword'] = t("security.passwordMustBeDifferent");
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -161,7 +161,7 @@ export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProp
                   }}
                   className={cn(
                     "pr-10",
-                    errors.currentPassword && "border-red-500 focus:ring-red-500"
+                    errors['currentPassword'] && "border-red-500 focus:ring-red-500"
                   )}
                   placeholder={t("security.enterCurrentPassword")}
                 />
@@ -173,10 +173,10 @@ export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProp
                   {showPasswords.current ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
-              {errors.currentPassword && (
+              {errors['currentPassword'] && (
                 <p className="text-sm text-red-500 flex items-center gap-1">
                   <AlertCircle className="w-3 h-3" />
-                  {errors.currentPassword}
+                  {errors['currentPassword']}
                 </p>
               )}
             </div>
@@ -194,7 +194,7 @@ export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProp
                   }}
                   className={cn(
                     "pr-10",
-                    errors.newPassword && "border-red-500 focus:ring-red-500"
+                    errors['newPassword'] && "border-red-500 focus:ring-red-500"
                   )}
                   placeholder={t("security.enterNewPassword")}
                 />
@@ -206,13 +206,13 @@ export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProp
                   {showPasswords.new ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
-              {errors.newPassword && (
+              {errors['newPassword'] && (
                 <p className="text-sm text-red-500 flex items-center gap-1">
                   <AlertCircle className="w-3 h-3" />
-                  {errors.newPassword}
+                  {errors['newPassword']}
                 </p>
               )}
-              {!errors.newPassword && formData.newPassword && (
+              {!errors['newPassword'] && formData.newPassword && (
                 <p className="text-xs text-gray-500 dark:text-gray-400">
                   {t("security.passwordHint")}
                 </p>
@@ -232,7 +232,7 @@ export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProp
                   }}
                   className={cn(
                     "pr-10",
-                    errors.confirmPassword && "border-red-500 focus:ring-red-500"
+                    errors['confirmPassword'] && "border-red-500 focus:ring-red-500"
                   )}
                   placeholder={t("security.confirmNewPassword")}
                 />
@@ -244,10 +244,10 @@ export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProp
                   {showPasswords.confirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
-              {errors.confirmPassword && (
+              {errors['confirmPassword'] && (
                 <p className="text-sm text-red-500 flex items-center gap-1">
                   <AlertCircle className="w-3 h-3" />
-                  {errors.confirmPassword}
+                  {errors['confirmPassword']}
                 </p>
               )}
             </div>

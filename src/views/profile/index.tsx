@@ -18,10 +18,8 @@ import {
   ChevronRight,
   Mail,
   Phone,
-  Calendar,
   Settings,
   CreditCard,
-  Eye,
   Moon,
   Globe,
 } from "lucide-react";

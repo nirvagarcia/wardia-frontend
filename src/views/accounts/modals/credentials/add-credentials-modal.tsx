@@ -75,13 +75,13 @@ export function AddCredentialsModal({
     
     const newErrors: CredentialsFormErrors = {};
     if (!formData.bankName.trim()) {
-      newErrors.bankName = t("forms.bankNameRequired");
+      newErrors['bankName'] = t("forms.bankNameRequired");
     }
     if (!formData.username.trim()) {
-      newErrors.username = t("forms.usernameRequired");
+      newErrors['username'] = t("forms.usernameRequired");
     }
     if (!formData.password.trim()) {
-      newErrors.password = t("forms.passwordRequired");
+      newErrors['password'] = t("forms.passwordRequired");
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -142,9 +142,9 @@ export function AddCredentialsModal({
               value={formData.bankName}
               onChange={(e) => setFormData({ ...formData, bankName: e.target.value })}
               placeholder={t("forms.bankNamePlaceholder")}
-              className={cn(errors.bankName && "border-red-500 focus-visible:ring-red-500")}
+              className={cn(errors['bankName'] && "border-red-500 focus-visible:ring-red-500")}
             />
-            {errors.bankName && <p className="text-red-500 text-sm mt-1">{errors.bankName}</p>}
+            {errors['bankName'] && <p className="text-red-500 text-sm mt-1">{errors['bankName']}</p>}
           </div>
 
           <div>
@@ -160,9 +160,9 @@ export function AddCredentialsModal({
               value={formData.username}
               onChange={(e) => setFormData({ ...formData, username: e.target.value })}
               placeholder={t("credentials.username")}
-              className={cn("font-mono", errors.username && "border-red-500 focus-visible:ring-red-500")}
+              className={cn("font-mono", errors['username'] && "border-red-500 focus-visible:ring-red-500")}
             />
-            {errors.username && <p className="text-red-500 text-sm mt-1">{errors.username}</p>}
+            {errors['username'] && <p className="text-red-500 text-sm mt-1">{errors['username']}</p>}
           </div>
 
           <div>
@@ -178,9 +178,9 @@ export function AddCredentialsModal({
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               placeholder="••••••••••"
-              className={cn("font-mono", errors.password && "border-red-500 focus-visible:ring-red-500")}
+              className={cn("font-mono", errors['password'] && "border-red-500 focus-visible:ring-red-500")}
             />
-            {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
+            {errors['password'] && <p className="text-red-500 text-sm mt-1">{errors['password']}</p>}
           </div>
 
           <div>

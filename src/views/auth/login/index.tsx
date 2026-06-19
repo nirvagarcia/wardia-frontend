@@ -29,15 +29,15 @@ export function LoginView(): React.JSX.Element {
     const newErrors: { email?: string; password?: string } = {};
 
     if (!email) {
-      newErrors.email = t("auth.errors.emailRequired");
+      newErrors['email'] = t("auth.errors['emailRequired']");
     } else if (!/\S+@\S+\.\S+/.test(email)) {
-      newErrors.email = t("auth.errors.emailInvalid");
+      newErrors['email'] = t("auth.errors['emailInvalid']");
     }
 
     if (!password) {
-      newErrors.password = t("auth.errors.passwordRequired");
+      newErrors['password'] = t("auth.errors['passwordRequired']");
     } else if (password.length < 6) {
-      newErrors.password = t("auth.errors.passwordMinLength");
+      newErrors['password'] = t("auth.errors['passwordMinLength']");
     }
 
     setErrors(newErrors);
@@ -72,7 +72,7 @@ export function LoginView(): React.JSX.Element {
           placeholder={t("auth.emailPlaceholder")}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          error={errors.email}
+          error={errors['email']}
           autoComplete="email"
         />
 
@@ -83,7 +83,7 @@ export function LoginView(): React.JSX.Element {
           placeholder={t("auth.passwordPlaceholder")}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          error={errors.password}
+          error={errors['password']}
           autoComplete="current-password"
         />
 

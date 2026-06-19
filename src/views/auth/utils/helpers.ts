@@ -59,7 +59,7 @@ export function getPasswordStrengthColor(strength: number): string {
 /**
  * Format validation errors for display
  */
-export function formatValidationError(field: string, error: string): string {
+export function formatValidationError(_field: string, error: string): string {
   return error;
 }
 
