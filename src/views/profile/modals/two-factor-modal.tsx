@@ -258,11 +258,11 @@ export function TwoFactorModal({ isOpen, onClose }: TwoFactorModalProps): React.
 
   return (
     <div 
-      className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center" 
+      className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center px-4 pb-20 md:pb-0" 
       onClick={step !== "success" ? onClose : undefined}
     >
       <div 
-        className="bg-white dark:bg-zinc-900 rounded-t-2xl sm:rounded-2xl w-full max-w-md max-h-[80vh] sm:max-h-[85vh] overflow-y-auto animate-slide-up flex flex-col" 
+        className="bg-white dark:bg-zinc-900 rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto animate-slide-up flex flex-col" 
         onClick={(e) => e.stopPropagation()}
       >
         <div className="sticky top-0 bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 p-4 sm:p-6 flex items-center justify-between z-10">

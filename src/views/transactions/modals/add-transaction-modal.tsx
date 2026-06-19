@@ -14,7 +14,6 @@ import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { DatePicker } from "@/shared/components/ui/date-picker";
 import { Textarea } from "@/shared/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/components/ui/select";
 import { transactionModalSchema } from "@/shared/validation/schemas";
 import type { ITransaction } from "@/shared/types/finance";
 import type { TransactionType } from "@/shared/types";
@@ -154,12 +153,12 @@ export function AddTransactionModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center" onClick={onClose}>
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 pb-20 md:pb-4" onClick={onClose}>
       <div
-        className="bg-white dark:bg-zinc-900 rounded-t-2xl sm:rounded-2xl w-full max-w-md sm:max-w-2xl max-h-[80vh] sm:max-h-[85vh] overflow-y-auto animate-slide-up flex flex-col"
+        className="bg-white dark:bg-zinc-900 rounded-2xl w-full max-w-md sm:max-w-2xl max-h-[90vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="sticky top-0 bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 p-4 sm:p-6 flex items-center justify-between z-10">
+        <div className="shrink-0 bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 p-4 sm:p-6 flex items-center justify-between rounded-t-2xl">
           <h2 className="text-xl sm:text-2xl font-bold text-zinc-900 dark:text-white">
             {isEditMode ? t("forms.editTransaction") : t("forms.addTransaction")}
           </h2>
@@ -171,7 +170,8 @@ export function AddTransactionModal({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-5 sm:space-y-6 pb-20 sm:pb-6">
+        <div className="overflow-y-auto flex-1 min-h-0">
+        <form id="txn-form" onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-5 sm:space-y-6 pb-6">
           <div>
             <label className="block text-sm font-medium text-zinc-700 dark:text-gray-300 mb-3">
               {t("transactions.transactionType")}
@@ -210,7 +210,7 @@ export function AddTransactionModal({
             <label className="block text-sm font-medium text-zinc-700 dark:text-gray-300 mb-3">
               {t("forms.category")}
             </label>
-            <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 max-h-64 overflow-y-auto">
+            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 sm:gap-3">
               {currentCategories.map(({ key, labelKey, icon }) => (
                 <button
                   key={key}
@@ -285,19 +285,19 @@ export function AddTransactionModal({
 
             <div className="space-y-2">
               <Label htmlFor="currency">{t("forms.currency")}</Label>
-              <Select
-                value={formData.currency}
-                onValueChange={(value) => setFormData({ ...formData, currency: value as "PEN" | "USD" | "EUR" })}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="PEN">PEN</SelectItem>
-                  <SelectItem value="USD">USD</SelectItem>
-                  <SelectItem value="EUR">EUR</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="relative">
+                <select
+                  id="currency"
+                  value={formData.currency}
+                  onChange={(e) => setFormData({ ...formData, currency: e.target.value as "PEN" | "USD" | "EUR" })}
+                  className="w-full h-10 appearance-none rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 pr-8 text-sm text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 transition-colors"
+                >
+                  <option value="PEN">PEN (S/)</option>
+                  <option value="USD">USD ($)</option>
+                  <option value="EUR">EUR (€)</option>
+                </select>
+                <svg className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"/></svg>
+              </div>
             </div>
           </div>
 
@@ -370,27 +370,26 @@ export function AddTransactionModal({
             />
           </div>
 
-          <div className="flex gap-3 pt-4">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 px-4 py-3 rounded-xl border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-gray-300 font-medium hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-            >
-              {t("forms.cancel")}
-            </button>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="flex-1 px-4 py-3 rounded-xl bg-cyan-500 hover:bg-cyan-600 disabled:opacity-50 text-white font-medium transition-colors"
-            >
-              {isSubmitting
-                ? t("common.loading")
-                : isEditMode
-                ? t("forms.saveChanges")
-                : t("forms.add")}
-            </button>
-          </div>
         </form>
+        </div>
+
+        <div className="shrink-0 flex gap-3 p-4 sm:p-6 border-t border-zinc-200 dark:border-zinc-800">
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex-1 px-4 py-3 rounded-xl border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-gray-300 font-medium hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+          >
+            {t("forms.cancel")}
+          </button>
+          <button
+            type="submit"
+            form="txn-form"
+            disabled={isSubmitting}
+            className="flex-1 px-4 py-3 rounded-xl bg-cyan-500 hover:bg-cyan-600 disabled:opacity-50 text-white font-medium transition-colors"
+          >
+            {isSubmitting ? t("common.loading") : isEditMode ? t("forms.saveChanges") : t("forms.add")}
+          </button>
+        </div>
       </div>
     </div>
   );

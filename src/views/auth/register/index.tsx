@@ -15,11 +15,15 @@ import { cn } from "@/shared/utils/cn";
 import { usePreferencesStore } from "@/shared/stores/preferences-store";
 import { getTranslation } from "@/shared/langs";
 import { getPasswordStrengthLabelKey } from "../utils/helpers";
+import { authService } from "@/shared/services/auth-service";
+import { useAuthStore } from "@/shared/stores/auth-store";
+import { toast } from "sonner";
 
 export function RegisterView(): React.JSX.Element {
   const router = useRouter();
   const { language } = usePreferencesStore();
   const t = (key: string) => getTranslation(language, key);
+  const { setUser } = useAuthStore();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -85,11 +89,21 @@ export function RegisterView(): React.JSX.Element {
     }
 
     setIsLoading(true);
-    
-    setTimeout(() => {
-      setIsLoading(false);
+
+    try {
+      const user = await authService.register({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone || undefined,
+        password: formData.password,
+      });
+      setUser(user);
       router.push("/dashboard");
-    }, 1500);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Error al crear la cuenta");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const passwordStrength = () => {
@@ -214,6 +228,8 @@ export function RegisterView(): React.JSX.Element {
               {t("auth.agreeToTermsPrefix")}{" "}
               <Link
                 href="/terms"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 font-medium"
               >
                 {t("auth.termsLink")}
@@ -221,6 +237,8 @@ export function RegisterView(): React.JSX.Element {
               {" "}{t("auth.agreeToTermsAnd")}{" "}
               <Link
                 href="/privacy"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 font-medium"
               >
                 {t("auth.privacyLink")}

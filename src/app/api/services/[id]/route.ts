@@ -1,27 +1,27 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import * as res from "@/server/lib/api-response";
 import { handleRouteError } from "@/server/lib/api-error";
 import { ServiceUpdateSchema } from "@/server/modules/services/services.validation";
 import * as servicesService from "@/server/modules/services/services.service";
-
-const USER_ID = process.env["WARDIA_USER_ID"] ?? "default-user";
+import { getUserIdFromCookies } from "@/server/lib/jwt";
 
 export async function PUT(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const userId = await getUserIdFromCookies();
     const { id } = await params;
     const body = await req.json();
     const parsed = ServiceUpdateSchema.safeParse(body);
     if (!parsed.success) {
       return res.badRequest(parsed.error.message);
     }
-    const service = await servicesService.updateService(id, USER_ID, parsed.data);
+    const service = await servicesService.updateService(id, userId, parsed.data);
     return res.ok(service);
   } catch (err) {
-    const { message } = handleRouteError(err);
-    return res.serverError(message);
+    const { message, statusCode } = handleRouteError(err);
+    return NextResponse.json({ error: message }, { status: statusCode });
   }
 }
 
@@ -30,11 +30,12 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const userId = await getUserIdFromCookies();
     const { id } = await params;
-    await servicesService.deleteService(id, USER_ID);
+    await servicesService.deleteService(id, userId);
     return res.noContent();
   } catch (err) {
-    const { message } = handleRouteError(err);
-    return res.serverError(message);
+    const { message, statusCode } = handleRouteError(err);
+    return NextResponse.json({ error: message }, { status: statusCode });
   }
 }

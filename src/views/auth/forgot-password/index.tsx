@@ -13,6 +13,7 @@ import { Mail, ArrowRight, ArrowLeft, CheckCircle } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import { usePreferencesStore } from "@/shared/stores/preferences-store";
 import { getTranslation } from "@/shared/langs";
+import { authService } from "@/shared/services/auth-service";
 
 export function ForgotPasswordView(): React.JSX.Element {
   const { language } = usePreferencesStore();
@@ -43,11 +44,16 @@ export function ForgotPasswordView(): React.JSX.Element {
     }
 
     setIsLoading(true);
-    
-    setTimeout(() => {
-      setIsLoading(false);
+
+    try {
+      await authService.forgotPassword(email);
       setEmailSent(true);
-    }, 1500);
+    } catch {
+      // Always show success to avoid email enumeration
+      setEmailSent(true);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (emailSent) {

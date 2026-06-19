@@ -12,6 +12,7 @@ import { X, Eye, EyeOff, Lock, AlertCircle, CheckCircle } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
+import { authService } from "@/shared/services/auth-service";
 
 interface ChangePasswordModalProps {
   isOpen: boolean;
@@ -41,7 +42,9 @@ export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProp
   });
 
   const [errors, setErrors] = useState<PasswordFormErrors>({});
+  const [apiError, setApiError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -52,7 +55,9 @@ export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProp
       confirmPassword: "",
     });
     setErrors({});
+    setApiError("");
     setSuccess(false);
+    setIsSubmitting(false);
   }, [isOpen]);
 
   if (!isOpen) return null;
@@ -61,42 +66,30 @@ export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProp
     return password.length >= 8 && /[A-Z]/.test(password) && /[0-9]/.test(password);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const newErrors: PasswordFormErrors = {};
+    if (!formData.currentPassword) newErrors.currentPassword = t("security.currentPasswordRequired");
+    if (!formData.newPassword) newErrors.newPassword = t("security.newPasswordRequired");
+    else if (!validatePassword(formData.newPassword)) newErrors.newPassword = t("security.passwordRequirements");
+    if (!formData.confirmPassword) newErrors.confirmPassword = t("security.confirmPasswordRequired");
+    else if (formData.newPassword !== formData.confirmPassword) newErrors.confirmPassword = t("security.passwordMismatch");
+    if (formData.currentPassword === formData.newPassword) newErrors.newPassword = t("security.passwordMustBeDifferent");
 
-    if (!formData.currentPassword) {
-      newErrors['currentPassword'] = t("security.currentPasswordRequired");
-    }
+    if (Object.keys(newErrors).length > 0) { setErrors(newErrors); return; }
 
-    if (!formData.newPassword) {
-      newErrors['newPassword'] = t("security.newPasswordRequired");
-    } else if (!validatePassword(formData.newPassword)) {
-      newErrors['newPassword'] = t("security.passwordRequirements");
-    }
-
-    if (!formData.confirmPassword) {
-      newErrors['confirmPassword'] = t("security.confirmPasswordRequired");
-    } else if (formData.newPassword !== formData.confirmPassword) {
-      newErrors['confirmPassword'] = t("security.passwordMismatch");
-    }
-
-    if (formData.currentPassword === formData.newPassword) {
-      newErrors['newPassword'] = t("security.passwordMustBeDifferent");
-    }
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      return;
-    }
-
-    setTimeout(() => {
+    setIsSubmitting(true);
+    setApiError("");
+    try {
+      await authService.changePassword(formData.currentPassword, formData.newPassword);
       setSuccess(true);
-      setTimeout(() => {
-        onClose();
-      }, 1500);
-    }, 500);
+      setTimeout(() => onClose(), 1500);
+    } catch (err) {
+      setApiError(err instanceof Error ? err.message : "Error al cambiar la contraseña");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleClose = () => {
@@ -107,11 +100,11 @@ export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProp
 
   return (
     <div 
-      className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center" 
+      className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center px-4 pb-20 md:pb-0" 
       onClick={handleClose}
     >
       <div 
-        className="bg-white dark:bg-zinc-900 rounded-t-2xl sm:rounded-2xl w-full max-w-md max-h-[80vh] sm:max-h-[85vh] overflow-y-auto animate-slide-up flex flex-col" 
+        className="bg-white dark:bg-zinc-900 rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto animate-slide-up flex flex-col" 
         onClick={(e) => e.stopPropagation()}
       >
         <div className="sticky top-0 bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 p-4 sm:p-6 flex items-center justify-between z-10">
@@ -148,6 +141,12 @@ export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProp
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-5 pb-20 sm:pb-6">
+            {apiError && (
+              <div className="flex items-center gap-2 p-3 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                <AlertCircle className="w-4 h-4 text-red-500 shrink-0" />
+                <p className="text-sm text-red-700 dark:text-red-400">{apiError}</p>
+              </div>
+            )}
             <div className="space-y-2">
               <Label htmlFor="currentPassword">{t("security.currentPassword")}</Label>
               <div className="relative">
@@ -262,8 +261,10 @@ export function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProp
               </button>
               <button
                 type="submit"
-                className="flex-1 px-4 py-3 rounded-xl bg-cyan-500 hover:bg-cyan-600 text-white font-medium transition-colors"
+                disabled={isSubmitting}
+                className="flex-1 px-4 py-3 rounded-xl bg-cyan-500 hover:bg-cyan-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium transition-colors flex items-center justify-center gap-2"
               >
+                {isSubmitting ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : null}
                 {t("security.updatePassword")}
               </button>
             </div>

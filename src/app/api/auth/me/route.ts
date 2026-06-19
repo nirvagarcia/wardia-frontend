@@ -1,31 +1,30 @@
 import { NextRequest, NextResponse } from "next/server";
-import * as res from "@/server/lib/api-response";
-import { handleRouteError } from "@/server/lib/api-error";
-import { ServiceCreateSchema } from "@/server/modules/services/services.validation";
-import * as servicesService from "@/server/modules/services/services.service";
+import { authService } from "@/server/modules/auth/auth.service";
 import { getUserIdFromCookies } from "@/server/lib/jwt";
+import { handleRouteError } from "@/server/lib/api-error";
+import { updateProfileSchema } from "@/server/modules/auth/auth.validation";
 
 export async function GET() {
   try {
     const userId = await getUserIdFromCookies();
-    const result = await servicesService.getServices(userId);
-    return res.ok(result);
+    const user = await authService.getMe(userId);
+    return NextResponse.json({ data: user });
   } catch (err) {
     const { message, statusCode } = handleRouteError(err);
     return NextResponse.json({ error: message }, { status: statusCode });
   }
 }
 
-export async function POST(req: NextRequest) {
+export async function PATCH(req: NextRequest) {
   try {
     const userId = await getUserIdFromCookies();
     const body = await req.json();
-    const parsed = ServiceCreateSchema.safeParse(body);
+    const parsed = updateProfileSchema.safeParse(body);
     if (!parsed.success) {
-      return res.badRequest(parsed.error.message);
+      return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "Datos inválidos" }, { status: 400 });
     }
-    const service = await servicesService.createService(userId, parsed.data);
-    return res.created(service);
+    const user = await authService.updateProfile(userId, parsed.data);
+    return NextResponse.json({ data: user });
   } catch (err) {
     const { message, statusCode } = handleRouteError(err);
     return NextResponse.json({ error: message }, { status: statusCode });

@@ -3,11 +3,11 @@ import * as res from "@/server/lib/api-response";
 import { handleRouteError } from "@/server/lib/api-error";
 import { TransactionCreateSchema } from "@/server/modules/transactions/transactions.validation";
 import * as txnService from "@/server/modules/transactions/transactions.service";
-
-const USER_ID = process.env["WARDIA_USER_ID"] ?? "default-user";
+import { getUserIdFromCookies } from "@/server/lib/jwt";
 
 export async function GET(req: NextRequest) {
   try {
+    const userId = await getUserIdFromCookies();
     const { searchParams } = new URL(req.url);
     const monthParam = searchParams.get("month");
 
@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
       month = now.getMonth() + 1;
     }
 
-    const transactions = await txnService.getTransactionsByMonth(USER_ID, year, month);
+    const transactions = await txnService.getTransactionsByMonth(userId, year, month);
     return res.ok(transactions);
   } catch (err) {
     const { message } = handleRouteError(err);
@@ -34,12 +34,13 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
+    const userId = await getUserIdFromCookies();
     const body = await req.json();
     const parsed = TransactionCreateSchema.safeParse(body);
     if (!parsed.success) {
       return res.badRequest(parsed.error.message);
     }
-    const transaction = await txnService.createTransaction(USER_ID, parsed.data);
+    const transaction = await txnService.createTransaction(userId, parsed.data);
     return res.created(transaction);
   } catch (err) {
     const { message } = handleRouteError(err);

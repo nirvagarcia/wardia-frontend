@@ -14,11 +14,15 @@ import { Mail, Lock, ArrowRight } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import { usePreferencesStore } from "@/shared/stores/preferences-store";
 import { getTranslation } from "@/shared/langs";
+import { authService } from "@/shared/services/auth-service";
+import { useAuthStore } from "@/shared/stores/auth-store";
+import { toast } from "sonner";
 
 export function LoginView(): React.JSX.Element {
   const router = useRouter();
   const { language } = usePreferencesStore();
   const t = (key: string) => getTranslation(language, key);
+  const { setUser } = useAuthStore();
   
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -52,11 +56,17 @@ export function LoginView(): React.JSX.Element {
     }
 
     setIsLoading(true);
-    
-    setTimeout(() => {
+
+    try {
+      const user = await authService.login(email, password);
+      setUser(user);
+      const params = new URLSearchParams(window.location.search);
+      router.push(params.get("redirect") ?? "/dashboard");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Error al iniciar sesión");
+    } finally {
       setIsLoading(false);
-      router.push("/dashboard");
-    }, 1000);
+    }
   };
 
   return (
@@ -95,12 +105,7 @@ export function LoginView(): React.JSX.Element {
             />
             <span className="text-zinc-600 dark:text-zinc-400">{t("auth.rememberMe")}</span>
           </label>
-          <Link
-            href="/forgot-password"
-            className="text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 font-medium transition-colors"
-          >
-            {t("auth.forgotPasswordLink")}
-          </Link>
+          {/* forgot-password hidden until email recovery is functional */}
         </div>
 
         <button

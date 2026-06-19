@@ -6,6 +6,35 @@ datasource db {
   provider = "postgresql"
 }
 
+model User {
+  id            String          @id @default(cuid())
+  email         String          @unique
+  name          String
+  phone         String?
+  passwordHash  String
+  preferences   Json?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  passwordResets PasswordReset[]
+
+  @@index([email])
+}
+
+model PasswordReset {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([userId])
+}
+
 model Service {
   id              String   @id @default(cuid())
   userId          String
