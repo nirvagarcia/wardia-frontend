@@ -1,8 +1,3 @@
-/**
- * useInitializeServices Hook
- * Initializes services store with data from service layer.
- */
-
 "use client";
 
 import { useEffect } from "react";
@@ -23,7 +18,7 @@ export function useInitializeServices(): {
         setLoading(true);
         setError(null);
 
-        const services = await servicesService.getServices();
+        const { services } = await servicesService.getServices();
 
         if (isMounted) {
           setServices(services);
@@ -37,10 +32,7 @@ export function useInitializeServices(): {
       }
     }
 
-    const currentState = useServicesStore.getState();
-    if (currentState.services.length === 0) {
-      loadData();
-    }
+    loadData();
 
     return () => {
       isMounted = false;

@@ -1,157 +1,92 @@
 ﻿"use client";
 
-/**
- * Bank Credentials Section
- * Displays and manages banking credentials with secure copy-to-clipboard functionality
- */
-
-import React, { useState, useEffect, useCallback } from "react";
-import { usePreferencesStore } from "@/shared/stores/preferences-store";
-import { getTranslation } from "@/shared/langs";
-import { getLocale } from "@/shared/utils/currency";
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  type DragEndEvent,
-} from "@dnd-kit/core";
-import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from "@dnd-kit/sortable";
-import { ConfirmModal } from "@/shared/components/modals/confirm-modal";
-import { CredentialCard } from "./credential-card";
+import React, { useState } from "react";
+import { Building2, Wallet, CreditCard, LayoutGrid } from "lucide-react";
+import { cn } from "@/shared/utils/cn";
+import { BankCredentialCard } from "@/views/accounts/components/bank-credential-card";
+import { CredentialFlipCard } from "@/views/accounts/components/credential-flip-card";
 import { EmptyCredentialsState } from "./empty-state";
-import type { IBankCredentials } from "@/shared/types/finance";
-
+import type { ICredential, CredentialType } from "@/shared/types/finance";
 
 interface BankCredentialsSectionProps {
-  credentials: IBankCredentials[];
-  onEdit: (credential: IBankCredentials) => void;
+  credentials: ICredential[];
+  onEdit: (credential: ICredential) => void;
   onDelete: (id: string) => void;
-  onReorder?: (credentials: IBankCredentials[]) => void;
 }
 
-export function BankCredentialsSection({ credentials, onEdit, onDelete, onReorder }: BankCredentialsSectionProps): React.JSX.Element {
-  const { language } = usePreferencesStore();
-  const t = (key: string, variables?: Record<string, string | number>) => getTranslation(language, key, variables);
-  const locale = getLocale(language);
+type FilterType = "all" | CredentialType;
 
-  const [expandedBank, setExpandedBank] = useState<string | null>(null);
-  const [visiblePasswords, setVisiblePasswords] = useState<Set<string>>(new Set());
-  const [copiedFields, setCopiedFields] = useState<Set<string>>(new Set());
-  const [localCredentials, setLocalCredentials] = useState(credentials);
-  const [confirmDelete, setConfirmDelete] = useState<{ isOpen: boolean; credId: string | null; bankName: string }>({
-    isOpen: false,
-    credId: null,
-    bankName: "",
-  });
+const FILTERS: { value: FilterType; label: string; Icon: React.ElementType }[] = [
+  { value: "all",    label: "Todos",     Icon: LayoutGrid },
+  { value: "bank",   label: "Bancarias", Icon: Building2 },
+  { value: "debit",  label: "Debito",    Icon: Wallet },
+  { value: "credit", label: "Credito",   Icon: CreditCard },
+];
 
-  useEffect(() => {
-    setLocalCredentials(credentials);
-  }, [credentials]);
+export function BankCredentialsSection({ credentials, onEdit, onDelete }: BankCredentialsSectionProps): React.JSX.Element {
+  const [filter, setFilter] = useState<FilterType>("all");
 
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: { delay: 250, tolerance: 5 },
-    }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
+  const filtered = filter === "all" ? credentials : credentials.filter((c) => c.type === filter);
 
-  const handleDragEnd = useCallback((event: DragEndEvent) => {
-    const { active, over } = event;
-    if (over && active.id !== over.id) {
-      setLocalCredentials((items) => {
-        const oldIndex = items.findIndex((item) => item.id === active.id);
-        const newIndex = items.findIndex((item) => item.id === over.id);
-        const newOrder = arrayMove(items, oldIndex, newIndex);
-        setTimeout(() => {
-          if (onReorder) onReorder(newOrder);
-        }, 0);
-        return newOrder;
-      });
-    }
-  }, [onReorder]);
-
-  const togglePasswordVisibility = useCallback((credId: string) => {
-    setVisiblePasswords((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(credId)) {
-        newSet.delete(credId);
-      } else {
-        newSet.add(credId);
-      }
-      return newSet;
-    });
-  }, []);
-
-  const copyToClipboard = useCallback((text: string, fieldId: string) => {
-    navigator.clipboard.writeText(text).then(() => {
-      setCopiedFields((prev) => new Set(prev).add(fieldId));
-      setTimeout(() => {
-        setCopiedFields((prev) => {
-          const newSet = new Set(prev);
-          newSet.delete(fieldId);
-          return newSet;
-        });
-      }, 2000);
-    });
-  }, []);
-
-  const handleDeleteClick = useCallback((id: string, name: string) => {
-    setConfirmDelete({ isOpen: true, credId: id, bankName: name });
-  }, []);
-
-  const handleConfirmDelete = useCallback(() => {
-    if (confirmDelete.credId) {
-      onDelete(confirmDelete.credId);
-      setConfirmDelete({ isOpen: false, credId: null, bankName: "" });
-    }
-  }, [confirmDelete.credId, onDelete]);
-
-  if (credentials.length === 0) {
-    return <EmptyCredentialsState t={t} />;
-  }
+  if (credentials.length === 0) return <EmptyCredentialsState />;
 
   return (
-    <>
-      <DndContext id="credentials-dnd" sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-        <SortableContext items={localCredentials.map((c) => c.id)} strategy={verticalListSortingStrategy}>
-          <div className="space-y-3">
-            {localCredentials.map((cred) => (
-              <CredentialCard
-                key={cred.id}
-                cred={cred}
-                isExpanded={expandedBank === cred.id}
-                isPasswordVisible={visiblePasswords.has(cred.id)}
-                t={t}
-                locale={locale}
-                onToggleExpand={() => setExpandedBank(expandedBank === cred.id ? null : cred.id)}
-                onTogglePassword={() => togglePasswordVisibility(cred.id)}
-                onCopy={copyToClipboard}
-                copiedFields={copiedFields}
-                onEdit={onEdit}
-                onDeleteClick={handleDeleteClick}
-              />
-            ))}
-          </div>
-        </SortableContext>
-      </DndContext>
+    <div className="space-y-4">
+      {/* Filter chips */}
+      <div className="flex items-center gap-2 flex-wrap">
+        {FILTERS.map(({ value, label, Icon }) => {
+          const count = value === "all" ? credentials.length : credentials.filter((c) => c.type === value).length;
+          const isActive = filter === value;
+          return (
+            <button
+              key={value}
+              onClick={() => setFilter(value)}
+              className={cn(
+                "flex items-center gap-2 px-3 py-2 rounded-xl border-2 text-xs font-medium transition-all",
+                isActive
+                  ? "border-cyan-500 bg-cyan-50 dark:bg-cyan-950/30 text-cyan-700 dark:text-cyan-300"
+                  : "border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:border-zinc-300 dark:hover:border-zinc-600"
+              )}
+            >
+              <Icon className={cn("w-3.5 h-3.5", isActive ? "text-cyan-600 dark:text-cyan-400" : "text-zinc-500 dark:text-zinc-400")} />
+              {label}
+              <span className={cn(
+                "min-w-[1.1rem] h-4 px-1 rounded-full text-[10px] font-bold flex items-center justify-center",
+                isActive ? "bg-cyan-500 text-white" : "bg-zinc-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-400"
+              )}>
+                {count}
+              </span>
+            </button>
+          );
+        })}
+      </div>
 
-      <ConfirmModal
-        isOpen={confirmDelete.isOpen}
-        onClose={() => setConfirmDelete({ isOpen: false, credId: null, bankName: "" })}
-        title={t("credentials.confirmDelete")}
-        message={t("credentials.deleteMessage", { bank: confirmDelete.bankName })}
-        confirmText={t("common.delete")}
-        cancelText={t("common.cancel")}
-        onConfirm={handleConfirmDelete}
-        variant="danger"
-      />
-    </>
+      {/* Cards */}
+      {filtered.length === 0 ? (
+        <div className="text-center py-8 text-sm text-zinc-500 dark:text-zinc-400">
+          No hay credenciales de este tipo.
+        </div>
+      ) : (
+        <div className="grid gap-3 sm:grid-cols-2">
+          {filtered.map((credential) =>
+            credential.type === "bank" ? (
+              <BankCredentialCard
+                key={credential.id}
+                credential={credential}
+                onEdit={onEdit}
+                onDelete={onDelete}
+              />
+            ) : (
+              <CredentialFlipCard
+                key={credential.id}
+                credential={credential}
+                onEdit={onEdit}
+                onDelete={onDelete}
+              />
+            )
+          )}
+        </div>
+      )}
+    </div>
   );
 }
-
-         

@@ -15,22 +15,21 @@ import { Label } from "@/shared/components/ui/label";
 import { DatePicker } from "@/shared/components/ui/date-picker";
 import { Textarea } from "@/shared/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/components/ui/select";
+import { transactionModalSchema } from "@/shared/validation/schemas";
 import type { ITransaction } from "@/shared/types/finance";
 import type { TransactionType } from "@/shared/types";
 import { incomeCategories, expenseCategories } from "../utils/helpers";
 
+function toLocalDateString(date: Date): string {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
 interface AddTransactionModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAdd: (transaction: Omit<ITransaction, "id">) => void;
+  onAdd: (transaction: Omit<ITransaction, "id">) => Promise<void> | void;
   editingTransaction?: ITransaction | null;
-  onUpdate?: (id: string, transaction: Omit<ITransaction, "id">) => void;
-}
-
-interface TransactionFormErrors {
-  description?: string;
-  amount?: string;
-  date?: string;
+  onUpdate?: (id: string, transaction: Omit<ITransaction, "id">) => Promise<void> | void;
 }
 
 export function AddTransactionModal({
@@ -51,23 +50,24 @@ export function AddTransactionModal({
     description: string;
     amount: string;
     currency: "PEN" | "USD" | "EUR";
-    merchant: string;
+    source: string;
     date: string;
     notes: string;
-    status: "pending" | "completed";
+    status: "pending" | "completed" | "failed";
   }>({
     type: "expense",
     category: "groceries",
     description: "",
     amount: "",
     currency: "PEN",
-    merchant: "",
+    source: "",
     date: "",
     notes: "",
     status: "completed",
   });
 
-  const [errors, setErrors] = useState<TransactionFormErrors>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -79,8 +79,8 @@ export function AddTransactionModal({
         description: editingTransaction.description,
         amount: editingTransaction.amount.value.toString(),
         currency: editingTransaction.amount.currency,
-        merchant: editingTransaction.merchant || "",
-        date: editingTransaction.date.toISOString().split("T")[0] || "",
+        source: editingTransaction.source || "",
+        date: toLocalDateString(editingTransaction.transactionDate),
         notes: editingTransaction.notes || "",
         status: editingTransaction.status === "pending" ? "pending" : "completed",
       });
@@ -91,8 +91,8 @@ export function AddTransactionModal({
         description: "",
         amount: "",
         currency: "PEN",
-        merchant: "",
-        date: new Date().toISOString().split("T")[0] || "",
+        source: "",
+        date: toLocalDateString(new Date()),
         notes: "",
         status: "completed",
       });
@@ -104,57 +104,45 @@ export function AddTransactionModal({
 
   const currentCategories = formData.type === "income" ? incomeCategories : expenseCategories;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const newErrors: TransactionFormErrors = {};
-    if (!formData.description.trim()) newErrors['description'] = t("forms.nameRequired");
-    if (!formData.amount || parseFloat(formData.amount) <= 0) {
-      newErrors['amount'] = t("forms.invalidAmount");
-    }
-    if (!formData.date) {
-      newErrors['date'] = t("forms.dateRequired");
-    }
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
+    const result = transactionModalSchema.safeParse(formData);
+    if (!result.success) {
+      const fieldErrors: Record<string, string> = {};
+      result.error.issues.forEach((issue) => {
+        const key = String(issue.path[0]);
+        if (!fieldErrors[key]) fieldErrors[key] = issue.message;
+      });
+      setErrors(fieldErrors);
       return;
     }
 
-    const newTransaction: Omit<ITransaction, "id"> = {
-      accountId: "acc-001", 
-      type: formData.type,
-      status: formData.status,
+    const payload: Omit<ITransaction, "id"> = {
+      type: result.data.type,
+      status: result.data.status,
       amount: {
-        value: parseFloat(formData.amount),
-        currency: formData.currency,
+        value: parseFloat(result.data.amount),
+        currency: result.data.currency,
       },
-      description: formData.description,
-      merchant: formData.merchant || undefined,
-      category: formData.category,
-      date: new Date(formData.date),
-      notes: formData.notes || undefined,
+      description: result.data.description,
+      source: result.data.merchant || undefined,
+      category: result.data.category,
+      transactionDate: new Date(result.data.date + "T12:00:00"),
+      notes: result.data.notes || undefined,
     };
 
-    if (isEditMode && editingTransaction && onUpdate) {
-      onUpdate(editingTransaction.id, newTransaction);
-    } else {
-      onAdd(newTransaction);
+    setIsSubmitting(true);
+    try {
+      if (isEditMode && editingTransaction && onUpdate) {
+        await onUpdate(editingTransaction.id, payload);
+      } else {
+        await onAdd(payload);
+      }
+      setErrors({});
+    } finally {
+      setIsSubmitting(false);
     }
-
-    setFormData({
-      type: "expense",
-      category: "dining",
-      description: "",
-      amount: "",
-      currency: "PEN",
-      merchant: "",
-      date: "",
-      notes: "",
-      status: "completed",
-    });
-    setErrors({});
-    onClose();
   };
 
   const handleTypeChange = (type: TransactionType) => {
@@ -314,23 +302,23 @@ export function AddTransactionModal({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="merchant">{t("transactions.merchant")}</Label>
+            <Label htmlFor="source">{t("transactions.source")}</Label>
             <Input
-              id="merchant"
-              value={formData.merchant}
-              onChange={(e) => setFormData({ ...formData, merchant: e.target.value })}
-              placeholder={t("transactions.merchantPlaceholder")}
+              id="source"
+              value={formData.source}
+              onChange={(e) => setFormData({ ...formData, source: e.target.value })}
+              placeholder={t("transactions.sourcePlaceholder")}
             />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="date">
-              {t("forms.nextPaymentDate")} <span className="text-red-500">*</span>
+              {t("transactions.transactionDate")} <span className="text-red-500">*</span>
             </Label>
             <DatePicker
-              value={formData.date ? new Date(formData.date) : undefined}
+              value={formData.date ? new Date(formData.date + "T12:00:00") : undefined}
               onChange={(date) => {
-                setFormData({ ...formData, date: date ? (date.toISOString().split("T")[0] || "") : "" });
+                setFormData({ ...formData, date: date ? toLocalDateString(date) : "" });
                 setErrors({ ...errors, date: "" });
               }}
               placeholder={t("forms.selectDate")}
@@ -392,9 +380,14 @@ export function AddTransactionModal({
             </button>
             <button
               type="submit"
-              className="flex-1 px-4 py-3 rounded-xl bg-cyan-500 hover:bg-cyan-600 text-white font-medium transition-colors"
+              disabled={isSubmitting}
+              className="flex-1 px-4 py-3 rounded-xl bg-cyan-500 hover:bg-cyan-600 disabled:opacity-50 text-white font-medium transition-colors"
             >
-              {isEditMode ? t("forms.saveChanges") : t("forms.add")}
+              {isSubmitting
+                ? t("common.loading")
+                : isEditMode
+                ? t("forms.saveChanges")
+                : t("forms.add")}
             </button>
           </div>
         </form>

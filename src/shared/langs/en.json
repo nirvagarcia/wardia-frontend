@@ -80,7 +80,13 @@
     "categoryUtilities": "Utilities",
     "categoryTelecom": "Telecommunications",
     "categoryHousing": "Housing",
-    "confirmDelete": "Are you sure you want to delete the service \"{name}\"? This action cannot be undone."
+    "confirmDelete": "Are you sure you want to delete the service \"{name}\"? This action cannot be undone.",
+    "addSuccess": "Service added successfully",
+    "addError": "Failed to add service",
+    "updateSuccess": "Service updated successfully",
+    "updateError": "Failed to update service",
+    "deleteSuccess": "Service deleted",
+    "deleteError": "Failed to delete service"
   },
   "profile": {
     "title": "My Profile",
@@ -174,8 +180,9 @@
     "transactionType": "Transaction Type",
     "description": "Description",
     "descriptionPlaceholder": "e.g. Grocery shopping, Salary payment",
-    "merchant": "Merchant / Source",
-    "merchantPlaceholder": "e.g. Supermarket, Company Name",
+    "transactionDate": "Transaction Date",
+    "source": "Source",
+    "sourcePlaceholder": "e.g. Supermarket, Company Name",
     "notes": "Notes",
     "status": "Status",
     "completed": "Completed",
@@ -203,7 +210,16 @@
     "categoryEducation": "Education",
     "categoryHousing": "Housing",
     "categoryGifts": "Gifts",
-    "categoryOtherExpense": "Other Expense"
+    "categoryOtherExpense": "Other Expense",
+    "addSuccess": "Transaction added",
+    "addError": "Failed to add transaction",
+    "updateSuccess": "Transaction updated",
+    "updateError": "Failed to update transaction",
+    "deleteSuccess": "Transaction deleted",
+    "deleteError": "Failed to delete transaction",
+    "history": "History",
+    "historyTitle": "Monthly History",
+    "historyEmpty": "No historical data yet"
   },
   "credentials": {
     "title": "Bank Credentials",
@@ -223,9 +239,13 @@
     "addCredentials": "Add Credentials",
     "editCredentials": "Edit Credentials",
     "confirmDelete": "Are you sure you want to delete the credentials for {bank}? This action cannot be undone.",
-    "deleteWarning": "Deleting credentials will also remove the data associated with the linked accounts. This action cannot be undone."
-
-
+    "deleteWarning": "Deleting credentials will also remove the data associated with the linked accounts. This action cannot be undone.",
+    "addSuccess": "Credentials added successfully",
+    "addError": "Failed to add credentials",
+    "updateSuccess": "Credentials updated successfully",
+    "updateError": "Failed to update credentials",
+    "deleteSuccess": "Credentials deleted",
+    "deleteError": "Failed to delete credentials"
   },
   "creditCard": {
     "creditUsage": "Credit Usage",

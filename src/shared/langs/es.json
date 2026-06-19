@@ -80,7 +80,13 @@
     "categoryUtilities": "Servicios Básicos",
     "categoryTelecom": "Telecomunicaciones",
     "categoryHousing": "Vivienda",
-    "confirmDelete": "¿Estás seguro de que deseas eliminar el servicio \"{name}\"? Esta acción no se puede deshacer."
+    "confirmDelete": "¿Estás seguro de que deseas eliminar el servicio \"{name}\"? Esta acción no se puede deshacer.",
+    "addSuccess": "Servicio agregado correctamente",
+    "addError": "Error al agregar el servicio",
+    "updateSuccess": "Servicio actualizado correctamente",
+    "updateError": "Error al actualizar el servicio",
+    "deleteSuccess": "Servicio eliminado",
+    "deleteError": "Error al eliminar el servicio"
   },
   "profile": {
     "title": "Mi Perfil",
@@ -174,8 +180,9 @@
     "transactionType": "Tipo de Transacción",
     "description": "Descripción",
     "descriptionPlaceholder": "Ej: Compra de supermercado, Pago de salario",
-    "merchant": "Comercio / Fuente",
-    "merchantPlaceholder": "Ej: Supermercado, Nombre de Empresa",
+    "transactionDate": "Fecha de Transacción",
+    "source": "Fuente",
+    "sourcePlaceholder": "Ej: Supermercado, Nombre de Empresa",
     "notes": "Notas",
     "status": "Estado",
     "completed": "Completado",
@@ -203,7 +210,16 @@
     "categoryEducation": "Educación",
     "categoryHousing": "Vivienda",
     "categoryGifts": "Regalos",
-    "categoryOtherExpense": "Otros Gastos"
+    "categoryOtherExpense": "Otros Gastos",
+    "addSuccess": "Transacción agregada",
+    "addError": "Error al agregar la transacción",
+    "updateSuccess": "Transacción actualizada",
+    "updateError": "Error al actualizar la transacción",
+    "deleteSuccess": "Transacción eliminada",
+    "deleteError": "Error al eliminar la transacción",
+    "history": "Historial",
+    "historyTitle": "Historial Mensual",
+    "historyEmpty": "Sin datos históricos aún"
   },
   "credentials": {
     "title": "Credenciales Bancarias",
@@ -223,7 +239,13 @@
     "addCredentials": "Agregar Credenciales",
     "editCredentials": "Editar Credenciales",
     "confirmDelete": "¿Estás seguro de que deseas eliminar las credenciales de {bank}? Esta acción no se puede deshacer.",
-    "deleteWarning": "Eliminar credenciales eliminará también los datos asociados a las cuentas vinculadas. Esta acción no se puede deshacer."
+    "deleteWarning": "Eliminar credenciales eliminará también los datos asociados a las cuentas vinculadas. Esta acción no se puede deshacer.",
+    "addSuccess": "Credenciales agregadas correctamente",
+    "addError": "Error al agregar credenciales",
+    "updateSuccess": "Credenciales actualizadas correctamente",
+    "updateError": "Error al actualizar credenciales",
+    "deleteSuccess": "Credenciales eliminadas",
+    "deleteError": "Error al eliminar credenciales"
   },
   "creditCard": {
     "creditUsage": "Uso de Crédito",

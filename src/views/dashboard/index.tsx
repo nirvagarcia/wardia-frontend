@@ -10,20 +10,23 @@
 import React, { useMemo, useCallback, useState, useEffect } from "react";
 import { usePreferencesStore } from "@/shared/stores/preferences-store";
 import { useAccountsStore } from "@/shared/stores/accounts-store";
-import { useServicesStore } from "@/shared/stores/services-store";
 import { useTransactionsStore } from "@/shared/stores/transactions-store";
 import { useInitializeAccounts } from "@/shared/hooks/use-initialize-accounts";
-import { useInitializeServices } from "@/shared/hooks/use-initialize-services";
 import { useInitializeTransactions } from "@/shared/hooks/use-initialize-transactions";
+import {
+  useServicesQuery,
+  computeMonthlyTotal,
+  computeUpcomingPayments,
+} from "@/shared/hooks/use-services-query";
 import { getTranslation } from "@/shared/langs";
 import { getLocale, formatCurrency } from "@/shared/utils/currency";
 import { getDaysUntil } from "@/shared/utils/date";
-import { LoadingState } from "@/shared/components/loading-state";
 import { IUpcomingPayment, ITransaction } from "@/shared/types/finance";
 import { ArrowUpRight, ArrowDownRight, TrendingUp, Calendar, Layers, Receipt } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import { getMiniDonutSegments } from "./utils/helpers";
 import { MiniDonutChart } from "./components/mini-donut-chart";
+import { DashboardSkeleton } from "./components/dashboard-skeleton";
 
 export function DashboardView(): React.JSX.Element {
   const [mounted, setMounted] = useState(false);
@@ -35,18 +38,18 @@ export function DashboardView(): React.JSX.Element {
   }, []);
 
   const accountsInit = useInitializeAccounts();
-  const servicesInit = useInitializeServices();
   const transactionsInit = useInitializeTransactions();
+  const { data: servicesData } = useServicesQuery();
 
   const { getTotalBalance, getTotalCreditUsed, getTotalCreditAvailable } = useAccountsStore();
-  const { getMonthlyTotal, getUpcomingPayments } = useServicesStore();
   const { transactions } = useTransactionsStore();
 
+  const servicesArr = servicesData?.services ?? [];
   const totalBalance = getTotalBalance();
   const totalCreditCardDebt = getTotalCreditUsed();
   const totalAvailableCredit = getTotalCreditAvailable();
-  const monthlySubscriptionCost = getMonthlyTotal();
-  const upcomingPayments = getUpcomingPayments(30);
+  const monthlySubscriptionCost = computeMonthlyTotal(servicesArr);
+  const upcomingPayments = computeUpcomingPayments(servicesArr, 30);
 
   const summary = useMemo(() => ({
     totalBalance: { value: totalBalance, currency },
@@ -69,16 +72,16 @@ export function DashboardView(): React.JSX.Element {
 
   const recentTransactions = useMemo(
     () => transactions
-      .sort((a, b) => b.date.getTime() - a.date.getTime())
+      .sort((a, b) => b.transactionDate.getTime() - a.transactionDate.getTime())
       .slice(0, 5),
     [transactions]
   );
 
-  const isLoading = !mounted || accountsInit.isLoading || servicesInit.isLoading || transactionsInit.isLoading;
-  const error = accountsInit.error || servicesInit.error || transactionsInit.error;
+  const isLoading = !mounted || accountsInit.isLoading || transactionsInit.isLoading;
+  const error = accountsInit.error || transactionsInit.error;
 
   if (isLoading) {
-    return <LoadingState message={t("common.loading")} fullScreen />;
+    return <DashboardSkeleton />;
   }
 
   if (error) {
@@ -331,11 +334,11 @@ export function DashboardView(): React.JSX.Element {
                     {transaction.description}
                   </h4>
                   <p className="text-xs text-zinc-500 dark:text-zinc-500 mt-1 flex items-center gap-2">
-                    <span>{transaction.date.toLocaleDateString(locale, { month: "short", day: "numeric" })}</span>
-                    {transaction.merchant && (
+                    <span>{transaction.transactionDate.toLocaleDateString(locale, { month: "short", day: "numeric" })}</span>
+                    {transaction.source && (
                       <>
                         <span>•</span>
-                        <span className="truncate">{transaction.merchant}</span>
+                        <span className="truncate">{transaction.source}</span>
                       </>
                     )}
                   </p>

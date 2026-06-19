@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Toaster } from "sonner";
 import { ThemeProvider } from "@/shared/providers/theme-provider";
+import { QueryProvider } from "@/shared/providers/query-provider";
 import { ErrorBoundary } from "@/shared/components/error-boundary";
 import "./globals.css";
 
@@ -47,7 +49,10 @@ export default function RootLayout({
       <body className={`${geistSans.className} antialiased`} suppressHydrationWarning>
         <ErrorBoundary>
           <ThemeProvider>
-            {children}
+            <QueryProvider>
+              <Toaster richColors position="top-right" />
+              {children}
+            </QueryProvider>
           </ThemeProvider>
         </ErrorBoundary>
       </body>

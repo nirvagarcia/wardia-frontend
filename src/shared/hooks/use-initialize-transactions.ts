@@ -37,10 +37,7 @@ export function useInitializeTransactions(): {
       }
     }
 
-    const currentState = useTransactionsStore.getState();
-    if (currentState.transactions.length === 0) {
-      loadData();
-    }
+    loadData();
 
     return () => {
       isMounted = false;

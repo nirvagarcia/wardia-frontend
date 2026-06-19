@@ -9,7 +9,7 @@ import { usePreferencesStore } from "@/shared/stores/preferences-store";
 import { getTranslation } from "@/shared/langs";
 import { getLocale, formatCurrency } from "@/shared/utils/currency";
 import { formatDate } from "@/shared/utils/date";
-import { ArrowUpCircle, ArrowDownCircle, Clock } from "lucide-react";
+import { ArrowUpCircle, ArrowDownCircle, Clock, Pencil, Trash2 } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import {
   getCategoryIcon,
@@ -18,10 +18,17 @@ import {
 
 interface TransactionCardProps {
   transaction: ITransaction;
+  onEdit?: (transaction: ITransaction) => void;
+  onDelete?: (id: string) => void;
   onClick?: () => void;
 }
 
-export function TransactionCard({ transaction, onClick }: TransactionCardProps): React.JSX.Element {
+export function TransactionCard({
+  transaction,
+  onEdit,
+  onDelete,
+  onClick,
+}: TransactionCardProps): React.JSX.Element {
   const { language } = usePreferencesStore();
   const t = (key: string) => getTranslation(language, key);
   const locale = getLocale(language);
@@ -31,78 +38,99 @@ export function TransactionCard({ transaction, onClick }: TransactionCardProps):
 
   const categoryIcon = getCategoryIcon(transaction.category);
   const categoryLabel = getCategoryLabel(t, transaction.category);
-  const formattedDate = formatDate(transaction.date, locale);
+  const formattedDate = formatDate(transaction.transactionDate, locale);
   const formattedAmount = formatCurrency(transaction.amount, language);
 
   return (
-    <button
-      onClick={onClick}
+    <div
       className={cn(
-        "w-full bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 hover:shadow-md transition-all",
-        "flex items-center gap-4 text-left",
+        "w-full bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 transition-all",
+        "flex items-center gap-4",
         isPending && "opacity-70"
       )}
     >
-      <div className="flex-shrink-0">
-        <div
-          className={cn(
-            "w-12 h-12 rounded-xl flex items-center justify-center text-2xl",
-            isIncome
-              ? "bg-emerald-100 dark:bg-emerald-950/30"
-              : "bg-red-100 dark:bg-red-950/30"
-          )}
-        >
-          {categoryIcon}
+      <button
+        onClick={onClick}
+        className="flex items-center gap-4 flex-1 min-w-0 text-left"
+      >
+        <div className="flex-shrink-0">
+          <div
+            className={cn(
+              "w-12 h-12 rounded-xl flex items-center justify-center text-2xl",
+              isIncome
+                ? "bg-emerald-100 dark:bg-emerald-950/30"
+                : "bg-red-100 dark:bg-red-950/30"
+            )}
+          >
+            {categoryIcon}
+          </div>
         </div>
-      </div>
 
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-1">
-          <h3 className="font-semibold text-zinc-900 dark:text-white truncate">
-            {transaction.description}
-          </h3>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1">
+            <h3 className="font-semibold text-zinc-900 dark:text-white truncate">
+              {transaction.description}
+            </h3>
+            {isPending && <Clock className="w-4 h-4 text-amber-500 flex-shrink-0" />}
+          </div>
+          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+            <span>{categoryLabel}</span>
+            {transaction.source && (
+              <>
+                <span>•</span>
+                <span className="truncate">{transaction.source}</span>
+              </>
+            )}
+          </div>
+          <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">{formattedDate}</p>
+        </div>
+
+        <div className="flex-shrink-0 text-right">
+          <div
+            className={cn(
+              "font-bold text-lg flex items-center gap-1",
+              isIncome
+                ? "text-emerald-600 dark:text-emerald-400"
+                : "text-red-600 dark:text-red-400"
+            )}
+          >
+            {isIncome ? (
+              <ArrowUpCircle className="w-5 h-5" />
+            ) : (
+              <ArrowDownCircle className="w-5 h-5" />
+            )}
+            <span>
+              {isIncome ? "+" : "-"} {formattedAmount}
+            </span>
+          </div>
           {isPending && (
-            <Clock className="w-4 h-4 text-amber-500 flex-shrink-0" />
+            <span className="text-xs text-amber-600 dark:text-amber-400 font-medium">
+              {t("transactions.pending")}
+            </span>
           )}
         </div>
-        <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-          <span>{categoryLabel}</span>
-          {transaction.merchant && (
-            <>
-              <span>•</span>
-              <span className="truncate">{transaction.merchant}</span>
-            </>
-          )}
-        </div>
-        <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
-          {formattedDate}
-        </p>
-      </div>
+      </button>
 
-      <div className="flex-shrink-0 text-right">
-        <div
-          className={cn(
-            "font-bold text-lg flex items-center gap-1",
-            isIncome
-              ? "text-emerald-600 dark:text-emerald-400"
-              : "text-red-600 dark:text-red-400"
+      {(onEdit || onDelete) && (
+        <div className="flex items-center gap-1 flex-shrink-0">
+          {onEdit && (
+            <button
+              onClick={() => onEdit(transaction)}
+              className="p-2 rounded-lg text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+            >
+              <Pencil className="w-4 h-4" />
+            </button>
           )}
-        >
-          {isIncome ? (
-            <ArrowUpCircle className="w-5 h-5" />
-          ) : (
-            <ArrowDownCircle className="w-5 h-5" />
+          {onDelete && (
+            <button
+              onClick={() => onDelete(transaction.id)}
+              className="p-2 rounded-lg text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
           )}
-          <span>
-            {isIncome ? "+" : "-"} {formattedAmount}
-          </span>
         </div>
-        {isPending && (
-          <span className="text-xs text-amber-600 dark:text-amber-400 font-medium">
-            {t("transactions.pending")}
-          </span>
-        )}
-      </div>
-    </button>
+      )}
+    </div>
   );
 }

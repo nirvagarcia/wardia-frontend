@@ -68,15 +68,15 @@ export interface ICreditCard {
  */
 export interface ITransaction {
   id: string;
-  accountId: string;
+  accountId?: string;
   cardId?: string;
   type: TransactionType;
   status: TransactionStatus;
   amount: IAmount;
   description: string;
-  merchant?: string;
+  source?: string;
   category: string;
-  date: Date;
+  transactionDate: Date;
   notes?: string;
 }
 
@@ -122,16 +122,39 @@ export interface IUpcomingPayment {
   isUrgent?: boolean;
 }
 
+export type CredentialType = "bank" | "debit" | "credit";
+
 /**
- * Represents bank credentials for online banking access.
+ * Unified credential record supporting bank login, debit card, and credit card types.
+ * Sensitive fields (password, cvv, accountNumber, cci) are masked in list responses
+ * and only revealed via the GET /api/credentials/[id] endpoint.
  */
-export interface IBankCredentials {
+export interface ICredential {
   id: string;
+  type: CredentialType;
   bankName: string;
-  username: string;
-  password: string;
-  digitalKey?: string;
-  securityToken?: string;
-  notes?: string;
+  credentialName?: string;
+  description?: string;
+
+  // Bank login fields
+  username?: string;
+  password?: string;
+
+  // Card fields (debit + credit)
+  cardName?: string;
+  cardNetwork?: CardNetwork;
+  accountNumber?: string;
+  cci?: string;          
+  expiryMonth?: number;
+  expiryYear?: number;
+  cvv?: string;
+  accountType?: AccountType;
+
+  // Credit-specific fields
+  cardholderName?: string;
+  creditLimitValue?: number;
+  creditLimitCurrency?: string;
+  cutoffDay?: number;
+
   lastUpdated: Date;
 }

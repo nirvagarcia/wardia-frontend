@@ -23,7 +23,7 @@ const customStorage = {
       if (state.transactions && Array.isArray(state.transactions)) {
         state.transactions = state.transactions.map((txn: ITransaction) => ({
           ...txn,
-          date: txn.date ? new Date(txn.date) : new Date(),
+          transactionDate: txn.transactionDate ? new Date(txn.transactionDate) : new Date(),
         }));
       }
       
@@ -123,7 +123,7 @@ export const useTransactionsStore = create<TransactionsState>()(
           .filter((txn) => txn.type === "income")
           .filter((txn) => {
             if (!startDate && !endDate) return true;
-            const txnDate = new Date(txn.date);
+            const txnDate = new Date(txn.transactionDate);
             if (startDate && txnDate < startDate) return false;
             if (endDate && txnDate > endDate) return false;
             return true;
@@ -137,7 +137,7 @@ export const useTransactionsStore = create<TransactionsState>()(
           .filter((txn) => txn.type === "expense")
           .filter((txn) => {
             if (!startDate && !endDate) return true;
-            const txnDate = new Date(txn.date);
+            const txnDate = new Date(txn.transactionDate);
             if (startDate && txnDate < startDate) return false;
             if (endDate && txnDate > endDate) return false;
             return true;
@@ -154,27 +154,27 @@ export const useTransactionsStore = create<TransactionsState>()(
         const { transactions } = get();
         return transactions
           .filter((txn) => txn.type === type)
-          .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+          .sort((a, b) => new Date(b.transactionDate).getTime() - new Date(a.transactionDate).getTime());
       },
 
       getTransactionsByCategory: (category) => {
         const { transactions } = get();
         return transactions
           .filter((txn) => txn.category === category)
-          .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+          .sort((a, b) => new Date(b.transactionDate).getTime() - new Date(a.transactionDate).getTime());
       },
 
       getTransactionsByAccount: (accountId) => {
         const { transactions } = get();
         return transactions
           .filter((txn) => txn.accountId === accountId)
-          .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+          .sort((a, b) => new Date(b.transactionDate).getTime() - new Date(a.transactionDate).getTime());
       },
 
       getRecentTransactions: (limit = 10) => {
         const { transactions } = get();
         return [...transactions]
-          .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+          .sort((a, b) => new Date(b.transactionDate).getTime() - new Date(a.transactionDate).getTime())
           .slice(0, limit);
       },
     }),
@@ -184,3 +184,5 @@ export const useTransactionsStore = create<TransactionsState>()(
     }
   )
 );
+
+

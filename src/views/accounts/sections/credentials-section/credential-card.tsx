@@ -5,16 +5,16 @@
 
 import React from "react";
 import Image from "next/image";
-import { Building2, Edit2, Trash2, ChevronDown, ChevronUp, Key, Shield } from "lucide-react";
+import { Building2, Edit2, Trash2, ChevronDown, ChevronUp } from "lucide-react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { cn } from "@/shared/utils/cn";
 import { getBankLogo } from "@/shared/utils/bank-logos";
 import { CredentialField } from "./credential-field";
-import type { IBankCredentials } from "@/shared/types/finance";
+import type { ICredential } from "@/shared/types/finance";
 
 interface CredentialCardProps {
-  cred: IBankCredentials;
+  cred: ICredential;
   isExpanded: boolean;
   isPasswordVisible: boolean;
   t: (key: string, vars?: Record<string, string | number>) => string;
@@ -23,7 +23,7 @@ interface CredentialCardProps {
   onTogglePassword: () => void;
   onCopy: (text: string, fieldId: string) => void;
   copiedFields: Set<string>;
-  onEdit: (cred: IBankCredentials) => void;
+  onEdit: (cred: ICredential) => void;
   onDeleteClick: (id: string, name: string) => void;
 }
 
@@ -130,7 +130,7 @@ export function CredentialCard({
         >
           <CredentialField
             label={t("credentials.username")}
-            value={cred.username}
+            value={cred.username ?? ""}
             fieldId={`username-${cred.id}`}
             onCopy={onCopy}
             copiedFields={copiedFields}
@@ -138,7 +138,7 @@ export function CredentialCard({
 
           <CredentialField
             label={t("credentials.password")}
-            value={cred.password}
+            value={cred.password ?? ""}
             fieldId={`password-${cred.id}`}
             isPassword={true}
             isVisible={isPasswordVisible}
@@ -147,35 +147,13 @@ export function CredentialCard({
             copiedFields={copiedFields}
           />
 
-          {cred.digitalKey && (
-            <CredentialField
-              label={t("credentials.digitalKey")}
-              value={cred.digitalKey}
-              fieldId={`digitalKey-${cred.id}`}
-              icon={<Key className="w-3 h-3" />}
-              onCopy={onCopy}
-              copiedFields={copiedFields}
-            />
-          )}
-
-          {cred.securityToken && (
-            <CredentialField
-              label={t("credentials.securityToken")}
-              value={cred.securityToken}
-              fieldId={`securityToken-${cred.id}`}
-              icon={<Shield className="w-3 h-3" />}
-              onCopy={onCopy}
-              copiedFields={copiedFields}
-            />
-          )}
-
-          {cred.notes && (
+          {cred.description && (
             <div>
               <label className="text-xs font-medium text-zinc-600 dark:text-zinc-400 mb-1 block">
-                {t("credentials.notes")}
+                Descripción
               </label>
               <div className="px-3 py-2 bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700 text-sm text-zinc-900 dark:text-white cursor-text select-text">
-                {cred.notes}
+                {cred.description}
               </div>
             </div>
           )}

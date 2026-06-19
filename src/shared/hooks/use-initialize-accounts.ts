@@ -14,7 +14,7 @@ export function useInitializeAccounts(): {
   isLoading: boolean;
   error: string | null;
 } {
-  const { setAccounts, setCreditCards, setCredentials, setLoading, setError, isLoading, error } =
+  const { setAccounts, setCreditCards, setLoading, setError, isLoading, error } =
     useAccountsStore();
 
   useEffect(() => {
@@ -25,16 +25,14 @@ export function useInitializeAccounts(): {
         setLoading(true);
         setError(null);
 
-        const [accounts, creditCards, credentials] = await Promise.all([
+        const [accounts, creditCards] = await Promise.all([
           accountsService.getAccounts(),
           accountsService.getCreditCards(),
-          accountsService.getCredentials(),
         ]);
 
         if (isMounted) {
           setAccounts(accounts);
           setCreditCards(creditCards);
-          setCredentials(credentials);
           setLoading(false);
         }
       } catch (err) {
@@ -45,19 +43,12 @@ export function useInitializeAccounts(): {
       }
     }
 
-    const currentState = useAccountsStore.getState();
-    if (
-      currentState.accounts.length === 0 && 
-      currentState.creditCards.length === 0 && 
-      currentState.credentials.length === 0
-    ) {
-      loadData();
-    }
+    loadData();
 
     return () => {
       isMounted = false;
     };
-  }, [setAccounts, setCreditCards, setCredentials, setLoading, setError]);
+  }, [setAccounts, setCreditCards, setLoading, setError]);
 
   return { isLoading, error };
 }

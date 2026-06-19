@@ -34,6 +34,12 @@ export function AccountsTabs({
   return (
     <div className="flex gap-2">
       <button
+        onClick={() => onTabChange("credentials")}
+        className={tabButtonClass(activeTab === "credentials")}
+      >
+        {credentialsLabel}
+      </button>
+      <button
         onClick={() => onTabChange("debit")}
         className={tabButtonClass(activeTab === "debit")}
       >
@@ -44,12 +50,6 @@ export function AccountsTabs({
         className={tabButtonClass(activeTab === "credit")}
       >
         {creditLabel}
-      </button>
-      <button
-        onClick={() => onTabChange("credentials")}
-        className={tabButtonClass(activeTab === "credentials")}
-      >
-        {credentialsLabel}
       </button>
     </div>
   );

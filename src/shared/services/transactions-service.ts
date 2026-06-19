@@ -1,119 +1,76 @@
-/**
- * Transactions Service
- * Abstraction layer for transaction data operations.
- */
-
 import type { ITransaction } from "@/shared/types/finance";
-import { mockTransactions } from "@/shared/utils/mock";
+import type { MonthSummary } from "@/server/modules/transactions/transactions.service";
 
-const USE_MOCK_DATA = true;
+async function handleResponse<T>(response: Response): Promise<T> {
+  if (!response.ok) {
+    const json = await response.json().catch(() => ({}));
+    throw new Error((json as { error?: string }).error ?? `Request failed: ${response.status}`);
+  }
+  if (response.status === 204) return undefined as T;
+  return response.json().then((j: { data: T }) => j.data);
+}
+
+function toTransaction(r: ITransaction & { transactionDate: string }): ITransaction {
+  return { ...r, transactionDate: new Date(r.transactionDate) };
+}
 
 export const transactionsService = {
-  /**
-   * Fetch all transactions
-   */
-  async getTransactions(): Promise<ITransaction[]> {
-    if (USE_MOCK_DATA) {
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      return mockTransactions;
-    }
-
-    // Real API implementation
-    // const response = await fetch('/api/transactions');
-    // if (!response.ok) throw new Error('Failed to fetch transactions');
-    // return response.json();
-
-    return [];
+  async getTransactions(month?: string): Promise<ITransaction[]> {
+    const url = month ? `/api/transactions?month=${month}` : "/api/transactions";
+    const res = await fetch(url);
+    const data = await handleResponse<ITransaction[]>(res);
+    return data.map((t) => toTransaction(t as ITransaction & { transactionDate: string }));
   },
 
-  /**
-   * Fetch transactions by date range
-   */
-  async getTransactionsByDateRange(startDate: Date, endDate: Date): Promise<ITransaction[]> {
-    if (USE_MOCK_DATA) {
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      return mockTransactions.filter((txn) => {
-        const txnDate = new Date(txn.date);
-        return txnDate >= startDate && txnDate <= endDate;
-      });
-    }
-
-    // Real API implementation
-    // const params = new URLSearchParams({
-    //   startDate: startDate.toISOString(),
-    //   endDate: endDate.toISOString(),
-    // });
-    // const response = await fetch(`/api/transactions?${params}`);
-    // if (!response.ok) throw new Error('Failed to fetch transactions');
-    // return response.json();
-
-    return [];
+  async getHistory(): Promise<MonthSummary[]> {
+    const res = await fetch("/api/transactions/history");
+    return handleResponse<MonthSummary[]>(res);
   },
 
-  /**
-   * Create a new transaction
-   */
-  async createTransaction(transaction: Omit<ITransaction, "id">): Promise<ITransaction> {
-    if (USE_MOCK_DATA) {
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      return {
-        ...transaction,
-        id: `txn-${Date.now()}`,
-      };
-    }
-
-    // Real API implementation
-    // const response = await fetch('/api/transactions', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(transaction),
-    // });
-    // if (!response.ok) throw new Error('Failed to create transaction');
-    // return response.json();
-
-    throw new Error("API not implemented");
+  async createTransaction(data: Omit<ITransaction, "id">): Promise<ITransaction> {
+    const res = await fetch("/api/transactions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        type: data.type,
+        status: data.status,
+        amountValue: data.amount.value,
+        amountCurrency: data.amount.currency,
+        description: data.description,
+        merchant: data.source,
+        category: data.category,
+        date: data.transactionDate instanceof Date ? data.transactionDate.toISOString() : data.transactionDate,
+        notes: data.notes,
+        cardId: data.cardId,
+      }),
+    });
+    const t = await handleResponse<ITransaction & { transactionDate: string }>(res);
+    return toTransaction(t);
   },
 
-  /**
-   * Update an existing transaction
-   */
-  async updateTransaction(id: string, transaction: Omit<ITransaction, "id">): Promise<ITransaction> {
-    if (USE_MOCK_DATA) {
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      return {
-        ...transaction,
-        id,
-      };
-    }
-
-    // Real API implementation
-    // const response = await fetch(`/api/transactions/${id}`, {
-    //   method: 'PUT',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(transaction),
-    // });
-    // if (!response.ok) throw new Error('Failed to update transaction');
-    // return response.json();
-
-    throw new Error("API not implemented");
+  async updateTransaction(id: string, data: Omit<ITransaction, "id">): Promise<ITransaction> {
+    const res = await fetch(`/api/transactions/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        type: data.type,
+        status: data.status,
+        amountValue: data.amount.value,
+        amountCurrency: data.amount.currency,
+        description: data.description,
+        merchant: data.source,
+        category: data.category,
+        date: data.transactionDate instanceof Date ? data.transactionDate.toISOString() : data.transactionDate,
+        notes: data.notes,
+        cardId: data.cardId,
+      }),
+    });
+    const t = await handleResponse<ITransaction & { transactionDate: string }>(res);
+    return toTransaction(t);
   },
 
-  /**
-   * Delete a transaction
-   */
   async deleteTransaction(id: string): Promise<void> {
-    if (USE_MOCK_DATA) {
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      console.log(`Deleting transaction: ${id}`);
-      return;
-    }
-
-    // Real API implementation
-    // const response = await fetch(`/api/transactions/${id}`, {
-    //   method: 'DELETE',
-    // });
-    // if (!response.ok) throw new Error('Failed to delete transaction');
-
-    throw new Error("API not implemented");
+    const res = await fetch(`/api/transactions/${id}`, { method: "DELETE" });
+    return handleResponse<void>(res);
   },
 };

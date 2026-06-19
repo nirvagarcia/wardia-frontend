@@ -1,24 +1,24 @@
-/**
- * Transactions View Component
- * Manages income and expense tracking with filtering and statistics
- * Now with Zustand store integration and modular component architecture
- */
-
 "use client";
 
 import React, { useState, useMemo, useEffect } from "react";
+import { toast } from "sonner";
 import { usePreferencesStore } from "@/shared/stores/preferences-store";
-import { useTransactionsStore } from "@/shared/stores/transactions-store";
-import { useInitializeTransactions } from "@/shared/hooks/use-initialize-transactions";
 import { getTranslation } from "@/shared/langs";
 import { formatCurrency, getLocale } from "@/shared/utils/currency";
-import { LoadingState } from "@/shared/components/loading-state";
-import { Receipt, Plus, Filter } from "lucide-react";
+import { Receipt, Plus, Filter, History } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import { TransactionStats } from "./components/transaction-stats";
 import { TransactionCard } from "./components/transaction-card";
+import { TransactionsSkeleton } from "./components/transactions-skeleton";
 import { AddTransactionModal } from "./modals/add-transaction-modal";
+import { TransactionHistoryModal } from "./modals/transaction-history-modal";
 import { ConfirmModal } from "@/shared/components/modals/confirm-modal";
+import {
+  useTransactionsQuery,
+  useAddTransaction,
+  useUpdateTransaction,
+  useDeleteTransaction,
+} from "@/shared/hooks/use-transactions-query";
 import type { ITransaction } from "@/shared/types/finance";
 import {
   filterTransactionsByType,
@@ -30,28 +30,30 @@ import {
 
 type FilterType = "all" | "income" | "expense";
 
+function getCurrentMonth(): string {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+}
+
 export function TransactionsView(): React.JSX.Element {
   const [mounted, setMounted] = useState(false);
   const { language, currency } = usePreferencesStore();
-  const t = (key: string) => getTranslation(language, key);
+  const t = (key: string, vars?: Record<string, string | number>) => getTranslation(language, key, vars);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const currentMonth = useMemo(() => getCurrentMonth(), []);
 
-  const { isLoading, error } = useInitializeTransactions();
+  useEffect(() => { setMounted(true); }, []);
 
-  const {
-    transactions,
-    addTransaction,
-    updateTransaction,
-    deleteTransaction,
-    getTotalIncome,
-    getTotalExpenses,
-    getBalance,
-  } = useTransactionsStore();
+  const { data: transactions = [], isLoading, isError } = useTransactionsQuery(currentMonth);
+  const addMutation = useAddTransaction(currentMonth);
+  const updateMutation = useUpdateTransaction(currentMonth);
+  const deleteMutation = useDeleteTransaction(currentMonth);
+
+  const isActionLoading =
+    addMutation.isPending || updateMutation.isPending || deleteMutation.isPending;
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<ITransaction | null>(null);
   const [filterType, setFilterType] = useState<FilterType>("all");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -60,24 +62,21 @@ export function TransactionsView(): React.JSX.Element {
     isOpen: boolean;
     id: string | null;
     description: string;
-  }>({
-    isOpen: false,
-    id: null,
-    description: "",
-  });
+  }>({ isOpen: false, id: null, description: "" });
 
   const totalIncome = useMemo(
-    () => getTotalIncome(),
-    [getTotalIncome]
+    () => transactions
+      .filter((t) => t.type === "income")
+      .reduce((sum, t) => sum + t.amount.value, 0),
+    [transactions]
   );
   const totalExpenses = useMemo(
-    () => getTotalExpenses(),
-    [getTotalExpenses]
+    () => transactions
+      .filter((t) => t.type === "expense")
+      .reduce((sum, t) => sum + t.amount.value, 0),
+    [transactions]
   );
-  const balance = useMemo(
-    () => getBalance(),
-    [getBalance]
-  );
+  const balance = useMemo(() => totalIncome - totalExpenses, [totalIncome, totalExpenses]);
 
   const filteredTransactions = useMemo(() => {
     let filtered = filterTransactionsByType(transactions, filterType);
@@ -85,15 +84,13 @@ export function TransactionsView(): React.JSX.Element {
     return sortTransactionsByDate(filtered, "desc");
   }, [transactions, filterType, selectedCategories]);
 
-  if (!mounted || isLoading) {
-    return <LoadingState message={t("common.loading")} fullScreen />;
-  }
+  if (!mounted || isLoading) return <TransactionsSkeleton />;
 
-  if (error) {
+  if (isError) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center space-y-4">
-          <p className="text-red-500 dark:text-red-400">Error: {error}</p>
+          <p className="text-red-500 dark:text-red-400">{t("common.errorLoading")}</p>
           <button
             onClick={() => window.location.reload()}
             className="px-4 py-2 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600"
@@ -105,17 +102,17 @@ export function TransactionsView(): React.JSX.Element {
     );
   }
 
-  const handleAddTransaction = (newTransactionData: Omit<ITransaction, "id">) => {
-    addTransaction(newTransactionData);
+  const handleAddTransaction = async (data: Omit<ITransaction, "id">) => {
+    await addMutation.mutateAsync(data);
+    toast.success(t("transactions.addSuccess"));
+    setIsAddModalOpen(false);
   };
 
-  const handleUpdateTransaction = (id: string, updatedTransactionData: Omit<ITransaction, "id">) => {
-    updateTransaction(id, updatedTransactionData);
-  };
-
-  const handleDeleteTransaction = (id: string) => {
-    deleteTransaction(id);
-    setConfirmDelete({ isOpen: false, id: null, description: "" });
+  const handleUpdateTransaction = async (id: string, data: Omit<ITransaction, "id">) => {
+    await updateMutation.mutateAsync({ id, data });
+    toast.success(t("transactions.updateSuccess"));
+    setIsAddModalOpen(false);
+    setEditingTransaction(null);
   };
 
   const handleEditTransaction = (transaction: ITransaction) => {
@@ -126,6 +123,17 @@ export function TransactionsView(): React.JSX.Element {
   const handleCloseModal = () => {
     setIsAddModalOpen(false);
     setEditingTransaction(null);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!confirmDelete.id) return;
+    try {
+      await deleteMutation.mutateAsync(confirmDelete.id);
+      toast.success(t("transactions.deleteSuccess"));
+    } catch {
+      toast.error(t("transactions.deleteError"));
+    }
+    setConfirmDelete({ isOpen: false, id: null, description: "" });
   };
 
   const toggleCategory = (category: string) => {
@@ -141,35 +149,43 @@ export function TransactionsView(): React.JSX.Element {
 
   const hasActiveFilters = filterType !== "all" || selectedCategories.length > 0;
 
-  const currentFilterCategories = filterType === "income" 
-    ? incomeCategories 
-    : filterType === "expense" 
-    ? expenseCategories 
-    : [...incomeCategories, ...expenseCategories];
+  const currentFilterCategories =
+    filterType === "income"
+      ? incomeCategories
+      : filterType === "expense"
+      ? expenseCategories
+      : [...incomeCategories, ...expenseCategories];
 
-  const formatAmount = (value: number) =>
-    formatCurrency(value, currency, language);
+  const formatAmount = (value: number) => formatCurrency(value, currency, language);
 
-  const now = new Date();
   const locale = getLocale(language);
+  const now = new Date();
   const monthName = now.toLocaleDateString(locale, { month: "long" });
-  const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
-  const year = now.getFullYear();
-  const currentMonthYear = `${capitalizedMonth} ${year}`;
+  const currentMonthYear =
+    monthName.charAt(0).toUpperCase() + monthName.slice(1) + " " + now.getFullYear();
 
   return (
     <div className="space-y-6">
       <header className="space-y-4">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2.5 text-zinc-900 dark:text-white tracking-tight">
-            <div className="bg-cyan-500/10 p-2 rounded-xl ring-1 ring-cyan-500/10">
-              <Receipt className="w-5 h-5 md:w-6 md:h-6 text-cyan-500 dark:text-cyan-400" />
-            </div>
-            {t("transactions.title")}
-          </h1>
-          <p className="text-sm md:text-base text-zinc-500 dark:text-zinc-500 mt-1">
-            {t("transactions.subtitle")}
-          </p>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2.5 text-zinc-900 dark:text-white tracking-tight">
+              <div className="bg-cyan-500/10 p-2 rounded-xl ring-1 ring-cyan-500/10">
+                <Receipt className="w-5 h-5 md:w-6 md:h-6 text-cyan-500 dark:text-cyan-400" />
+              </div>
+              {t("transactions.title")}
+            </h1>
+            <p className="text-sm md:text-base text-zinc-500 dark:text-zinc-500 mt-1">
+              {t("transactions.subtitle")}
+            </p>
+          </div>
+          <button
+            onClick={() => setIsHistoryOpen(true)}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors shrink-0 mt-1"
+          >
+            <History className="w-4 h-4" />
+            {t("transactions.history")}
+          </button>
         </div>
       </header>
 
@@ -204,7 +220,8 @@ export function TransactionsView(): React.JSX.Element {
         </button>
         <button
           onClick={() => setIsAddModalOpen(true)}
-          className="px-3 md:px-4 py-1.5 md:py-2 rounded-xl text-xs md:text-sm bg-cyan-500 hover:bg-cyan-600 text-white font-medium transition-colors flex items-center gap-2"
+          disabled={isActionLoading}
+          className="px-3 md:px-4 py-1.5 md:py-2 rounded-xl text-xs md:text-sm bg-cyan-500 hover:bg-cyan-600 disabled:opacity-50 text-white font-medium transition-colors flex items-center gap-2"
         >
           <Plus className="w-4 h-4 md:w-5 md:h-5" />
           {t("transactions.addTransaction")}
@@ -218,39 +235,24 @@ export function TransactionsView(): React.JSX.Element {
               {t("transactions.filters")}
             </h3>
             <div className="flex gap-2">
-              <button
-                onClick={() => setFilterType("all")}
-                className={cn(
-                  "px-4 py-2 rounded-lg text-sm font-medium transition-colors",
-                  filterType === "all"
-                    ? "bg-cyan-500 text-white"
-                    : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700"
-                )}
-              >
-                {t("transactions.all")}
-              </button>
-              <button
-                onClick={() => setFilterType("income")}
-                className={cn(
-                  "px-4 py-2 rounded-lg text-sm font-medium transition-colors",
-                  filterType === "income"
-                    ? "bg-emerald-500 text-white"
-                    : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700"
-                )}
-              >
-                {t("transactions.income")}
-              </button>
-              <button
-                onClick={() => setFilterType("expense")}
-                className={cn(
-                  "px-4 py-2 rounded-lg text-sm font-medium transition-colors",
-                  filterType === "expense"
-                    ? "bg-red-500 text-white"
-                    : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700"
-                )}
-              >
-                {t("transactions.expenses")}
-              </button>
+              {(["all", "income", "expense"] as const).map((type) => (
+                <button
+                  key={type}
+                  onClick={() => setFilterType(type)}
+                  className={cn(
+                    "px-4 py-2 rounded-lg text-sm font-medium transition-colors",
+                    filterType === type
+                      ? type === "income"
+                        ? "bg-emerald-500 text-white"
+                        : type === "expense"
+                        ? "bg-red-500 text-white"
+                        : "bg-cyan-500 text-white"
+                      : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700"
+                  )}
+                >
+                  {t(`transactions.${type === "all" ? "all" : type === "income" ? "income" : "expenses"}`)}
+                </button>
+              ))}
             </div>
           </div>
 
@@ -272,9 +274,8 @@ export function TransactionsView(): React.JSX.Element {
               {currentFilterCategories.map((category) => {
                 const isActive = selectedCategories.includes(category.key);
                 const categoryCount = transactions.filter(
-                  tr => tr.category === category.key
+                  (tr) => tr.category === category.key
                 ).length;
-
                 return (
                   <button
                     key={category.key}
@@ -301,10 +302,10 @@ export function TransactionsView(): React.JSX.Element {
                     </div>
                     <span
                       className={cn(
-                        "px-2 py-0.5 rounded-full text-xs font-bold",
+                        "text-xs font-bold px-1.5 py-0.5 rounded-full",
                         isActive
                           ? "bg-cyan-500 text-white"
-                          : "bg-zinc-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-400"
+                          : "bg-zinc-100 dark:bg-zinc-700 text-zinc-500 dark:text-zinc-400"
                       )}
                     >
                       {categoryCount}
@@ -318,44 +319,27 @@ export function TransactionsView(): React.JSX.Element {
       )}
 
       <section className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-zinc-700 dark:text-gray-300">
-            {t("transactions.recentTransactions")}
-          </h2>
-          <span className="text-sm text-gray-500 dark:text-gray-400">
-            {filteredTransactions.length} {t("transactions.transactions")}
-          </span>
-        </div>
-
         {filteredTransactions.length === 0 ? (
-          <div className="bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-12 text-center">
-            <div className="bg-zinc-100 dark:bg-zinc-800 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Receipt className="w-8 h-8 text-gray-400" />
-            </div>
-            <h3 className="text-lg font-semibold text-zinc-900 dark:text-white mb-2">
-              {t("transactions.noTransactions")}
-            </h3>
-            <p className="text-gray-600 dark:text-gray-400 mb-6">
-              {t("transactions.addFirstTransaction")}
-            </p>
-            <button
-              onClick={() => setIsAddModalOpen(true)}
-              className="px-6 py-3 rounded-xl bg-cyan-500 hover:bg-cyan-600 text-white font-medium transition-colors inline-flex items-center gap-2"
-            >
-              <Plus className="w-5 h-5" />
-              {t("transactions.addTransaction")}
-            </button>
+          <div className="text-center py-12 text-zinc-500 dark:text-zinc-400">
+            <Receipt className="w-12 h-12 mx-auto mb-4 opacity-30" />
+            <p className="font-medium">{t("transactions.noTransactions")}</p>
           </div>
         ) : (
-          <div className="space-y-3">
-            {filteredTransactions.map((transaction) => (
-              <TransactionCard
-                key={transaction.id}
-                transaction={transaction}
-                onClick={() => handleEditTransaction(transaction)}
-              />
-            ))}
-          </div>
+          filteredTransactions.map((transaction) => (
+            <TransactionCard
+              key={transaction.id}
+              transaction={transaction}
+              onEdit={handleEditTransaction}
+              onDelete={(id) => {
+                const found = transactions.find((t) => t.id === id);
+                setConfirmDelete({
+                  isOpen: true,
+                  id,
+                  description: found?.description ?? "",
+                });
+              }}
+            />
+          ))
         )}
       </section>
 
@@ -367,12 +351,17 @@ export function TransactionsView(): React.JSX.Element {
         onUpdate={handleUpdateTransaction}
       />
 
+      <TransactionHistoryModal
+        isOpen={isHistoryOpen}
+        onClose={() => setIsHistoryOpen(false)}
+      />
+
       <ConfirmModal
         isOpen={confirmDelete.isOpen}
-        title={t("transactions.deleteTransaction")}
-        message={t("transactions.confirmDelete").replace("{description}", confirmDelete.description)}
-        onConfirm={() => confirmDelete.id && handleDeleteTransaction(confirmDelete.id)}
         onClose={() => setConfirmDelete({ isOpen: false, id: null, description: "" })}
+        onConfirm={handleConfirmDelete}
+        title={t("common.confirmDelete")}
+        message={t("common.confirmDeleteMessage", { name: confirmDelete.description })}
         confirmText={t("common.delete")}
         cancelText={t("common.cancel")}
         variant="danger"

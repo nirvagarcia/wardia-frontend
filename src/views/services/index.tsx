@@ -6,14 +6,20 @@
 
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
+import { toast } from "sonner";
 import { usePreferencesStore } from "@/shared/stores/preferences-store";
-import { useServicesStore } from "@/shared/stores/services-store";
-import { useInitializeServices } from "@/shared/hooks/use-initialize-services";
+import {
+  useServicesQuery,
+  useAddService,
+  useUpdateService,
+  useDeleteService,
+  computeMonthlyTotal,
+  computeUpcomingPayments,
+} from "@/shared/hooks/use-services-query";
 import { getTranslation } from "@/shared/langs";
 import { getLocale, formatCurrency } from "@/shared/utils/currency";
 import { getDaysUntil } from "@/shared/utils/date";
-import { LoadingState } from "@/shared/components/loading-state";
 import {
   Receipt,
   DollarSign,
@@ -48,6 +54,7 @@ import {
 import type { ISubscription } from "@/shared/types/finance";
 import type { IAmount } from "@/shared/types";
 import { SortableServiceCard } from "./components/sortable-service-card";
+import { ServicesSkeleton } from "./components/services-skeleton";
 import {
   getFrequencyLabel,
   getStatusLabel,
@@ -73,24 +80,25 @@ export function ServicesView(): React.JSX.Element {
     setMounted(true);
   }, []);
 
-  const { isLoading, error } = useInitializeServices();
-  
-  const {
-    services,
-    addService,
-    updateService,
-    deleteService,
-    reorderServices,
-    getMonthlyTotal,
-    getUpcomingPayments,
-  } = useServicesStore();
+  const { data, isLoading, isError } = useServicesQuery();
+  const addMutation = useAddService();
+  const updateMutation = useUpdateService();
+  const deleteMutation = useDeleteService();
+
+  const [services, setServices] = useState<ISubscription[]>([]);
+
+  useEffect(() => {
+    if (data?.services) setServices(data.services);
+  }, [data]);
+
+  const totalInUserCurrency = useMemo(() => computeMonthlyTotal(services), [services]);
+  const upcomingSubs = useMemo(() => computeUpcomingPayments(services, 7), [services]);
+  const isActionLoading = addMutation.isPending || updateMutation.isPending || deleteMutation.isPending;
   
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingService, setEditingService] = useState<ISubscription | null>(null);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
-  const [totalInUserCurrency, setTotalInUserCurrency] = useState(0);
-  const [upcomingSubs, setUpcomingSubs] = useState<ISubscription[]>([]);
   const [confirmDelete, setConfirmDelete] = useState<{
     isOpen: boolean;
     id: string | null;
@@ -113,20 +121,15 @@ export function ServicesView(): React.JSX.Element {
     })
   );
 
-  useEffect(() => {
-    setTotalInUserCurrency(getMonthlyTotal());
-    setUpcomingSubs(getUpcomingPayments(7));
-  }, [services, getMonthlyTotal, getUpcomingPayments]);
-
   if (!mounted || isLoading) {
-    return <LoadingState message={t("common.loading")} fullScreen />;
+    return <ServicesSkeleton />;
   }
 
-  if (error) {
+  if (isError) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center space-y-4">
-          <p className="text-red-500 dark:text-red-400">Error: {error}</p>
+          <p className="text-red-500 dark:text-red-400">{t("common.error")}</p>
           <button
             onClick={() => window.location.reload()}
             className="px-4 py-2 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600"
@@ -148,12 +151,22 @@ export function ServicesView(): React.JSX.Element {
     setSelectedCategories([]);
   };
 
-  const handleAddService = (newServiceData: Omit<ISubscription, "id">) => {
-    addService(newServiceData);
+  const handleAddService = async (newServiceData: Omit<ISubscription, "id">) => {
+    try {
+      await addMutation.mutateAsync(newServiceData);
+      toast.success(t("services.addSuccess"));
+    } catch {
+      toast.error(t("services.addError"));
+    }
   };
 
-  const handleUpdateService = (id: string, updatedServiceData: Omit<ISubscription, "id">) => {
-    updateService(id, updatedServiceData);
+  const handleUpdateService = async (id: string, updatedServiceData: Omit<ISubscription, "id">) => {
+    try {
+      await updateMutation.mutateAsync({ id, data: updatedServiceData });
+      toast.success(t("services.updateSuccess"));
+    } catch {
+      toast.error(t("services.updateError"));
+    }
   };
 
   const handleEditService = (service: ISubscription) => {
@@ -172,9 +185,14 @@ export function ServicesView(): React.JSX.Element {
     }
   };
 
-  const confirmDeletion = () => {
+  const confirmDeletion = async () => {
     if (confirmDelete.id) {
-      deleteService(confirmDelete.id);
+      try {
+        await deleteMutation.mutateAsync(confirmDelete.id);
+        toast.success(t("services.deleteSuccess"));
+      } catch {
+        toast.error(t("services.deleteError"));
+      }
     }
     setConfirmDelete({ isOpen: false, id: null, name: "" });
   };
@@ -184,8 +202,7 @@ export function ServicesView(): React.JSX.Element {
     if (over && active.id !== over.id) {
       const oldIndex = services.findIndex((item) => item.id === active.id);
       const newIndex = services.findIndex((item) => item.id === over.id);
-      const reordered = arrayMove(services, oldIndex, newIndex);
-      reorderServices(reordered);
+      setServices(arrayMove(services, oldIndex, newIndex));
     }
   };
 
@@ -315,31 +332,31 @@ export function ServicesView(): React.JSX.Element {
                   key={category}
                   onClick={() => toggleCategory(category)}
                   className={cn(
-                    "flex items-center justify-between gap-2 p-4 rounded-xl border-2 transition-all",
+                    "flex items-center justify-between gap-2 p-3 rounded-xl border-2 transition-all overflow-hidden",
                     isActive
                       ? "border-cyan-500 bg-cyan-50 dark:bg-cyan-950/30"
                       : "border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600"
                   )}
                 >
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 min-w-0">
                     <IconComponent className={cn(
-                      "w-4 h-4",
+                      "w-4 h-4 flex-shrink-0",
                       isActive ? "text-cyan-600 dark:text-cyan-400" : "text-zinc-600 dark:text-zinc-400"
                     )} />
                     <span className={cn(
-                      "text-sm font-medium",
+                      "text-sm font-medium truncate",
                       isActive ? "text-cyan-600 dark:text-cyan-400" : "text-zinc-600 dark:text-zinc-400"
                     )}>
                       {getCategoryLabel(category, t)}
                     </span>
                   </div>
                   <span className={cn(
-                    "px-2 py-0.5 rounded-full text-xs font-bold",
+                    "flex-shrink-0 min-w-[1.25rem] h-5 px-1.5 rounded-full text-xs font-bold flex items-center justify-center",
                     isActive
                       ? "bg-cyan-500 text-white"
                       : "bg-zinc-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-400"
                   )}>
-                    {categoryCount}
+                    {categoryCount > 9 ? "+9" : categoryCount}
                   </span>
                 </button>
               );
@@ -358,7 +375,25 @@ export function ServicesView(): React.JSX.Element {
           strategy={verticalListSortingStrategy}
         >
           <section>
-            {filteredServices.length === 0 ? (
+            {isActionLoading ? (
+              <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="card-surface rounded-2xl p-4 animate-pulse">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-10 h-10 rounded-xl bg-zinc-200 dark:bg-zinc-700" />
+                      <div className="flex-1 space-y-2">
+                        <div className="h-4 bg-zinc-200 dark:bg-zinc-700 rounded w-3/4" />
+                        <div className="h-3 bg-zinc-200 dark:bg-zinc-700 rounded w-1/2" />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="h-3 bg-zinc-200 dark:bg-zinc-700 rounded w-full" />
+                      <div className="h-3 bg-zinc-200 dark:bg-zinc-700 rounded w-4/5" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : filteredServices.length === 0 ? (
               <div className="card-surface rounded-2xl p-12 text-center">
                 <div className="bg-zinc-100 dark:bg-zinc-800 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Receipt className="w-8 h-8 text-zinc-400" />

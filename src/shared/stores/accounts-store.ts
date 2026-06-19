@@ -5,7 +5,7 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { IAccount, ICreditCard, IBankCredentials } from "@/shared/types/finance";
+import type { IAccount, ICreditCard } from "@/shared/types/finance";
 
 /**
  * Custom storage with date deserialization
@@ -35,12 +35,6 @@ const customStorage = {
         }));
       }
       
-      if (state.credentials && Array.isArray(state.credentials)) {
-        state.credentials = state.credentials.map((cred: IBankCredentials) => ({
-          ...cred,
-          lastUpdated: cred.lastUpdated ? new Date(cred.lastUpdated) : new Date(),
-        }));
-      }
       
       return { state, version: parsed.version };
     } catch (error) {
@@ -60,7 +54,6 @@ interface AccountsState {
   // State
   accounts: IAccount[];
   creditCards: ICreditCard[];
-  credentials: IBankCredentials[];
   isLoading: boolean;
   error: string | null;
 
@@ -76,16 +69,9 @@ interface AccountsState {
   deleteCreditCard: (id: string) => void;
   setCreditCards: (cards: ICreditCard[]) => void;
 
-  // Credentials actions
-  addCredentials: (credentials: Omit<IBankCredentials, "id" | "lastUpdated">) => void;
-  updateCredentials: (id: string, credentials: Omit<IBankCredentials, "id" | "lastUpdated">) => void;
-  deleteCredentials: (id: string) => void;
-  setCredentials: (credentials: IBankCredentials[]) => void;
-
   // Reordering
   reorderAccounts: (accounts: IAccount[]) => void;
   reorderCreditCards: (cards: ICreditCard[]) => void;
-  reorderCredentials: (credentials: IBankCredentials[]) => void;
 
   // Loading states
   setLoading: (loading: boolean) => void;
@@ -104,7 +90,6 @@ export const useAccountsStore = create<AccountsState>()(
       // Initial state
       accounts: [],
       creditCards: [],
-      credentials: [],
       isLoading: false,
       error: null,
 
@@ -221,41 +206,6 @@ export const useAccountsStore = create<AccountsState>()(
         set({ creditCards: cards, error: null });
       },
 
-      // Credentials actions
-      addCredentials: (credentialsData) => {
-        const newCredentials: IBankCredentials = {
-          ...credentialsData,
-          id: `cred-${Date.now()}`,
-          lastUpdated: new Date(),
-        };
-        set((state) => ({
-          credentials: [...state.credentials, newCredentials],
-          error: null,
-        }));
-      },
-
-      updateCredentials: (id, credentialsData) => {
-        set((state) => ({
-          credentials: state.credentials.map((cred) =>
-            cred.id === id
-              ? { ...credentialsData, id, lastUpdated: new Date() }
-              : cred
-          ),
-          error: null,
-        }));
-      },
-
-      deleteCredentials: (id) => {
-        set((state) => ({
-          credentials: state.credentials.filter((cred) => cred.id !== id),
-          error: null,
-        }));
-      },
-
-      setCredentials: (credentials) => {
-        set({ credentials, error: null });
-      },
-
       // Reordering
       reorderAccounts: (accounts) => {
         set({ accounts });
@@ -263,10 +213,6 @@ export const useAccountsStore = create<AccountsState>()(
 
       reorderCreditCards: (cards) => {
         set({ creditCards: cards });
-      },
-
-      reorderCredentials: (credentials) => {
-        set({ credentials });
       },
 
       // Loading states
@@ -306,7 +252,6 @@ export const useAccountsStore = create<AccountsState>()(
       partialize: (state) => ({
         accounts: state.accounts,
         creditCards: state.creditCards,
-        credentials: state.credentials,
         isLoading: state.isLoading,
         error: state.error,
       }),

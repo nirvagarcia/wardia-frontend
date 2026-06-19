@@ -6,22 +6,29 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { toast } from "sonner";
 import { usePreferencesStore } from "@/shared/stores/preferences-store";
 import { useAccountsStore } from "@/shared/stores/accounts-store";
 import { useInitializeAccounts } from "@/shared/hooks/use-initialize-accounts";
+import {
+  useCredentialsQuery,
+  useAddCredential,
+  useUpdateCredential,
+  useDeleteCredential,
+} from "@/shared/hooks/use-credentials-query";
 import { getTranslation } from "@/shared/langs";
 import { formatCurrency } from "@/shared/utils/currency";
-import { LoadingState } from "@/shared/components/loading-state";
 import { BankCredentialsSection } from "./sections/credentials-section";
 import { AddAccountModal } from "./modals/add-account";
 import { AddCredentialsModal } from "./modals/credentials/add-credentials-modal";
 import { ConfirmModal } from "@/shared/components/modals/confirm-modal";
 import { AccountsHeader } from "./components/accounts-header";
+import { AccountsSkeleton } from "./components/accounts-skeleton";
 import { AccountsTabs } from "./components/accounts-tabs";
 import { DebitStats, CreditStats } from "./components/accounts-stats";
 import { DebitAccountsTab } from "./components/debit-accounts-tab";
 import { CreditCardsTab } from "./components/credit-cards-tab";
-import type { IAccount, ICreditCard, IBankCredentials } from "@/shared/types/finance";
+import type { IAccount, ICreditCard, ICredential } from "@/shared/types/finance";
 
 type TabType = "debit" | "credit" | "credentials";
 
@@ -31,7 +38,12 @@ export function AccountsView(): React.JSX.Element {
   const t = (key: string, vars?: Record<string, string | number>) => 
     getTranslation(language, key, vars);
   
-  const { isLoading, error } = useInitializeAccounts();
+  const { isLoading: accountsLoading, error } = useInitializeAccounts();
+
+  const credentialsQuery = useCredentialsQuery();
+  const addCredentialMutation = useAddCredential();
+  const updateCredentialMutation = useUpdateCredential();
+  const deleteCredentialMutation = useDeleteCredential();
   
   useEffect(() => {
     setMounted(true);
@@ -40,28 +52,26 @@ export function AccountsView(): React.JSX.Element {
   const {
     accounts,
     creditCards: cards,
-    credentials,
     addAccount,
     updateAccount,
     deleteAccount,
     addCreditCard,
     updateCreditCard,
     deleteCreditCard,
-    addCredentials,
-    updateCredentials,
-    deleteCredentials,
     reorderAccounts,
     reorderCreditCards,
-    reorderCredentials,
     getTotalBalance,
     getTotalCreditUsed,
     getTotalCreditAvailable,
   } = useAccountsStore();
+
+  const credentials = credentialsQuery.data ?? [];
+  const isLoading = accountsLoading || credentialsQuery.isLoading;
   
-  const [activeTab, setActiveTab] = useState<TabType>("debit");
+  const [activeTab, setActiveTab] = useState<TabType>("credentials");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isCredentialsModalOpen, setIsCredentialsModalOpen] = useState(false);
-  const [editingCredential, setEditingCredential] = useState<IBankCredentials | null>(null);
+  const [editingCredential, setEditingCredential] = useState<ICredential | null>(null);
   const [editingAccount, setEditingAccount] = useState<IAccount | null>(null);
   const [editingCard, setEditingCard] = useState<ICreditCard | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<{
@@ -77,7 +87,7 @@ export function AccountsView(): React.JSX.Element {
   });
 
   if (!mounted || isLoading) {
-    return <LoadingState message={t("common.loading")} fullScreen />;
+    return <AccountsSkeleton />;
   }
 
   if (error) {
@@ -119,7 +129,7 @@ export function AccountsView(): React.JSX.Element {
     setIsAddModalOpen(true);
   };
 
-  const handleEditCredentials = (credential: IBankCredentials) => {
+  const handleEditCredentials = (credential: ICredential) => {
     setEditingCredential(credential);
     setIsCredentialsModalOpen(true);
   };
@@ -239,8 +249,14 @@ export function AccountsView(): React.JSX.Element {
             <BankCredentialsSection
               credentials={credentials}
               onEdit={handleEditCredentials}
-              onDelete={deleteCredentials}
-              onReorder={reorderCredentials}
+              onDelete={async (id) => {
+                try {
+                  await deleteCredentialMutation.mutateAsync(id);
+                  toast.success(t("credentials.deleteSuccess"));
+                } catch {
+                  toast.error(t("credentials.deleteError"));
+                }
+              }}
             />
           </div>
         )}
@@ -268,8 +284,25 @@ export function AccountsView(): React.JSX.Element {
           setEditingCredential(null);
         }}
         editingCredential={editingCredential}
-        onSave={addCredentials}
-        onUpdate={updateCredentials}
+        onSave={async (data) => {
+          try {
+            await addCredentialMutation.mutateAsync(data);
+            toast.success(t("credentials.addSuccess"));
+            setIsCredentialsModalOpen(false);
+          } catch {
+            toast.error(t("credentials.addError"));
+          }
+        }}
+        onUpdate={async (id, data) => {
+          try {
+            await updateCredentialMutation.mutateAsync({ id, data });
+            toast.success(t("credentials.updateSuccess"));
+            setIsCredentialsModalOpen(false);
+            setEditingCredential(null);
+          } catch {
+            toast.error(t("credentials.updateError"));
+          }
+        }}
       />
 
       <ConfirmModal

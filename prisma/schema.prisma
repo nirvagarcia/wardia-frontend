@@ -1,0 +1,80 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Service {
+  id              String   @id @default(cuid())
+  userId          String
+  name            String
+  description     String?
+  category        String
+  iconUrl         String?
+  amountValue     Float
+  amountCurrency  String   @default("PEN")
+  frequency       String
+  nextPaymentDate DateTime
+  status          String   @default("active")
+  autoRenewal     Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([userId])
+  @@index([userId, status])
+}
+
+model Credential {
+  id                  String   @id @default(cuid())
+  userId              String
+  type                String   @default("bank")
+  credentialName      String?
+  description         String?
+  bankName            String
+
+  username            String?
+  passwordEnc         String?
+
+  cardName            String?
+  cardNetwork         String?
+  accountNumberEnc    String?
+  cciEnc              String?
+  expiryMonth         Int?
+  expiryYear          Int?
+  cvvEnc              String?
+  accountType         String?
+
+  cardholderName      String?
+  creditLimitValue    Float?
+  creditLimitCurrency String?
+  cutoffDay           Int?
+
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([userId])
+  @@index([userId, type])
+}
+
+model Transaction {
+  id             String   @id @default(cuid())
+  userId         String
+  type           String
+  status         String   @default("completed")
+  amountValue    Float
+  amountCurrency String   @default("PEN")
+  description    String
+  merchant       String?
+  category       String
+  date           DateTime
+  notes          String?
+  accountId      String?
+  cardId         String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([userId])
+  @@index([userId, date])
+}

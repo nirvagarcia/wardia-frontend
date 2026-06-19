@@ -1,95 +1,103 @@
-/**
- * Services Service (Subscriptions)
- * Abstraction layer for subscription/service data operations.
- */
-
 import type { ISubscription } from "@/shared/types/finance";
-import { mockSubscriptions } from "@/shared/utils/mock";
 
-const USE_MOCK_DATA = true;
+interface ServiceRecord {
+  id: string;
+  name: string;
+  description?: string | null;
+  category: string;
+  iconUrl?: string | null;
+  amountValue: number;
+  amountCurrency: string;
+  frequency: string;
+  nextPaymentDate: string;
+  status: string;
+  autoRenewal: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ServicesMeta {
+  total: number;
+  activeCount: number;
+  totalMonthlyCost: number;
+}
+
+function toSubscription(r: ServiceRecord): ISubscription {
+  return {
+    id: r.id,
+    name: r.name,
+    description: r.description ?? undefined,
+    category: r.category,
+    iconUrl: r.iconUrl ?? undefined,
+    amount: {
+      value: r.amountValue,
+      currency: r.amountCurrency as "PEN" | "USD" | "EUR",
+    },
+    frequency: r.frequency as ISubscription["frequency"],
+    nextPaymentDate: new Date(r.nextPaymentDate),
+    status: r.status as ISubscription["status"],
+    autoRenewal: r.autoRenewal,
+  };
+}
+
+function toPayload(service: Omit<ISubscription, "id">) {
+  return {
+    name: service.name,
+    description: service.description,
+    category: service.category,
+    iconUrl: service.iconUrl,
+    amountValue: service.amount.value,
+    amountCurrency: service.amount.currency,
+    frequency: service.frequency,
+    nextPaymentDate: service.nextPaymentDate.toISOString(),
+    status: service.status,
+    autoRenewal: service.autoRenewal,
+  };
+}
+
+async function handleResponse<T>(res: Response): Promise<T> {
+  if (!res.ok) {
+    const json = await res.json().catch(() => ({}));
+    throw new Error((json as { error?: string }).error ?? `Request failed: ${res.status}`);
+  }
+  return res.json().then((j: { data: T }) => j.data);
+}
 
 export const servicesService = {
-  /**
-   * Fetch all services/subscriptions
-   */
-  async getServices(): Promise<ISubscription[]> {
-    if (USE_MOCK_DATA) {
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      return mockSubscriptions;
-    }
-
-    // Real API implementation
-    // const response = await fetch('/api/services');
-    // if (!response.ok) throw new Error('Failed to fetch services');
-    // return response.json();
-
-    return [];
+  async getServices(): Promise<{ services: ISubscription[]; meta: ServicesMeta }> {
+    const res = await fetch("/api/services");
+    const data = await handleResponse<{ services: ServiceRecord[]; meta: ServicesMeta }>(res);
+    return {
+      services: data.services.map(toSubscription),
+      meta: data.meta,
+    };
   },
 
-  /**
-   * Create a new service
-   */
   async createService(service: Omit<ISubscription, "id">): Promise<ISubscription> {
-    if (USE_MOCK_DATA) {
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      return {
-        ...service,
-        id: `service-${Date.now()}`,
-      };
-    }
-
-    // Real API implementation
-    // const response = await fetch('/api/services', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(service),
-    // });
-    // if (!response.ok) throw new Error('Failed to create service');
-    // return response.json();
-
-    throw new Error("API not implemented");
+    const res = await fetch("/api/services", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(toPayload(service)),
+    });
+    const record = await handleResponse<ServiceRecord>(res);
+    return toSubscription(record);
   },
 
-  /**
-   * Update an existing service
-   */
   async updateService(id: string, service: Omit<ISubscription, "id">): Promise<ISubscription> {
-    if (USE_MOCK_DATA) {
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      return {
-        ...service,
-        id,
-      };
-    }
-
-    // Real API implementation
-    // const response = await fetch(`/api/services/${id}`, {
-    //   method: 'PUT',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(service),
-    // });
-    // if (!response.ok) throw new Error('Failed to update service');
-    // return response.json();
-
-    throw new Error("API not implemented");
+    const res = await fetch(`/api/services/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(toPayload(service)),
+    });
+    const record = await handleResponse<ServiceRecord>(res);
+    return toSubscription(record);
   },
 
-  /**
-   * Delete a service
-   */
   async deleteService(id: string): Promise<void> {
-    if (USE_MOCK_DATA) {
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      console.log(`Deleting service: ${id}`);
-      return;
+    const res = await fetch(`/api/services/${id}`, { method: "DELETE" });
+    if (!res.ok) {
+      const json = await res.json().catch(() => ({}));
+      throw new Error((json as { error?: string }).error ?? "Failed to delete service");
     }
-
-    // Real API implementation
-    // const response = await fetch(`/api/services/${id}`, {
-    //   method: 'DELETE',
-    // });
-    // if (!response.ok) throw new Error('Failed to delete service');
-
-    throw new Error("API not implemented");
   },
 };

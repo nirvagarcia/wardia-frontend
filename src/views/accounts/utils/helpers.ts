@@ -3,7 +3,7 @@
  * Extracted for reusability and testability.
  */
 
-import { IAccount, ICreditCard, IBankCredentials } from "@/shared/types/finance";
+import { IAccount, ICreditCard } from "@/shared/types/finance";
 
 /**
  * Calculate total balance from accounts.
@@ -92,29 +92,3 @@ export function updateCard(
   };
 }
 
-/**
- * Create new credentials with generated ID and timestamp.
- */
-export function createNewCredentials(
-  credData: Omit<IBankCredentials, "id" | "lastUpdated">
-): IBankCredentials {
-  return {
-    ...credData,
-    id: `cred-${Date.now()}`,
-    lastUpdated: new Date(),
-  };
-}
-
-/**
- * Update credentials with new data, preserving ID and updating timestamp.
- */
-export function updateCredentials(
-  id: string,
-  credData: Omit<IBankCredentials, "id" | "lastUpdated">
-): IBankCredentials {
-  return {
-    ...credData,
-    id,
-    lastUpdated: new Date(),
-  };
-}

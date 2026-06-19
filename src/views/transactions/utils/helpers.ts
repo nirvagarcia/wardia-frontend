@@ -118,8 +118,8 @@ export const filterTransactionsByDate = (
   endDate: Date | null
 ): ITransaction[] => {
   return transactions.filter(t => {
-    if (startDate && t.date < startDate) return false;
-    if (endDate && t.date > endDate) return false;
+    if (startDate && t.transactionDate < startDate) return false;
+    if (endDate && t.transactionDate > endDate) return false;
     return true;
   });
 };
@@ -129,8 +129,8 @@ export const sortTransactionsByDate = (
   order: "asc" | "desc" = "desc"
 ): ITransaction[] => {
   return [...transactions].sort((a, b) => {
-    const timeA = a.date.getTime();
-    const timeB = b.date.getTime();
+    const timeA = a.transactionDate.getTime();
+    const timeB = b.transactionDate.getTime();
     return order === "desc" ? timeB - timeA : timeA - timeB;
   });
 };
@@ -141,7 +141,7 @@ export const groupTransactionsByDate = (
   const grouped: Record<string, ITransaction[]> = {};
   
   transactions.forEach(transaction => {
-    const dateKey = getDateKey(transaction.date);
+    const dateKey = getDateKey(transaction.transactionDate);
     if (!grouped[dateKey]) {
       grouped[dateKey] = [];
     }

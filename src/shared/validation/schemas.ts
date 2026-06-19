@@ -153,7 +153,7 @@ export const editAccountFormSchema = accountSchema.partial().required({ id: true
  */
 export const addCreditCardFormSchema = creditCardSchema.omit({ 
   id: true,
-  availableCredit: true, // Calculated field
+  availableCredit: true,
 });
 
 /**
@@ -227,6 +227,85 @@ export const userPreferencesSchema = z.object({
     securityAlerts: z.boolean().default(true),
   }),
 });
+
+// ============================================================================
+// MODAL FORM SCHEMAS (practical, lenient versions for UI forms)
+// ============================================================================
+
+export const bankCredentialModalSchema = z.object({
+  bankName: z.string().min(1, "Bank name is required"),
+  credentialName: z.string().optional().or(z.literal("")),
+  description: z.string().optional().or(z.literal("")),
+  username: z.string().min(1, "Username is required"),
+  password: z.string().min(1, "Password is required"),
+});
+export type BankCredentialModalData = z.infer<typeof bankCredentialModalSchema>;
+
+export const debitCardModalSchema = z.object({
+  bankName: z.string().min(1, "Bank name is required"),
+  cardName: z.string().min(1, "Card name is required"),
+  accountType: z.enum(["savings", "checking"]),
+  cardNetwork: z.enum(["visa", "mastercard", "amex", "discover"]),
+  accountNumber: z.string().min(1, "Account number is required"),
+  cci: z.string().optional().or(z.literal("")),
+  expiryMonth: z.number().int().min(1).max(12),
+  expiryYear: z.number().int().min(2024),
+  cvv: z.string().min(3).max(4),
+});
+export type DebitCardModalData = z.infer<typeof debitCardModalSchema>;
+
+export const creditCardModalSchema = z.object({
+  bankName: z.string().min(1, "Bank name is required"),
+  cardName: z.string().min(1, "Card name is required"),
+  cardholderName: z.string().min(1, "Cardholder name is required"),
+  accountType: z.enum(["savings", "checking"]).optional(),
+  cardNetwork: z.enum(["visa", "mastercard", "amex", "discover"]),
+  creditLimitValue: z.number().min(0),
+  creditLimitCurrency: z.enum(["PEN", "USD", "EUR"]),
+  cutoffDay: z.number().int().min(1).max(31),
+  accountNumber: z.string().optional().or(z.literal("")),
+  cci: z.string().optional().or(z.literal("")),
+  expiryMonth: z.number().int().min(1).max(12),
+  expiryYear: z.number().int().min(2024),
+  cvv: z.string().min(3).max(4),
+});
+export type CreditCardModalData = z.infer<typeof creditCardModalSchema>;
+
+// Legacy alias kept for compatibility during transition
+export const credentialsModalSchema = bankCredentialModalSchema;
+export type CredentialsModalData = BankCredentialModalData;
+
+export const serviceModalSchema = z.object({
+  name: z.string().min(1, "Service name is required"),
+  description: z.string().optional().or(z.literal("")),
+  category: z.string().min(1, "Category is required"),
+  amount: z.string().refine(
+    (v) => !isNaN(parseFloat(v)) && parseFloat(v) > 0,
+    "Amount must be a positive number"
+  ),
+  currency: z.enum(["PEN", "USD", "EUR"]),
+  frequency: z.enum(["monthly", "yearly", "weekly", "quarterly"]),
+  nextPaymentDate: z.string().min(1, "Date is required"),
+  status: z.enum(["active", "paused", "cancelled"]),
+  autoRenewal: z.boolean(),
+});
+export type ServiceModalData = z.infer<typeof serviceModalSchema>;
+
+export const transactionModalSchema = z.object({
+  type: z.enum(["income", "expense", "transfer"]),
+  category: z.string().min(1, "Category is required"),
+  description: z.string().min(1, "Description is required"),
+  amount: z.string().refine(
+    (v) => !isNaN(parseFloat(v)) && parseFloat(v) > 0,
+    "Amount must be a positive number"
+  ),
+  currency: z.enum(["PEN", "USD", "EUR"]),
+  merchant: z.string().optional().or(z.literal("")),
+  date: z.string().min(1, "Date is required"),
+  notes: z.string().optional().or(z.literal("")),
+  status: z.enum(["pending", "completed", "failed"]),
+});
+export type TransactionModalData = z.infer<typeof transactionModalSchema>;
 
 // ============================================================================
 // TYPE INFERENCE
