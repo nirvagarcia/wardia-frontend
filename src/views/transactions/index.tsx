@@ -11,7 +11,7 @@ import { usePreferencesStore } from "@/shared/stores/preferences-store";
 import { useTransactionsStore } from "@/shared/stores/transactions-store";
 import { useInitializeTransactions } from "@/shared/hooks/use-initialize-transactions";
 import { getTranslation } from "@/shared/langs";
-import { formatCurrency } from "@/shared/utils/currency";
+import { formatCurrency, getLocale } from "@/shared/utils/currency";
 import { LoadingState } from "@/shared/components/loading-state";
 import { Receipt, Plus, Filter } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
@@ -150,6 +150,13 @@ export function TransactionsView(): React.JSX.Element {
   const formatAmount = (value: number) =>
     formatCurrency(value, currency, language);
 
+  const now = new Date();
+  const locale = getLocale(language);
+  const monthName = now.toLocaleDateString(locale, { month: "long" });
+  const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+  const year = now.getFullYear();
+  const currentMonthYear = `${capitalizedMonth} ${year}`;
+
   return (
     <div className="space-y-6">
       <header className="space-y-4">
@@ -174,10 +181,9 @@ export function TransactionsView(): React.JSX.Element {
         incomeLabel={t("transactions.income")}
         expensesLabel={t("transactions.expenses")}
         balanceLabel={t("transactions.balance")}
-        thisMonthLabel={t("transactions.thisMonth")}
+        thisMonthLabel={currentMonthYear}
       />
 
-      {/* Filters and Actions Bar */}
       <div className="flex gap-2 justify-end">
         <button
           onClick={() => setShowFilters(!showFilters)}
@@ -207,7 +213,6 @@ export function TransactionsView(): React.JSX.Element {
 
       {showFilters && (
         <div className="bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-4 space-y-4">
-          {/* Type Filters */}
           <div>
             <h3 className="font-semibold text-zinc-900 dark:text-white mb-3">
               {t("transactions.filters")}
@@ -249,7 +254,6 @@ export function TransactionsView(): React.JSX.Element {
             </div>
           </div>
 
-          {/* Category Filters */}
           <div>
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-semibold text-zinc-900 dark:text-white">

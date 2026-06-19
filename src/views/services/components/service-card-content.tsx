@@ -4,9 +4,19 @@
  */
 
 import React from "react";
-import { Calendar, DollarSign, Edit2, Trash2 } from "lucide-react";
+import Image from "next/image";
+import { Calendar, Edit2, Trash2 } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import { ISubscription } from "@/shared/types/finance";
+
+const categoryIconMap: Record<string, string> = {
+  housing: "🏠",
+  utilities: "⚡",
+  telecom: "📡",
+  health: "💪",
+  productivity: "💼",
+  entertainment: "🎬",
+};
 
 interface ServiceCardContentProps {
   sub: ISubscription;
@@ -37,13 +47,12 @@ export function ServiceCardContent({
     <div className="space-y-3">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-3 flex-1 min-w-0">
-          <div
-            className={cn(
-              "w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0",
-              "bg-cyan-500/10 ring-1 ring-cyan-500/10"
+          <div className="relative w-9 h-9 rounded-lg flex-shrink-0 overflow-hidden bg-zinc-100 dark:bg-zinc-800 ring-1 ring-zinc-200/50 dark:ring-zinc-700">
+            {sub.iconUrl ? (
+              <Image src={sub.iconUrl} alt={sub.name} fill className="object-cover" unoptimized />
+            ) : (
+              <span className="text-lg absolute inset-0 flex items-center justify-center">{categoryIconMap[sub.category] || "💳"}</span>
             )}
-          >
-            <DollarSign className="w-4 h-4 text-cyan-500 dark:text-cyan-400" />
           </div>
           <div className="flex-1 min-w-0">
             <h3 className="font-semibold text-sm text-zinc-900 dark:text-white truncate">

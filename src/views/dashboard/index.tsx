@@ -24,7 +24,6 @@ import { ArrowUpRight, ArrowDownRight, TrendingUp, Calendar, Layers, Receipt } f
 import { cn } from "@/shared/utils/cn";
 import { getMiniDonutSegments } from "./utils/helpers";
 import { MiniDonutChart } from "./components/mini-donut-chart";
-import { StatBar } from "./components/stat-bar";
 
 export function DashboardView(): React.JSX.Element {
   const [mounted, setMounted] = useState(false);
@@ -176,7 +175,7 @@ export function DashboardView(): React.JSX.Element {
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-1">
         <div className="card-surface rounded-2xl p-6 transition-all duration-300 hover:card-elevated flex items-center justify-center">
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center gap-3">
@@ -195,22 +194,6 @@ export function DashboardView(): React.JSX.Element {
             </span>
           </div>
         </div>
-
-        <div className="card-surface rounded-2xl p-6 space-y-4 transition-all duration-300 hover:card-elevated">
-          <h3 className="font-semibold text-zinc-900 dark:text-white text-sm">{t("dashboard.financialHealth")}</h3>
-          <StatBar 
-            label={t("dashboard.available")} 
-            value={summary.totalBalance.value - summary.totalCreditCardDebt.value} 
-            total={summary.totalBalance.value} 
-            color="#06b6d4" 
-          />
-          <StatBar 
-            label={t("dashboard.debt")} 
-            value={summary.totalCreditCardDebt.value} 
-            total={summary.totalBalance.value} 
-            color="#ef4444" 
-          />
-        </div>
       </div>
 
       <section className="space-y-4">
@@ -225,68 +208,78 @@ export function DashboardView(): React.JSX.Element {
         </div>
 
         <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-          {summary.upcomingPayments.map((payment: IUpcomingPayment) => {
-            const daysUntil = getDaysUntil(payment.dueDate);
-            const isUrgent = daysUntil <= 3;
+          {summary.upcomingPayments.length === 0 ? (
+            <div className="md:col-span-2 lg:col-span-3 card-surface rounded-xl p-6 flex flex-col items-center justify-center gap-2 text-center">
+              <div className="bg-cyan-500/10 p-3 rounded-xl ring-1 ring-cyan-500/10 mb-1">
+                <Calendar className="w-6 h-6 text-cyan-500 dark:text-cyan-400" />
+              </div>
+              <p className="font-semibold text-zinc-900 dark:text-white text-sm">{t("dashboard.noUpcomingPayments")}</p>
+              <p className="text-xs text-zinc-500 dark:text-zinc-500">{t("dashboard.noUpcomingPaymentsDesc")}</p>
+            </div>
+          ) : (
+            summary.upcomingPayments.map((payment: IUpcomingPayment) => {
+              const daysUntil = getDaysUntil(payment.dueDate);
+              const isUrgent = daysUntil <= 3;
 
-            let dueText = "";
-            if (daysUntil === 0) {
-              dueText = t("dashboard.dueToday");
-            } else if (daysUntil === 1) {
-              dueText = t("dashboard.dueTomorrow");
-            } else {
-              const template = t("dashboard.inDays");
-              dueText = template.replace("{days}", daysUntil.toString());
-            }
+              let dueText = "";
+              if (daysUntil === 0) {
+                dueText = t("dashboard.dueToday");
+              } else if (daysUntil === 1) {
+                dueText = t("dashboard.dueTomorrow");
+              } else {
+                const template = t("dashboard.inDays");
+                dueText = template.replace("{days}", daysUntil.toString());
+              }
 
-            return (
-              <div
-                key={payment.id}
-                className={cn(
-                  "card-surface rounded-xl p-4 transition-all duration-300 hover:card-elevated hover:scale-[1.02] group",
-                  isUrgent && "ring-1 ring-amber-500/30"
-                )}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <h4 className="font-semibold text-zinc-900 dark:text-white text-sm">{payment.name}</h4>
-                    <p className="text-xs text-zinc-500 dark:text-zinc-500 mt-1.5">
-                      {payment.dueDate.toLocaleDateString(locale, {
-                        month: "short",
-                        day: "numeric",
-                      })}
-                      {" · "}
+              return (
+                <div
+                  key={payment.id}
+                  className={cn(
+                    "card-surface rounded-xl p-4 transition-all duration-300 hover:card-elevated hover:scale-[1.02] group",
+                    isUrgent && "ring-1 ring-amber-500/30"
+                  )}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-zinc-900 dark:text-white text-sm">{payment.name}</h4>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-500 mt-1.5">
+                        {payment.dueDate.toLocaleDateString(locale, {
+                          month: "short",
+                          day: "numeric",
+                        })}
+                        {" · "}
+                        <span
+                          className={cn(
+                            "font-medium",
+                            isUrgent ? "text-amber-500 dark:text-amber-400" : "text-zinc-500 dark:text-zinc-500"
+                          )}
+                        >
+                          {dueText}
+                        </span>
+                      </p>
+                    </div>
+                    <div className="text-right space-y-1.5">
+                      <p className="font-bold text-zinc-900 dark:text-white text-sm tracking-tight">
+                        {formatCurrency(payment.amount, language)}
+                      </p>
                       <span
                         className={cn(
-                          "font-medium",
-                          isUrgent ? "text-amber-500 dark:text-amber-400" : "text-zinc-500 dark:text-zinc-500"
+                          "inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold tracking-wide uppercase",
+                          payment.type === "card" && "bg-blue-500/10 text-blue-600 dark:text-blue-400 ring-1 ring-blue-500/20",
+                          payment.type === "subscription" && "bg-purple-500/10 text-purple-600 dark:text-purple-400 ring-1 ring-purple-500/20",
+                          payment.type === "loan" && "bg-orange-500/10 text-orange-600 dark:text-orange-400 ring-1 ring-orange-500/20"
                         )}
                       >
-                        {dueText}
+                        {payment.type === "card" && t("dashboard.card")}
+                        {payment.type === "subscription" && t("dashboard.subscription")}
+                        {payment.type === "loan" && t("dashboard.bill")}
                       </span>
-                    </p>
-                  </div>
-                  <div className="text-right space-y-1.5">
-                    <p className="font-bold text-zinc-900 dark:text-white text-sm tracking-tight">
-                      {formatCurrency(payment.amount, language)}
-                    </p>
-                    <span
-                      className={cn(
-                        "inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold tracking-wide uppercase",
-                        payment.type === "card" && "bg-blue-500/10 text-blue-600 dark:text-blue-400 ring-1 ring-blue-500/20",
-                        payment.type === "subscription" && "bg-purple-500/10 text-purple-600 dark:text-purple-400 ring-1 ring-purple-500/20",
-                        payment.type === "loan" && "bg-orange-500/10 text-orange-600 dark:text-orange-400 ring-1 ring-orange-500/20"
-                      )}
-                    >
-                      {payment.type === "card" && t("dashboard.card")}
-                      {payment.type === "subscription" && t("dashboard.subscription")}
-                      {payment.type === "loan" && t("dashboard.bill")}
-                    </span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })
+          )}
         </div>
       </section>
 

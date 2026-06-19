@@ -87,6 +87,7 @@ export interface ISubscription {
   id: string;
   name: string;
   description?: string;
+  iconUrl?: string;
   amount: IAmount;
   frequency: PaymentFrequency;
   nextPaymentDate: Date;

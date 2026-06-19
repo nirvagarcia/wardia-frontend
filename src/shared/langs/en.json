@@ -12,7 +12,7 @@
     "greeting": "Hello",
     "summary": "Here's your financial summary for",
     "totalBalance": "Total Balance",
-    "debt": "Debt",
+    "debt": "Expense",
     "available": "Available",
     "spent": "Spent",
     "thisMonth": "this month",
@@ -30,6 +30,8 @@
     "financialHealth": "Financial Health",
     "recentTransactions": "Recent Transactions",
     "lastMovements": "Your latest financial movements",
+    "noUpcomingPayments": "No upcoming payments",
+    "noUpcomingPaymentsDesc": "No payments or due dates in the next 30 days",
     "viewAll": "View all"
   },
   "accounts": {
@@ -189,7 +191,7 @@
     "categoryOtherIncome": "Other Income",
     "categoryDining": "Dining",
     "categoryGroceries": "Groceries",
-    "categoryCoffee": "Coffee & Snacks",
+    "categoryCoffee": "Snacks",
     "categoryClothing": "Clothing",
     "categoryTech": "Technology",
     "categoryEntertainment": "Entertainment",
@@ -200,6 +202,7 @@
     "categoryHealth": "Health",
     "categoryEducation": "Education",
     "categoryHousing": "Housing",
+    "categoryGifts": "Gifts",
     "categoryOtherExpense": "Other Expense"
   },
   "credentials": {

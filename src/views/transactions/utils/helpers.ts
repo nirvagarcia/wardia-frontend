@@ -27,6 +27,7 @@ export type TransactionCategory =
   | "health"
   | "education"
   | "housing"
+  | "gifts"
   | "other-expense";
 
 interface CategoryInfo {
@@ -45,19 +46,17 @@ export const incomeCategories: CategoryInfo[] = [
 ];
 
 export const expenseCategories: CategoryInfo[] = [
-  { key: "dining", labelKey: "transactions.categoryDining", icon: "🍽️", type: "expense" },
   { key: "groceries", labelKey: "transactions.categoryGroceries", icon: "🛒", type: "expense" },
-  { key: "coffee", labelKey: "transactions.categoryCoffee", icon: "☕", type: "expense" },
-  { key: "clothing", labelKey: "transactions.categoryClothing", icon: "👕", type: "expense" },
-  { key: "tech", labelKey: "transactions.categoryTech", icon: "💻", type: "expense" },
-  { key: "entertainment", labelKey: "transactions.categoryEntertainment", icon: "🎬", type: "expense" },
-  { key: "snacks", labelKey: "transactions.categorySnacks", icon: "🍬", type: "expense" },
-  { key: "utilities", labelKey: "transactions.categoryUtilities", icon: "⚡", type: "expense" },
   { key: "transportation", labelKey: "transactions.categoryTransportation", icon: "🚗", type: "expense" },
+  { key: "coffee", labelKey: "transactions.categoryCoffee", icon: "🍬", type: "expense" },
+  { key: "clothing", labelKey: "transactions.categoryClothing", icon: "👕", type: "expense" },
   { key: "fitness", labelKey: "transactions.categoryFitness", icon: "💪", type: "expense" },
   { key: "health", labelKey: "transactions.categoryHealth", icon: "🏥", type: "expense" },
   { key: "education", labelKey: "transactions.categoryEducation", icon: "📚", type: "expense" },
+  { key: "entertainment", labelKey: "transactions.categoryEntertainment", icon: "🎬", type: "expense" },
+  { key: "utilities", labelKey: "transactions.categoryUtilities", icon: "⚡", type: "expense" },
   { key: "housing", labelKey: "transactions.categoryHousing", icon: "🏠", type: "expense" },
+  { key: "gifts", labelKey: "transactions.categoryGifts", icon: "🎁", type: "expense" },
   { key: "other-expense", labelKey: "transactions.categoryOtherExpense", icon: "📦", type: "expense" },
 ];
 

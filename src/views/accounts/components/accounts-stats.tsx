@@ -4,45 +4,44 @@
  */
 
 import React from "react";
+import { ArrowDownRight, Wallet, CreditCard } from "lucide-react";
 
-interface StatsCardProps {
+interface HeroCardProps {
   label: string;
   value: string;
   subtitle: string;
-  variant: "cyan" | "red";
+  icon: React.ReactNode;
 }
 
-function StatsCard({ label, value, subtitle, variant }: StatsCardProps): React.JSX.Element {
-  const colors = variant === "cyan"
-    ? {
-        gradient: "from-cyan-50 to-teal-100 dark:from-cyan-600/30 dark:to-teal-600/30",
-        border: "border-cyan-200/40 dark:border-white/5",
-        labelText: "text-cyan-700 dark:text-cyan-300",
-        valueText: "text-cyan-900 dark:text-white",
-        subtitleText: "text-cyan-600 dark:text-cyan-400",
-      }
-    : {
-        gradient: "from-red-50 to-rose-100 dark:from-red-600/30 dark:to-rose-600/30",
-        border: "border-red-200/40 dark:border-white/5",
-        labelText: "text-red-700 dark:text-red-300",
-        valueText: "text-red-900 dark:text-white",
-        subtitleText: "text-red-600 dark:text-red-400",
-      };
-
+function HeroCard({ label, value, subtitle, icon }: HeroCardProps): React.JSX.Element {
   return (
-    <div className={`relative overflow-hidden rounded-2xl p-5 md:p-6 bg-gradient-to-br ${colors.gradient} shadow-sm dark:shadow-[0_8px_16px_rgba(0,0,0,0.3)] border ${colors.border}`}>
-      <div className="absolute inset-0 shadow-[inset_0_1px_2px_rgba(255,255,255,0.5)] dark:shadow-[inset_0_2px_8px_rgba(255,255,255,0.05)]" />
-      <div className="relative">
-        <p className={`${colors.labelText} text-xs md:text-sm font-semibold mb-1`}>
-          {label}
-        </p>
-        <p className={`text-3xl md:text-[2.5rem] leading-tight font-bold ${colors.valueText} tracking-tight`}>
-          {value}
-        </p>
-        <p className={`${colors.subtitleText} text-xs md:text-sm mt-2 font-medium`}>
-          {subtitle}
-        </p>
+    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-cyan-500 via-cyan-600 to-teal-700 p-8 card-elevated transition-all duration-300 hover:scale-[1.02]">
+      <div className="gradient-mesh-cyan absolute inset-0 opacity-50" />
+      <div className="relative flex flex-col items-center justify-center text-center space-y-4">
+        <div className="bg-white/15 backdrop-blur-sm p-3 rounded-xl ring-1 ring-white/20">
+          {icon}
+        </div>
+        <div>
+          <p className="text-cyan-100/80 text-sm font-medium mb-2">{label}</p>
+          <h2 className="text-[2.5rem] leading-none font-bold text-white tracking-tight">{value}</h2>
+        </div>
+        <p className="text-cyan-200/70 text-sm">{subtitle}</p>
       </div>
+    </div>
+  );
+}
+
+function RedCard({ label, value, subtitle }: { label: string; value: string; subtitle: string }): React.JSX.Element {
+  return (
+    <div className="card-surface rounded-2xl p-5 md:p-6 flex flex-col justify-between transition-all duration-300 hover:card-elevated">
+      <div className="flex items-center gap-2.5 mb-3">
+        <div className="bg-red-500/10 p-2 rounded-lg ring-1 ring-red-500/10">
+          <ArrowDownRight className="w-4 h-4 text-red-500" />
+        </div>
+        <span className="text-sm text-zinc-500 dark:text-zinc-400 font-medium">{label}</span>
+      </div>
+      <p className="text-2xl md:text-3xl font-bold text-red-500 dark:text-red-400 tracking-tight">{value}</p>
+      <p className="text-xs md:text-sm text-zinc-500 dark:text-zinc-500 mt-2 font-medium">{subtitle}</p>
     </div>
   );
 }
@@ -66,14 +65,13 @@ export function DebitStats({
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <StatsCard
-        variant="cyan"
+      <HeroCard
         label="Balance de Cuentas"
         value={totalBalance}
         subtitle={`${accountsCount} ${accountsLabel}`}
+        icon={<Wallet className="w-6 h-6 text-white" />}
       />
-      <StatsCard
-        variant="red"
+      <RedCard
         label={spentLabel}
         value={spentAmount}
         subtitle={thisMonthLabel}
@@ -103,14 +101,13 @@ export function CreditStats({
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <StatsCard
-        variant="cyan"
+      <HeroCard
         label={availableLabel}
         value={availableCredit}
         subtitle={`${cardsCount} ${cardsLabel}`}
+        icon={<CreditCard className="w-6 h-6 text-white" />}
       />
-      <StatsCard
-        variant="red"
+      <RedCard
         label={usedLabel}
         value={usedCredit}
         subtitle={thisMonthLabel}

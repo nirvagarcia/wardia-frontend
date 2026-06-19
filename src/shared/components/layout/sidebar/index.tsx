@@ -39,9 +39,9 @@ export const Sidebar: React.FC = () => {
 
   const navItems: NavItem[] = [
     { href: "/dashboard", labelKey: "nav.home", icon: Home },
+    { href: "/accounts", labelKey: "nav.accounts", icon: Wallet },
     { href: "/transactions", labelKey: "nav.transactions", icon: TrendingUp },
     { href: "/services", labelKey: "nav.services", icon: Receipt },
-    { href: "/accounts", labelKey: "nav.accounts", icon: Wallet },
   ];
 
   const toggleTheme = () => {

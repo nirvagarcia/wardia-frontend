@@ -57,7 +57,7 @@ export function AddTransactionModal({
     status: "pending" | "completed";
   }>({
     type: "expense",
-    category: "dining",
+    category: "groceries",
     description: "",
     amount: "",
     currency: "PEN",

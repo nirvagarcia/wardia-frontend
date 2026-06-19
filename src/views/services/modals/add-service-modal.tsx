@@ -6,9 +6,10 @@
  */
 
 import React, { useState, useEffect } from "react";
+import Image from "next/image";
 import { usePreferencesStore } from "@/shared/stores/preferences-store";
 import { getTranslation } from "@/shared/langs";
-import { X, Calendar, DollarSign, Tag, FileText, RefreshCw, CheckCircle } from "lucide-react";
+import { X, Calendar, DollarSign, Tag, FileText, RefreshCw, CheckCircle, Upload, Image as ImageIcon } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
@@ -26,12 +27,12 @@ interface AddServiceModalProps {
 }
 
 const categories = [
-  { key: "entertainment", icon: "🎬" },
-  { key: "productivity", icon: "💼" },
-  { key: "health", icon: "💪" },
+  { key: "housing", icon: "🏠" },
   { key: "utilities", icon: "⚡" },
   { key: "telecom", icon: "📡" },
-  { key: "housing", icon: "🏠" },
+  { key: "health", icon: "💪" },
+  { key: "productivity", icon: "💼" },
+  { key: "entertainment", icon: "🎬" },
 ];
 
 export function AddServiceModal({ isOpen, onClose, onAdd, editingService, onUpdate }: AddServiceModalProps): React.JSX.Element | null {
@@ -44,6 +45,7 @@ export function AddServiceModal({ isOpen, onClose, onAdd, editingService, onUpda
     name: string;
     description: string;
     category: string;
+    iconUrl: string;
     amount: string;
     currency: "PEN" | "USD" | "EUR";
     frequency: PaymentFrequency;
@@ -53,7 +55,8 @@ export function AddServiceModal({ isOpen, onClose, onAdd, editingService, onUpda
   }>({
     name: "",
     description: "",
-    category: "entertainment",
+    category: "housing",
+    iconUrl: "",
     amount: "",
     currency: "PEN",
     frequency: "monthly",
@@ -75,6 +78,7 @@ export function AddServiceModal({ isOpen, onClose, onAdd, editingService, onUpda
         name: editingService.name,
         description: editingService.description || "",
         category: editingService.category,
+        iconUrl: editingService.iconUrl || "",
         amount: editingService.amount.value.toString(),
         currency: editingService.amount.currency,
         frequency: editingService.frequency,
@@ -87,7 +91,8 @@ export function AddServiceModal({ isOpen, onClose, onAdd, editingService, onUpda
         ...prev,
         name: "",
         description: "",
-        category: "entertainment",
+        category: "housing",
+        iconUrl: "",
         amount: "",
         currency: "PEN",
         frequency: "monthly",
@@ -122,6 +127,7 @@ export function AddServiceModal({ isOpen, onClose, onAdd, editingService, onUpda
       name: formData.name,
       description: formData.description,
       category: formData.category,
+      iconUrl: formData.iconUrl || undefined,
       amount: {
         value: parseFloat(formData.amount),
         currency: formData.currency,
@@ -141,7 +147,8 @@ export function AddServiceModal({ isOpen, onClose, onAdd, editingService, onUpda
     setFormData({
       name: "",
       description: "",
-      category: "entertainment",
+      category: "housing",
+      iconUrl: "",
       amount: "",
       currency: "PEN",
       frequency: "monthly",
@@ -201,6 +208,55 @@ export function AddServiceModal({ isOpen, onClose, onAdd, editingService, onUpda
                   </span>
                 </button>
               ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-zinc-700 dark:text-gray-300 mb-2">
+              <span className="flex items-center gap-2">
+                <ImageIcon className="w-4 h-4" />
+                Ícono del servicio ({t("credentials.optional")})
+              </span>
+            </label>
+            <div className="flex items-center gap-4">
+              <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-zinc-100 dark:bg-zinc-800 ring-1 ring-zinc-200 dark:ring-zinc-700 flex-shrink-0">
+                {formData.iconUrl ? (
+                  <Image src={formData.iconUrl} alt="icon" fill className="object-cover" unoptimized />
+                ) : (
+                  <span className="text-3xl absolute inset-0 flex items-center justify-center">
+                    {categories.find(c => c.key === formData.category)?.icon || "💳"}
+                  </span>
+                )}
+              </div>
+              <div className="flex-1">
+                <label className="cursor-pointer flex items-center gap-2 px-4 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors text-sm text-zinc-600 dark:text-zinc-400">
+                  <Upload className="w-4 h-4" />
+                  Subir imagen
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      const reader = new FileReader();
+                      reader.onload = (ev) => {
+                        setFormData({ ...formData, iconUrl: ev.target?.result as string });
+                      };
+                      reader.readAsDataURL(file);
+                    }}
+                  />
+                </label>
+                {formData.iconUrl && (
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, iconUrl: "" })}
+                    className="mt-2 text-xs text-red-500 hover:text-red-600"
+                  >
+                    Quitar imagen
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 
