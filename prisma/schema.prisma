@@ -17,6 +17,7 @@ model User {
   updatedAt     DateTime        @updatedAt
 
   passwordResets PasswordReset[]
+  billingPeriods BillingPeriod[]
 
   @@index([email])
 }
@@ -106,4 +107,18 @@ model Transaction {
 
   @@index([userId])
   @@index([userId, date])
+}
+
+model BillingPeriod {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label     String
+  startDate DateTime
+  endDate   DateTime? // null = currently active period
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([userId, startDate])
 }

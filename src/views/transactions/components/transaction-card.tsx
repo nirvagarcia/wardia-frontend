@@ -9,7 +9,7 @@ import { usePreferencesStore } from "@/shared/stores/preferences-store";
 import { getTranslation } from "@/shared/langs";
 import { getLocale, formatCurrency } from "@/shared/utils/currency";
 import { formatDate } from "@/shared/utils/date";
-import { Clock, Pencil, Trash2 } from "lucide-react";
+import { Clock, Pencil, Repeat2, Trash2 } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import {
   getCategoryIcon,
@@ -55,6 +55,11 @@ export function TransactionCard({
         >
           <div className="relative w-9 h-9 rounded-lg flex-shrink-0 bg-zinc-100 dark:bg-zinc-800 ring-1 ring-zinc-200/50 dark:ring-zinc-700 flex items-center justify-center text-lg flex-shrink-0">
             {categoryIcon}
+            {transaction.isService && (
+              <span className="absolute -top-1 -right-1 bg-cyan-500 rounded-full p-0.5 ring-1 ring-white dark:ring-zinc-900">
+                <Repeat2 className="w-2.5 h-2.5 text-white" />
+              </span>
+            )}
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5 mb-1">

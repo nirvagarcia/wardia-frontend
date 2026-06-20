@@ -14,9 +14,20 @@ function toTransaction(r: ITransaction & { transactionDate: string }): ITransact
   return { ...r, transactionDate: new Date(r.transactionDate) };
 }
 
+export type TransactionQueryParams =
+  | string
+  | { startDate: string; endDate?: string };
+
 export const transactionsService = {
-  async getTransactions(month?: string): Promise<ITransaction[]> {
-    const url = month ? `/api/transactions?month=${month}` : "/api/transactions";
+  async getTransactions(params?: TransactionQueryParams): Promise<ITransaction[]> {
+    let url = "/api/transactions";
+    if (typeof params === "string") {
+      url = `/api/transactions?month=${params}`;
+    } else if (params) {
+      const qs = new URLSearchParams({ startDate: params.startDate });
+      if (params.endDate) qs.set("endDate", params.endDate);
+      url = `/api/transactions?${qs.toString()}`;
+    }
     const res = await fetch(url);
     const data = await handleResponse<ITransaction[]>(res);
     return data.map((t) => toTransaction(t as ITransaction & { transactionDate: string }));

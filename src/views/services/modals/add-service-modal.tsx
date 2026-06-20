@@ -15,6 +15,7 @@ import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { DatePicker } from "@/shared/components/ui/date-picker";
 import { Textarea } from "@/shared/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/components/ui/select";
 import type { ISubscription, PaymentFrequency, SubscriptionStatus } from "@/shared/types/finance";
 
 interface AddServiceModalProps {
@@ -262,18 +263,19 @@ export function AddServiceModal({ isOpen, onClose, onAdd, editingService, onUpda
                 <DollarSign className="w-4 h-4" />
                 {t("forms.currency")}
               </Label>
-              <div className="relative">
-                <select
-                  value={formData.currency}
-                  onChange={(e) => setFormData({ ...formData, currency: e.target.value as "PEN" | "USD" | "EUR" })}
-                  className="w-full h-10 appearance-none rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 pr-8 text-sm text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 transition-colors"
-                >
-                  <option value="PEN">PEN (S/)</option>
-                  <option value="USD">USD ($)</option>
-                  <option value="EUR">EUR (€)</option>
-                </select>
-                <svg className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"/></svg>
-              </div>
+              <Select
+                value={formData.currency}
+                onValueChange={(v) => setFormData({ ...formData, currency: v as "PEN" | "USD" | "EUR" })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="PEN">PEN (S/)</SelectItem>
+                  <SelectItem value="USD">USD ($)</SelectItem>
+                  <SelectItem value="EUR">EUR (€)</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
@@ -282,19 +284,20 @@ export function AddServiceModal({ isOpen, onClose, onAdd, editingService, onUpda
               <RefreshCw className="w-4 h-4" />
               {t("forms.frequency")}
             </Label>
-            <div className="relative">
-              <select
-                value={formData.frequency}
-                onChange={(e) => setFormData({ ...formData, frequency: e.target.value as PaymentFrequency })}
-                className="w-full h-10 appearance-none rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 pr-8 text-sm text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 transition-colors"
-              >
-                <option value="monthly">{t("services.monthly")}</option>
-                <option value="yearly">{t("services.yearly")}</option>
-                <option value="weekly">{t("services.weekly")}</option>
-                <option value="quarterly">{t("services.quarterly")}</option>
-              </select>
-              <svg className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"/></svg>
-            </div>
+            <Select
+              value={formData.frequency}
+              onValueChange={(v) => setFormData({ ...formData, frequency: v as PaymentFrequency })}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="monthly">{t("services.monthly")}</SelectItem>
+                <SelectItem value="yearly">{t("services.yearly")}</SelectItem>
+                <SelectItem value="weekly">{t("services.weekly")}</SelectItem>
+                <SelectItem value="quarterly">{t("services.quarterly")}</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div>

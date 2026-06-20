@@ -78,6 +78,7 @@ export interface ITransaction {
   category: string;
   transactionDate: Date;
   notes?: string;
+  isService?: boolean;
 }
 
 /**

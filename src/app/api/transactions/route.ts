@@ -9,7 +9,20 @@ export async function GET(req: NextRequest) {
   try {
     const userId = await getUserIdFromCookies();
     const { searchParams } = new URL(req.url);
+    const startDateParam = searchParams.get("startDate");
+    const endDateParam = searchParams.get("endDate");
     const monthParam = searchParams.get("month");
+
+    // Prefer explicit date range (custom billing cycle)
+    if (startDateParam) {
+      const [sy, sm, sd] = startDateParam.split("-").map(Number);
+      const start = new Date(sy!, sm! - 1, sd!);
+      const end = endDateParam
+        ? (() => { const [ey, em, ed] = endDateParam.split("-").map(Number); return new Date(ey!, em! - 1, ed!); })()
+        : null;
+      const transactions = await txnService.getTransactionsByDateRange(userId, start, end);
+      return res.ok(transactions);
+    }
 
     let year: number;
     let month: number;

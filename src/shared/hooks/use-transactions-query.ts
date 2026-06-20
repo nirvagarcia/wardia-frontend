@@ -2,17 +2,20 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { transactionsService } from "@/shared/services/transactions-service";
+import type { TransactionQueryParams } from "@/shared/services/transactions-service";
 import type { ITransaction } from "@/shared/types/finance";
 
-export const TRANSACTIONS_QUERY_KEY = (month?: string) =>
-  month ? ["transactions", month] : ["transactions"];
+export type { TransactionQueryParams };
+
+export const TRANSACTIONS_QUERY_KEY = (params?: TransactionQueryParams) =>
+  params ? ["transactions", params] : ["transactions"];
 
 export const HISTORY_QUERY_KEY = ["transactions", "history"] as const;
 
-export function useTransactionsQuery(month?: string) {
+export function useTransactionsQuery(params?: TransactionQueryParams) {
   return useQuery({
-    queryKey: TRANSACTIONS_QUERY_KEY(month),
-    queryFn: () => transactionsService.getTransactions(month),
+    queryKey: TRANSACTIONS_QUERY_KEY(params),
+    queryFn: () => transactionsService.getTransactions(params),
   });
 }
 
@@ -23,37 +26,34 @@ export function useTransactionHistoryQuery() {
   });
 }
 
-export function useAddTransaction(month?: string) {
+export function useAddTransaction() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: Omit<ITransaction, "id">) =>
       transactionsService.createTransaction(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: TRANSACTIONS_QUERY_KEY(month) });
-      queryClient.invalidateQueries({ queryKey: HISTORY_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: ["transactions"] });
     },
   });
 }
 
-export function useUpdateTransaction(month?: string) {
+export function useUpdateTransaction() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: Omit<ITransaction, "id"> }) =>
       transactionsService.updateTransaction(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: TRANSACTIONS_QUERY_KEY(month) });
-      queryClient.invalidateQueries({ queryKey: HISTORY_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: ["transactions"] });
     },
   });
 }
 
-export function useDeleteTransaction(month?: string) {
+export function useDeleteTransaction() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => transactionsService.deleteTransaction(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: TRANSACTIONS_QUERY_KEY(month) });
-      queryClient.invalidateQueries({ queryKey: HISTORY_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: ["transactions"] });
     },
   });
 }

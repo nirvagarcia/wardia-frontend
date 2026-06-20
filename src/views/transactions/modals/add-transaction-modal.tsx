@@ -13,6 +13,7 @@ import { cn } from "@/shared/utils/cn";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { DatePicker } from "@/shared/components/ui/date-picker";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/components/ui/select";
 import { transactionModalSchema } from "@/shared/validation/schemas";
 import type { ITransaction } from "@/shared/types/finance";
 import type { TransactionType } from "@/shared/types";
@@ -285,19 +286,19 @@ export function AddTransactionModal({
 
             <div className="space-y-2">
               <Label htmlFor="currency">{t("forms.currency")}</Label>
-              <div className="relative">
-                <select
-                  id="currency"
-                  value={formData.currency}
-                  onChange={(e) => setFormData({ ...formData, currency: e.target.value as "PEN" | "USD" | "EUR" })}
-                  className="w-full h-10 appearance-none rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 pr-8 text-sm text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 transition-colors"
-                >
-                  <option value="PEN">PEN (S/)</option>
-                  <option value="USD">USD ($)</option>
-                  <option value="EUR">EUR (€)</option>
-                </select>
-                <svg className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"/></svg>
-              </div>
+              <Select
+                value={formData.currency}
+                onValueChange={(v) => setFormData({ ...formData, currency: v as "PEN" | "USD" | "EUR" })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="PEN">PEN (S/)</SelectItem>
+                  <SelectItem value="USD">USD ($)</SelectItem>
+                  <SelectItem value="EUR">EUR (€)</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 

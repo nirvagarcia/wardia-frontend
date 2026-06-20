@@ -18,6 +18,7 @@ interface TransactionStatsProps {
   expensesLabel: string;
   balanceLabel: string;
   thisMonthLabel: string;
+  periodStartDateLabel?: string;
 }
 
 export function TransactionStats({
@@ -29,6 +30,7 @@ export function TransactionStats({
   expensesLabel,
   balanceLabel,
   thisMonthLabel,
+  periodStartDateLabel,
 }: TransactionStatsProps): React.JSX.Element {
   return (
     <>
@@ -43,7 +45,10 @@ export function TransactionStats({
             )}>
               {formatAmount(balance)}
             </h2>
-            <p className="text-cyan-200/70 text-xs mt-0.5">{thisMonthLabel}</p>
+            <p className="text-cyan-200/80 text-xs mt-0.5 font-medium">{thisMonthLabel}</p>
+            {periodStartDateLabel && (
+              <p className="text-cyan-200/60 text-[10px] mt-0.5">{periodStartDateLabel}</p>
+            )}
           </div>
           <div className="flex flex-col gap-2 items-end">
             <div className="text-right">
@@ -75,7 +80,10 @@ export function TransactionStats({
                 {formatAmount(balance)}
               </h2>
             </div>
-            <p className="text-cyan-200/70 text-sm">{thisMonthLabel}</p>
+            <p className="text-cyan-200/80 text-sm font-semibold">{thisMonthLabel}</p>
+            {periodStartDateLabel && (
+              <p className="text-cyan-200/60 text-xs">{periodStartDateLabel}</p>
+            )}
           </div>
         </div>
 

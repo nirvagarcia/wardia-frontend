@@ -30,6 +30,10 @@ interface PreferencesState {
   currency: Currency;
   setCurrency: (currency: Currency) => void;
 
+  /** Day of the month the user receives their income (1–28). Defines the billing period start. */
+  billingCycleStartDay: number;
+  setBillingCycleStartDay: (day: number) => void;
+
   notifications: {
     paymentReminders: boolean;
     balanceAlerts: boolean;
@@ -59,6 +63,9 @@ export const usePreferencesStore = create<PreferencesState>()(
         set({ currency });
         syncPreferences({ currency });
       },
+
+      billingCycleStartDay: 1,
+      setBillingCycleStartDay: (day: number) => set({ billingCycleStartDay: day }),
 
       notifications: {
         paymentReminders: true,

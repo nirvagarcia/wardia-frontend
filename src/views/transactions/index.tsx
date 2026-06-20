@@ -1,17 +1,18 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { usePreferencesStore } from "@/shared/stores/preferences-store";
 import { getTranslation } from "@/shared/langs";
-import { formatCurrency, getLocale } from "@/shared/utils/currency";
-import { Receipt, Plus, Filter, History, Layers, TrendingUp, TrendingDown } from "lucide-react";
+import { formatCurrency } from "@/shared/utils/currency";
+import { Receipt, Plus, Filter, History, Layers, TrendingUp, TrendingDown, BarChart2, ChevronDown, Banknote } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import { TransactionStats } from "./components/transaction-stats";
 import { TransactionCard } from "./components/transaction-card";
 import { TransactionsSkeleton } from "./components/transactions-skeleton";
 import { AddTransactionModal } from "./modals/add-transaction-modal";
-import { TransactionHistoryModal } from "./modals/transaction-history-modal";
+import { StartPeriodModal } from "./modals/start-period-modal";
 import { ConfirmModal } from "@/shared/components/modals/confirm-modal";
 import {
   useTransactionsQuery,
@@ -19,6 +20,9 @@ import {
   useUpdateTransaction,
   useDeleteTransaction,
 } from "@/shared/hooks/use-transactions-query";
+import { useCurrentPeriod } from "@/shared/hooks/use-periods-query";
+import { useServicesQuery } from "@/shared/hooks/use-services-query";
+import { getServicesInPeriod } from "@/shared/utils/service-payments";
 import type { ITransaction } from "@/shared/types/finance";
 import {
   filterTransactionsByType,
@@ -30,31 +34,49 @@ import {
 
 type FilterType = "all" | "income" | "expense";
 
-function getCurrentMonth(): string {
-  const now = new Date();
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
-}
-
 export function TransactionsView(): React.JSX.Element {
   const [mounted, setMounted] = useState(false);
   const { language, currency } = usePreferencesStore();
   const t = (key: string, vars?: Record<string, string | number>) => getTranslation(language, key, vars);
 
-  const currentMonth = useMemo(() => getCurrentMonth(), []);
+  const periodQuery = useCurrentPeriod();
+  const apiParams = useMemo(() => {
+    if (!periodQuery.data) return undefined;
+    const start = periodQuery.data.startDate.split("T")[0]!;
+    return periodQuery.data.endDate
+      ? { startDate: start, endDate: periodQuery.data.endDate.split("T")[0]! }
+      : { startDate: start };
+  }, [periodQuery.data]);
 
   useEffect(() => { setMounted(true); }, []);
 
-  const { data: transactions = [], isLoading, isError } = useTransactionsQuery(currentMonth);
-  const addMutation = useAddTransaction(currentMonth);
-  const updateMutation = useUpdateTransaction(currentMonth);
-  const deleteMutation = useDeleteTransaction(currentMonth);
+  const { data: transactions = [], isLoading, isError } = useTransactionsQuery(apiParams);
+  const { data: servicesData } = useServicesQuery();
+  const services = useMemo(() => servicesData?.services ?? [], [servicesData]);
+  const addMutation = useAddTransaction();
+  const updateMutation = useUpdateTransaction();
+  const deleteMutation = useDeleteTransaction();
 
   const isActionLoading =
     addMutation.isPending || updateMutation.isPending || deleteMutation.isPending;
 
+  const router = useRouter();
+  const menuRef = useRef<HTMLDivElement>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [isStartPeriodModalOpen, setIsStartPeriodModalOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<ITransaction | null>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
   const [filterType, setFilterType] = useState<FilterType>("all");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
@@ -64,27 +86,57 @@ export function TransactionsView(): React.JSX.Element {
     description: string;
   }>({ isOpen: false, id: null, description: "" });
 
+  const servicePayments = useMemo(() => {
+    if (!periodQuery.data) return [];
+    const periodStart = new Date(periodQuery.data.startDate);
+    const periodEnd = periodQuery.data.endDate
+      ? new Date(periodQuery.data.endDate)
+      : new Date();
+    return getServicesInPeriod(
+      services.filter((s) => s.status === "active"),
+      periodStart,
+      periodEnd,
+    );
+  }, [services, periodQuery.data]);
+
+  const allTransactions = useMemo(
+    () => [...transactions, ...servicePayments],
+    [transactions, servicePayments],
+  );
+
   const totalIncome = useMemo(
-    () => transactions
+    () => allTransactions
       .filter((t) => t.type === "income")
       .reduce((sum, t) => sum + t.amount.value, 0),
-    [transactions]
+    [allTransactions]
   );
   const totalExpenses = useMemo(
-    () => transactions
+    () => allTransactions
       .filter((t) => t.type === "expense")
       .reduce((sum, t) => sum + t.amount.value, 0),
-    [transactions]
+    [allTransactions]
   );
   const balance = useMemo(() => totalIncome - totalExpenses, [totalIncome, totalExpenses]);
 
   const filteredTransactions = useMemo(() => {
-    let filtered = filterTransactionsByType(transactions, filterType);
+    let filtered = filterTransactionsByType(allTransactions, filterType);
     filtered = filterTransactionsByCategory(filtered, selectedCategories);
     return sortTransactionsByDate(filtered, "desc");
-  }, [transactions, filterType, selectedCategories]);
+  }, [allTransactions, filterType, selectedCategories]);
 
-  if (!mounted || isLoading) return <TransactionsSkeleton />;
+  const periodStartDateLabel = useMemo(() => {
+    if (!periodQuery.data) return "";
+    const date = new Date(periodQuery.data.startDate);
+    const locale = language === "es" ? "es-PE" : "en-US";
+    const formatted = date.toLocaleDateString(locale, {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+    return getTranslation(language, "transactions.periodStarted", { date: formatted });
+  }, [periodQuery.data, language]);
+
+  if (!mounted || isLoading || periodQuery.isLoading) return <TransactionsSkeleton />;
 
   if (isError) {
     return (
@@ -158,11 +210,7 @@ export function TransactionsView(): React.JSX.Element {
 
   const formatAmount = (value: number) => formatCurrency(value, currency, language);
 
-  const locale = getLocale(language);
-  const now = new Date();
-  const monthName = now.toLocaleDateString(locale, { month: "long" });
-  const currentMonthYear =
-    monthName.charAt(0).toUpperCase() + monthName.slice(1) + " " + now.getFullYear();
+  const periodLabel = periodQuery.data?.label ?? "";
 
   return (
     <div className="space-y-6">
@@ -179,13 +227,57 @@ export function TransactionsView(): React.JSX.Element {
               {t("transactions.subtitle")}
             </p>
           </div>
-          <button
-            onClick={() => setIsHistoryOpen(true)}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors shrink-0 mt-1"
-          >
-            <History className="w-4 h-4" />
-            {t("transactions.history")}
-          </button>
+          <div className="flex items-center gap-2 shrink-0 mt-1">
+            {/* Finalizar Período button */}
+            <button
+              onClick={() => setIsStartPeriodModalOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-cyan-500 hover:bg-cyan-600 text-white transition-colors"
+            >
+              <Banknote className="w-3.5 h-3.5" />
+              {t("transactions.closePeriod")}
+            </button>
+            {/* Report / History dropdown */}
+            <div ref={menuRef} className="relative">
+            <button
+              onClick={() => setIsMenuOpen((prev) => !prev)}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
+            >
+              <BarChart2 className="w-4 h-4" />
+              {t("transactions.report")}
+              <ChevronDown
+                className={cn(
+                  "w-3.5 h-3.5 transition-transform duration-200",
+                  isMenuOpen && "-rotate-180",
+                )}
+              />
+            </button>
+
+            {isMenuOpen && (
+              <div className="absolute right-0 top-full mt-1.5 w-48 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-xl shadow-lg overflow-hidden z-20">
+                <button
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    router.push("/transactions/insights");
+                  }}
+                  className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+                >
+                  <BarChart2 className="w-4 h-4 text-zinc-500" />
+                  {t("transactions.reportTitle")}
+                </button>
+                <button
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    router.push("/transactions/history");
+                  }}
+                  className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+                >
+                  <History className="w-4 h-4 text-zinc-500" />
+                  {t("transactions.history")}
+                </button>
+              </div>
+            )}
+            </div>
+          </div>
         </div>
       </header>
 
@@ -197,7 +289,8 @@ export function TransactionsView(): React.JSX.Element {
         incomeLabel={t("transactions.income")}
         expensesLabel={t("transactions.expenses")}
         balanceLabel={t("transactions.balance")}
-        thisMonthLabel={currentMonthYear}
+        thisMonthLabel={periodLabel}
+        periodStartDateLabel={periodStartDateLabel}
       />
 
       <div className="flex gap-2 justify-end">
@@ -241,7 +334,7 @@ export function TransactionsView(): React.JSX.Element {
                 { type: "expense" as const, Icon: TrendingDown, label: t("transactions.expenses"), activeBorder: "border-red-500 bg-red-50 dark:bg-red-950/30",             activeIcon: "text-red-600 dark:text-red-400",       activeBadge: "bg-red-500 text-white",       activeText: "text-red-600 dark:text-red-400"       },
               ]).map(({ type, Icon, label, activeBorder, activeIcon, activeBadge, activeText }) => {
                 const isActive = filterType === type;
-                const count = type === "all" ? transactions.length : transactions.filter((tr) => tr.type === type).length;
+                const count = type === "all" ? allTransactions.length : allTransactions.filter((tr) => tr.type === type).length;
                 return (
                   <button
                     key={type}
@@ -286,7 +379,7 @@ export function TransactionsView(): React.JSX.Element {
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
               {currentFilterCategories.map((category) => {
                 const isActive = selectedCategories.includes(category.key);
-                const categoryCount = transactions.filter(
+                const categoryCount = allTransactions.filter(
                   (tr) => tr.category === category.key
                 ).length;
                 return (
@@ -342,15 +435,17 @@ export function TransactionsView(): React.JSX.Element {
             <TransactionCard
               key={transaction.id}
               transaction={transaction}
-              onEdit={handleEditTransaction}
-              onDelete={(id) => {
-                const found = transactions.find((t) => t.id === id);
-                setConfirmDelete({
-                  isOpen: true,
-                  id,
-                  description: found?.description ?? "",
-                });
-              }}
+              {...(!transaction.isService && {
+                onEdit: handleEditTransaction,
+                onDelete: (id) => {
+                  const found = transactions.find((t) => t.id === id);
+                  setConfirmDelete({
+                    isOpen: true,
+                    id,
+                    description: found?.description ?? "",
+                  });
+                },
+              })}
             />
           ))
         )}
@@ -364,11 +459,6 @@ export function TransactionsView(): React.JSX.Element {
         onUpdate={handleUpdateTransaction}
       />
 
-      <TransactionHistoryModal
-        isOpen={isHistoryOpen}
-        onClose={() => setIsHistoryOpen(false)}
-      />
-
       <ConfirmModal
         isOpen={confirmDelete.isOpen}
         onClose={() => setConfirmDelete({ isOpen: false, id: null, description: "" })}
@@ -378,6 +468,12 @@ export function TransactionsView(): React.JSX.Element {
         confirmText={t("common.delete")}
         cancelText={t("common.cancel")}
         variant="danger"
+      />
+
+      <StartPeriodModal
+        isOpen={isStartPeriodModalOpen}
+        onClose={() => setIsStartPeriodModalOpen(false)}
+        currentPeriodLabel={periodLabel}
       />
     </div>
   );

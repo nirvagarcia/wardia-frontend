@@ -15,6 +15,14 @@ export async function getTransactionsByMonth(userId: string, year: number, month
   return repo.findByUserAndMonth(userId, year, month);
 }
 
+export async function getTransactionsByDateRange(
+  userId: string,
+  start: Date,
+  end: Date | null
+) {
+  return repo.findByDateRange(userId, start, end);
+}
+
 export async function getMonthlyHistory(userId: string): Promise<MonthSummary[]> {
   const all = await repo.findAllByUser(userId);
 

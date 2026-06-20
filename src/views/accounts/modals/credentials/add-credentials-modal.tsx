@@ -5,6 +5,7 @@ import { X, Building2, CreditCard, Wallet, Eye, EyeOff, ChevronLeft } from "luci
 import { cn } from "@/shared/utils/cn";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/components/ui/select";
 import {
   bankCredentialModalSchema,
   debitCardModalSchema,
@@ -159,44 +160,44 @@ function DebitForm({ initial, onSubmit, isSubmitting }: {
       </div>
       <div className="grid grid-cols-2 gap-4">
         <FormField label="Tipo de cuenta *" error={errors['accountType']}>
-          <div className="relative">
-            <select value={form.accountType} onChange={(e) => set("accountType", e.target.value as DebitCardModalData["accountType"])} className="w-full h-10 appearance-none rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 pr-8 text-sm text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 transition-colors">
-              <option value="savings">Ahorros</option>
-              <option value="checking">Corriente</option>
-            </select>
-            <svg className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"/></svg>
-          </div>
+          <Select value={form.accountType} onValueChange={(v) => set("accountType", v as DebitCardModalData["accountType"])}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="savings">Ahorros</SelectItem>
+              <SelectItem value="checking">Corriente</SelectItem>
+            </SelectContent>
+          </Select>
         </FormField>
         <FormField label="Red de tarjeta *" error={errors['cardNetwork']}>
-          <div className="relative">
-            <select value={form.cardNetwork} onChange={(e) => set("cardNetwork", e.target.value as DebitCardModalData["cardNetwork"])} className="w-full h-10 appearance-none rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 pr-8 text-sm text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 transition-colors">
-              <option value="visa">Visa</option>
-              <option value="mastercard">Mastercard</option>
-              <option value="amex">American Express</option>
-              <option value="discover">Discover</option>
-            </select>
-            <svg className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"/></svg>
-          </div>
+          <Select value={form.cardNetwork} onValueChange={(v) => set("cardNetwork", v as DebitCardModalData["cardNetwork"])}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="visa">Visa</SelectItem>
+              <SelectItem value="mastercard">Mastercard</SelectItem>
+              <SelectItem value="amex">American Express</SelectItem>
+              <SelectItem value="discover">Discover</SelectItem>
+            </SelectContent>
+          </Select>
         </FormField>
       </div>
       <FormField label="Numero de cuenta *" error={errors['accountNumber']}><Input value={form.accountNumber} onChange={(e) => set("accountNumber", e.target.value)} placeholder="12345678901" className={cn("font-mono", errors['accountNumber'] && "border-red-500")} /></FormField>
       <FormField label="CCI"><Input value={form.cci ?? ""} onChange={(e) => set("cci", e.target.value)} placeholder="00212345678901234567" className="font-mono" /></FormField>
       <div className="grid grid-cols-3 gap-4">
         <FormField label="Mes venc. *" error={errors['expiryMonth']}>
-          <div className="relative">
-            <select value={String(form.expiryMonth)} onChange={(e) => set("expiryMonth", Number(e.target.value))} className="w-full h-10 appearance-none rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 pr-8 text-sm text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 transition-colors">
-              {MONTHS.map((m) => <option key={m} value={String(Number(m))}>{m}</option>)}
-            </select>
-            <svg className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"/></svg>
-          </div>
+          <Select value={String(form.expiryMonth)} onValueChange={(v) => set("expiryMonth", Number(v))}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {MONTHS.map((m) => <SelectItem key={m} value={String(Number(m))}>{m}</SelectItem>)}
+            </SelectContent>
+          </Select>
         </FormField>
         <FormField label="Ano venc. *" error={errors['expiryYear']}>
-          <div className="relative">
-            <select value={String(form.expiryYear)} onChange={(e) => set("expiryYear", Number(e.target.value))} className="w-full h-10 appearance-none rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 pr-8 text-sm text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 transition-colors">
-              {YEARS.map((y) => <option key={y} value={String(y)}>{y}</option>)}
-            </select>
-            <svg className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"/></svg>
-          </div>
+          <Select value={String(form.expiryYear)} onValueChange={(v) => set("expiryYear", Number(v))}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {YEARS.map((y) => <SelectItem key={y} value={String(y)}>{y}</SelectItem>)}
+            </SelectContent>
+          </Select>
         </FormField>
         <FormField label="CVV *" error={errors['cvv']}><PasswordInput value={form.cvv} onChange={(v) => set("cvv", v)} placeholder="***" error={errors['cvv']} /></FormField>
       </div>
@@ -235,49 +236,49 @@ function CreditForm({ initial, onSubmit, isSubmitting }: {
       <FormField label="Titular *" error={errors['cardholderName']}><Input value={form.cardholderName} onChange={(e) => set("cardholderName", e.target.value)} placeholder="JUAN PEREZ LOPEZ" className={cn("font-mono uppercase", errors['cardholderName'] && "border-red-500")} /></FormField>
       <div className="grid grid-cols-2 gap-4">
         <FormField label="Red de tarjeta *" error={errors['cardNetwork']}>
-          <div className="relative">
-            <select value={form.cardNetwork} onChange={(e) => set("cardNetwork", e.target.value as CreditCardModalData["cardNetwork"])} className="w-full h-10 appearance-none rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 pr-8 text-sm text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 transition-colors">
-              <option value="visa">Visa</option>
-              <option value="mastercard">Mastercard</option>
-              <option value="amex">American Express</option>
-              <option value="discover">Discover</option>
-            </select>
-            <svg className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"/></svg>
-          </div>
+          <Select value={form.cardNetwork} onValueChange={(v) => set("cardNetwork", v as CreditCardModalData["cardNetwork"])}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="visa">Visa</SelectItem>
+              <SelectItem value="mastercard">Mastercard</SelectItem>
+              <SelectItem value="amex">American Express</SelectItem>
+              <SelectItem value="discover">Discover</SelectItem>
+            </SelectContent>
+          </Select>
         </FormField>
         <FormField label="Dia de corte *" error={errors['cutoffDay']}><Input type="number" min={1} max={31} value={form.cutoffDay} onChange={(e) => set("cutoffDay", Number(e.target.value))} className={cn(errors['cutoffDay'] && "border-red-500")} /></FormField>
       </div>
       <div className="grid grid-cols-2 gap-4">
         <FormField label="Limite de credito *" error={errors['creditLimitValue']}><Input type="number" min={0} step="0.01" value={form.creditLimitValue} onChange={(e) => set("creditLimitValue", Number(e.target.value))} className={cn("font-mono", errors['creditLimitValue'] && "border-red-500")} /></FormField>
         <FormField label="Moneda *" error={errors['creditLimitCurrency']}>
-          <div className="relative">
-            <select value={form.creditLimitCurrency} onChange={(e) => set("creditLimitCurrency", e.target.value as CreditCardModalData["creditLimitCurrency"])} className="w-full h-10 appearance-none rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 pr-8 text-sm text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 transition-colors">
-              <option value="PEN">PEN - Sol</option>
-              <option value="USD">USD - Dólar</option>
-              <option value="EUR">EUR - Euro</option>
-            </select>
-            <svg className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"/></svg>
-          </div>
+          <Select value={form.creditLimitCurrency} onValueChange={(v) => set("creditLimitCurrency", v as CreditCardModalData["creditLimitCurrency"])}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="PEN">PEN - Sol</SelectItem>
+              <SelectItem value="USD">USD - Dólar</SelectItem>
+              <SelectItem value="EUR">EUR - Euro</SelectItem>
+            </SelectContent>
+          </Select>
         </FormField>
       </div>
       <FormField label="Numero de cuenta"><Input value={form.accountNumber ?? ""} onChange={(e) => set("accountNumber", e.target.value)} placeholder="Opcional" className="font-mono" /></FormField>
       <FormField label="CCI"><Input value={form.cci ?? ""} onChange={(e) => set("cci", e.target.value)} placeholder="Opcional" className="font-mono" /></FormField>
       <div className="grid grid-cols-3 gap-4">
         <FormField label="Mes venc. *" error={errors['expiryMonth']}>
-          <div className="relative">
-            <select value={String(form.expiryMonth)} onChange={(e) => set("expiryMonth", Number(e.target.value))} className="w-full h-10 appearance-none rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 pr-8 text-sm text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 transition-colors">
-              {MONTHS.map((m) => <option key={m} value={String(Number(m))}>{m}</option>)}
-            </select>
-            <svg className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"/></svg>
-          </div>
+          <Select value={String(form.expiryMonth)} onValueChange={(v) => set("expiryMonth", Number(v))}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {MONTHS.map((m) => <SelectItem key={m} value={String(Number(m))}>{m}</SelectItem>)}
+            </SelectContent>
+          </Select>
         </FormField>
         <FormField label="Ano venc. *" error={errors['expiryYear']}>
-          <div className="relative">
-            <select value={String(form.expiryYear)} onChange={(e) => set("expiryYear", Number(e.target.value))} className="w-full h-10 appearance-none rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 pr-8 text-sm text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 transition-colors">
-              {YEARS.map((y) => <option key={y} value={String(y)}>{y}</option>)}
-            </select>
-            <svg className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"/></svg>
-          </div>
+          <Select value={String(form.expiryYear)} onValueChange={(v) => set("expiryYear", Number(v))}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {YEARS.map((y) => <SelectItem key={y} value={String(y)}>{y}</SelectItem>)}
+            </SelectContent>
+          </Select>
         </FormField>
         <FormField label="CVV *" error={errors['cvv']}><PasswordInput value={form.cvv} onChange={(v) => set("cvv", v)} placeholder="***" error={errors['cvv']} /></FormField>
       </div>

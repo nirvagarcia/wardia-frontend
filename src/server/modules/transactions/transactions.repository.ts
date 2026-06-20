@@ -49,6 +49,24 @@ export async function findByUserAndMonth(
   return rows.map(toTransaction);
 }
 
+export async function findByDateRange(
+  userId: string,
+  start: Date,
+  end: Date | null
+): Promise<ITransaction[]> {
+  const rows = await prisma.transaction.findMany({
+    where: {
+      userId,
+      date: {
+        gte: start,
+        ...(end ? { lt: end } : {}),
+      },
+    },
+    orderBy: { date: "desc" },
+  });
+  return rows.map(toTransaction);
+}
+
 export async function findAllByUser(userId: string): Promise<ITransaction[]> {
   const rows = await prisma.transaction.findMany({
     where: { userId },

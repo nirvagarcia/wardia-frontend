@@ -17,6 +17,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (user.preferences) {
           hydrateFromServer(user.preferences);
         }
+        // If DB is missing language or currency, push current local values once
+        const serverPrefs = user.preferences ?? {};
+        if (!serverPrefs["language"] || !serverPrefs["currency"]) {
+          const { language, currency } = usePreferencesStore.getState();
+          const patch: Record<string, string> = {};
+          if (!serverPrefs["language"]) patch["language"] = language;
+          if (!serverPrefs["currency"]) patch["currency"] = currency;
+          fetch("/api/auth/preferences", {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(patch),
+          }).catch(() => {});
+        }
       })
       .catch(() => setUser(null))
       .finally(() => setLoading(false));
