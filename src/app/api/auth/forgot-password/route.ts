@@ -13,10 +13,8 @@ export async function POST(req: NextRequest) {
     const baseUrl = process.env["NEXT_PUBLIC_BASE_URL"] ?? `${req.nextUrl.protocol}//${req.nextUrl.host}`;
     await authService.forgotPassword(parsed.data.email, baseUrl);
 
-    // Always return success to avoid email enumeration
     return NextResponse.json({ data: null });
   } catch {
-    // Swallow errors silently to avoid email enumeration
     return NextResponse.json({ data: null });
   }
 }

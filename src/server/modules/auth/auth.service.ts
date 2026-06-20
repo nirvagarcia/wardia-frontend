@@ -46,7 +46,7 @@ export const authService = {
 
   async forgotPassword(email: string, baseUrl: string): Promise<void> {
     const user = await authRepository.findByEmail(email);
-    if (!user) return; // Don't reveal whether email exists
+    if (!user) return;
 
     await authRepository.deleteExpiredResets(user.id);
     const token = randomBytes(32).toString("hex");
@@ -95,7 +95,6 @@ export const authService = {
     userId: string,
     preferences: { language?: string; currency?: string; notifications?: Record<string, boolean> }
   ): Promise<void> {
-    // Merge with existing preferences
     const user = await authRepository.findById(userId);
     if (!user) throw new ApiError("Usuario no encontrado", 404);
     const existing = (user.preferences as Record<string, unknown>) ?? {};

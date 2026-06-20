@@ -12,7 +12,6 @@ export async function getOrCreateCurrentPeriod(userId: string): Promise<IBilling
   const existing = await repo.getCurrentPeriod(userId);
   if (existing) return existing;
 
-  // Auto-create a period starting from the 1st of the current month
   const now = new Date();
   const startDate = new Date(Date.UTC(now.getFullYear(), now.getMonth(), 1));
   const label = buildDefaultLabel(startDate);
@@ -28,8 +27,6 @@ export async function startNewPeriod(
   paymentDate: Date,
   label: string
 ): Promise<IBillingPeriod> {
-  // Close the current open period — its end is the start of the new one (exclusive)
   await repo.closeCurrentPeriod(userId, paymentDate);
-  // Open the new period
   return repo.createPeriod(userId, label, paymentDate, null);
 }

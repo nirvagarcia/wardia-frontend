@@ -1,7 +1,7 @@
 export interface IBillingPeriodClient {
   id: string;
   label: string;
-  startDate: string; // ISO string
+  startDate: string;
   endDate: string | null;
 }
 

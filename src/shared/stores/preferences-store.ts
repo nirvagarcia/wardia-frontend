@@ -50,7 +50,7 @@ export const usePreferencesStore = create<PreferencesState>()(
   persist(
     (set) => ({
       theme: "dark",
-      setTheme: (theme: Theme) => set({ theme }), // theme is device-local only
+      setTheme: (theme: Theme) => set({ theme }), 
 
       language: "es",
       setLanguage: (language: Language) => {

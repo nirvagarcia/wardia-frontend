@@ -49,7 +49,6 @@ export function ForgotPasswordView(): React.JSX.Element {
       await authService.forgotPassword(email);
       setEmailSent(true);
     } catch {
-      // Always show success to avoid email enumeration
       setEmailSent(true);
     } finally {
       setIsLoading(false);

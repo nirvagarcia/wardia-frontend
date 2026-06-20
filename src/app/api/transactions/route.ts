@@ -13,7 +13,6 @@ export async function GET(req: NextRequest) {
     const endDateParam = searchParams.get("endDate");
     const monthParam = searchParams.get("month");
 
-    // Prefer explicit date range (custom billing cycle)
     if (startDateParam) {
       const [sy, sm, sd] = startDateParam.split("-").map(Number);
       const start = new Date(sy!, sm! - 1, sd!);

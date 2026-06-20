@@ -16,8 +16,6 @@ interface StartPeriodModalProps {
 }
 
 function suggestLabel(paymentDate: Date, language: string): string {
-  // Paid after the 20th → period belongs to the NEXT month (e.g. May 31 → "Junio 2026")
-  // Paid on day 20 or earlier → period belongs to the SAME month (e.g. July 7 → "Julio 2026")
   const refDate = new Date(paymentDate.getFullYear(), paymentDate.getMonth(), 1);
   if (paymentDate.getDate() >= 20) {
     refDate.setMonth(refDate.getMonth() + 1);

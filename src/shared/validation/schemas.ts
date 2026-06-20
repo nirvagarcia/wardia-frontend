@@ -311,7 +311,6 @@ export type TransactionModalData = z.infer<typeof transactionModalSchema>;
 // TYPE INFERENCE
 // ============================================================================
 
-// Export inferred types for use in components
 export type AmountInput = z.infer<typeof amountSchema>;
 export type AccountInput = z.infer<typeof accountSchema>;
 export type AddAccountInput = z.infer<typeof addAccountFormSchema>;

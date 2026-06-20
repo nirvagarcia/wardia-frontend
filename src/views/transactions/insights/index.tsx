@@ -109,7 +109,6 @@ export function TransactionInsightsView(): React.JSX.Element {
   const { language, currency } = usePreferencesStore();
   const t = (key: string) => getTranslation(language, key);
 
-  // DB-backed billing period navigation
   const { data: periods = [], isLoading: periodsLoading } = usePeriodsQuery();
   const [selectedIndex, setSelectedIndex] = useState(0);
 

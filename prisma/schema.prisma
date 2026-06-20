@@ -115,7 +115,7 @@ model BillingPeriod {
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   label     String
   startDate DateTime
-  endDate   DateTime? // null = currently active period
+  endDate   DateTime?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 

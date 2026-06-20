@@ -6,8 +6,8 @@
  */
 
 export interface BillingPeriod {
-  start: Date; // inclusive
-  end: Date;   // exclusive (first day of NEXT period)
+  start: Date;
+  end: Date;  
 }
 
 /**
@@ -26,7 +26,6 @@ export function getBillingPeriod(startDay: number, referenceDate: Date): Billing
     periodYear = year;
     periodMonth = month;
   } else {
-    // We haven't reached startDay yet this month — period started last month
     if (month === 0) {
       periodYear = year - 1;
       periodMonth = 11;

@@ -67,7 +67,6 @@ export function TransactionsView(): React.JSX.Element {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<ITransaction | null>(null);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {

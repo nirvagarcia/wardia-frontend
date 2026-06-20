@@ -19,7 +19,6 @@ const customStorage = {
       const parsed = JSON.parse(str);
       const { state } = parsed;
       
-      // Convert date strings back to Date objects
       if (state.accounts && Array.isArray(state.accounts)) {
         state.accounts = state.accounts.map((acc: IAccount) => ({
           ...acc,

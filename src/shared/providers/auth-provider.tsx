@@ -17,7 +17,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (user.preferences) {
           hydrateFromServer(user.preferences);
         }
-        // If DB is missing language or currency, push current local values once
         const serverPrefs = user.preferences ?? {};
         if (!serverPrefs["language"] || !serverPrefs["currency"]) {
           const { language, currency } = usePreferencesStore.getState();

@@ -1,105 +1,114 @@
-/**
- * DashboardView - Main financial overview component.
- * Extracted from page.tsx for better modularity and maintainability.
- * Premium enterprise financial dashboard with visual hierarchy.
- * Now with Zustand store integration for real-time data.
+﻿/**
+ * DashboardView â€“ period-based financial summary.
  */
 
 "use client";
 
 import React, { useMemo, useCallback, useState, useEffect } from "react";
 import { usePreferencesStore } from "@/shared/stores/preferences-store";
-import { useAccountsStore } from "@/shared/stores/accounts-store";
-import { useTransactionsStore } from "@/shared/stores/transactions-store";
-import { useInitializeAccounts } from "@/shared/hooks/use-initialize-accounts";
-import { useInitializeTransactions } from "@/shared/hooks/use-initialize-transactions";
-import {
-  useServicesQuery,
-  computeMonthlyTotal,
-  computeUpcomingPayments,
-} from "@/shared/hooks/use-services-query";
+import { useServicesQuery, computeUpcomingPayments } from "@/shared/hooks/use-services-query";
+import { useCurrentPeriod } from "@/shared/hooks/use-periods-query";
+import { useTransactionsQuery } from "@/shared/hooks/use-transactions-query";
+import { getServicesInPeriod } from "@/shared/utils/service-payments";
 import { getTranslation } from "@/shared/langs";
 import { getLocale, formatCurrency } from "@/shared/utils/currency";
 import { getDaysUntil } from "@/shared/utils/date";
-import { IUpcomingPayment, ITransaction } from "@/shared/types/finance";
-import { ArrowUpRight, ArrowDownRight, TrendingUp, Calendar, Layers, Receipt } from "lucide-react";
+import type { IUpcomingPayment } from "@/shared/types/finance";
+import { ArrowUpRight, ArrowDownRight, TrendingUp, Calendar, Receipt } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
-import { getMiniDonutSegments } from "./utils/helpers";
 import { MiniDonutChart } from "./components/mini-donut-chart";
 import { DashboardSkeleton } from "./components/dashboard-skeleton";
+import { TransactionCard } from "@/views/transactions/components/transaction-card";
 
 export function DashboardView(): React.JSX.Element {
   const [mounted, setMounted] = useState(false);
   const { language, currency } = usePreferencesStore();
   const t = useCallback((key: string) => getTranslation(language, key), [language]);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  useEffect(() => { setMounted(true); }, []);
 
-  const accountsInit = useInitializeAccounts();
-  const transactionsInit = useInitializeTransactions();
+  // â”€â”€ Period â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  const periodQuery = useCurrentPeriod();
+  const apiParams = useMemo(() => {
+    if (!periodQuery.data) return undefined;
+    const start = periodQuery.data.startDate.split("T")[0]!;
+    return periodQuery.data.endDate
+      ? { startDate: start, endDate: periodQuery.data.endDate.split("T")[0]! }
+      : { startDate: start };
+  }, [periodQuery.data]);
+
+  const { data: transactions = [], isLoading: txLoading } = useTransactionsQuery(apiParams);
   const { data: servicesData } = useServicesQuery();
+  const services = useMemo(() => servicesData?.services ?? [], [servicesData]);
 
-  const { getTotalBalance, getTotalCreditUsed, getTotalCreditAvailable } = useAccountsStore();
-  const { transactions } = useTransactionsStore();
+  const servicePayments = useMemo(() => {
+    if (!periodQuery.data) return [];
+    const periodStart = new Date(periodQuery.data.startDate);
+    const periodEnd = periodQuery.data.endDate
+      ? new Date(periodQuery.data.endDate)
+      : new Date();
+    return getServicesInPeriod(
+      services.filter((s) => s.status === "active"),
+      periodStart,
+      periodEnd,
+    );
+  }, [services, periodQuery.data]);
 
-  const servicesArr = servicesData?.services ?? [];
-  const totalBalance = getTotalBalance();
-  const totalCreditCardDebt = getTotalCreditUsed();
-  const totalAvailableCredit = getTotalCreditAvailable();
-  const monthlySubscriptionCost = computeMonthlyTotal(servicesArr);
-  const upcomingPayments = computeUpcomingPayments(servicesArr, 30);
+  const allTransactions = useMemo(
+    () => [...transactions, ...servicePayments],
+    [transactions, servicePayments],
+  );
 
-  const summary = useMemo(() => ({
-    totalBalance: { value: totalBalance, currency },
-    totalCreditCardDebt: { value: totalCreditCardDebt, currency },
-    totalAvailableCredit: { value: totalAvailableCredit, currency },
-    monthlySubscriptionCost: { value: monthlySubscriptionCost, currency },
-    upcomingPayments: upcomingPayments.map((service) => ({
-      id: service.id,
-      name: service.name,
-      amount: service.amount,
-      dueDate: service.nextPaymentDate,
+  // â”€â”€ Period totals â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  const periodIncome = useMemo(
+    () => allTransactions.filter((tx) => tx.type === "income").reduce((s, tx) => s + tx.amount.value, 0),
+    [allTransactions],
+  );
+  const periodExpenses = useMemo(
+    () => allTransactions.filter((tx) => tx.type === "expense").reduce((s, tx) => s + tx.amount.value, 0),
+    [allTransactions],
+  );
+  const periodBalance = periodIncome - periodExpenses;
+
+  // â”€â”€ Upcoming payments â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  const upcomingPayments = useMemo<IUpcomingPayment[]>(
+    () => computeUpcomingPayments(services, 30).map((s) => ({
+      id: s.id,
+      name: s.name,
+      amount: s.amount,
+      dueDate: s.nextPaymentDate,
       type: "subscription" as const,
     })),
-  }), [totalBalance, totalCreditCardDebt, totalAvailableCredit, monthlySubscriptionCost, upcomingPayments, currency]);
-
-  const donutSegments = useMemo(
-    () => getMiniDonutSegments(summary, t),
-    [summary, t]
+    [services],
   );
 
+  // â”€â”€ Recent transactions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const recentTransactions = useMemo(
-    () => transactions
-      .sort((a, b) => b.transactionDate.getTime() - a.transactionDate.getTime())
+    () => [...allTransactions]
+      .sort((a, b) => new Date(b.transactionDate).getTime() - new Date(a.transactionDate).getTime())
       .slice(0, 5),
-    [transactions]
+    [allTransactions],
   );
 
-  const isLoading = !mounted || accountsInit.isLoading || transactionsInit.isLoading;
-  const error = accountsInit.error || transactionsInit.error;
+  // â”€â”€ Donut: expenses (red) + balance/remainder (cyan) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  const donutSegments = useMemo(() => {
+    if (periodIncome === 0 && periodExpenses === 0) {
+      return [{ value: 1, color: "#e4e4e7", label: getTranslation(language, "transactions.income") }];
+    }
+    const segs: { value: number; color: string; label: string }[] = [];
+    if (periodExpenses > 0) {
+      segs.push({ value: periodExpenses, color: "#ef4444", label: getTranslation(language, "transactions.expenses") });
+    }
+    if (periodBalance > 0) {
+      segs.push({ value: periodBalance, color: "#06b6d4", label: getTranslation(language, "transactions.balance") });
+    }
+    return segs;
+  }, [periodIncome, periodExpenses, periodBalance, language]);
 
-  if (isLoading) {
-    return <DashboardSkeleton />;
-  }
+  // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  const isLoading = !mounted || periodQuery.isLoading || txLoading;
+  if (isLoading) return <DashboardSkeleton />;
 
-  if (error) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center space-y-4">
-          <p className="text-red-500 dark:text-red-400">Error: {error}</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600"
-          >
-            {t("common.back")}
-          </button>
-        </div>
-      </div>
-    );
-  }
-  
   const now = new Date();
   const locale = getLocale(language);
   const monthName = now.toLocaleDateString(locale, { month: "long" });
@@ -107,6 +116,7 @@ export function DashboardView(): React.JSX.Element {
   const year = now.getFullYear();
   const dayOfWeek = now.toLocaleDateString(locale, { weekday: "long" });
   const dayOfMonth = now.getDate();
+  const periodLabel = periodQuery.data?.label ?? capitalizedMonth;
 
   return (
     <div className="space-y-8">
@@ -122,7 +132,9 @@ export function DashboardView(): React.JSX.Element {
         </p>
       </header>
 
+      {/* â”€â”€ Period summary â”€â”€ */}
       <div className="grid gap-4 md:grid-cols-12">
+        {/* Balance */}
         <div className="md:col-span-6 lg:col-span-5 relative overflow-hidden rounded-2xl bg-gradient-to-br from-cyan-500 via-cyan-600 to-teal-700 p-8 card-elevated transition-all duration-300 hover:scale-[1.02]">
           <div className="gradient-mesh-cyan absolute inset-0 opacity-50" />
           <div className="relative flex flex-col items-center justify-center text-center space-y-4">
@@ -130,45 +142,47 @@ export function DashboardView(): React.JSX.Element {
               <TrendingUp className="w-6 h-6 text-white" />
             </div>
             <div>
-              <p className="text-cyan-100/80 text-sm font-medium mb-2">{t("dashboard.totalBalance")}</p>
+              <p className="text-cyan-100/80 text-sm font-medium mb-2">{t("transactions.balance")}</p>
               <h2 className="text-[3rem] leading-none font-bold text-white tracking-tight">
-                {formatCurrency(summary.totalBalance, language)}
+                {formatCurrency(periodBalance, currency, language)}
               </h2>
             </div>
-            <p className="text-cyan-200/70 text-sm">{t("dashboard.acrossAccounts")}</p>
+            <p className="text-cyan-200/70 text-sm">{periodLabel}</p>
           </div>
         </div>
 
+        {/* Gastos + Ingresos */}
         <div className="md:col-span-6 lg:col-span-4 grid grid-rows-2 gap-4">
           <div className="card-surface rounded-2xl p-5 flex flex-col justify-between transition-all duration-300 hover:card-elevated">
             <div className="flex items-center gap-2.5 mb-2">
               <div className="bg-red-500/10 p-2 rounded-lg ring-1 ring-red-500/10">
                 <ArrowDownRight className="w-4 h-4 text-red-500" />
               </div>
-              <span className="text-sm text-zinc-500 dark:text-zinc-400 font-medium">{t("dashboard.debt")}</span>
+              <span className="text-sm text-zinc-500 dark:text-zinc-400 font-medium">{t("transactions.expenses")}</span>
             </div>
             <p className="text-2xl font-bold text-red-500 dark:text-red-400 tracking-tight">
-              {formatCurrency(summary.totalCreditCardDebt, language)}
+              {formatCurrency(periodExpenses, currency, language)}
             </p>
           </div>
 
           <div className="card-surface rounded-2xl p-5 flex flex-col justify-between transition-all duration-300 hover:card-elevated">
             <div className="flex items-center gap-2.5 mb-2">
-              <div className="bg-cyan-500/10 p-2 rounded-lg ring-1 ring-cyan-500/10">
-                <ArrowUpRight className="w-4 h-4 text-cyan-500" />
+              <div className="bg-emerald-500/10 p-2 rounded-lg ring-1 ring-emerald-500/10">
+                <ArrowUpRight className="w-4 h-4 text-emerald-500" />
               </div>
-              <span className="text-sm text-zinc-500 dark:text-zinc-400 font-medium">{t("dashboard.available")}</span>
+              <span className="text-sm text-zinc-500 dark:text-zinc-400 font-medium">{t("transactions.income")}</span>
             </div>
-            <p className="text-2xl font-bold text-cyan-600 dark:text-cyan-400 tracking-tight">
-              {formatCurrency(summary.totalAvailableCredit, language)}
+            <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 tracking-tight">
+              {formatCurrency(periodIncome, currency, language)}
             </p>
           </div>
         </div>
 
+        {/* Donut */}
         <div className="md:col-span-12 lg:col-span-3 card-surface rounded-2xl p-5 flex flex-col items-center justify-center gap-4 transition-all duration-300 hover:card-elevated">
           <MiniDonutChart segments={donutSegments} />
           <div className="w-full space-y-2.5">
-            {donutSegments.map((seg: { color: string; label: string }, i: number) => (
+            {donutSegments.map((seg, i) => (
               <div key={i} className="flex items-center gap-2 text-xs">
                 <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: seg.color }} />
                 <span className="text-zinc-500 dark:text-zinc-400 truncate">{seg.label}</span>
@@ -178,27 +192,7 @@ export function DashboardView(): React.JSX.Element {
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-1">
-        <div className="card-surface rounded-2xl p-6 transition-all duration-300 hover:card-elevated flex items-center justify-center">
-          <div className="flex items-center justify-between w-full">
-            <div className="flex items-center gap-3">
-              <div className="bg-purple-500/10 p-2.5 rounded-xl ring-1 ring-purple-500/10">
-                <Layers className="w-5 h-5 text-purple-500 dark:text-purple-400" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-zinc-900 dark:text-white">{t("dashboard.monthlyServices")}</h3>
-                <p className="text-xs text-zinc-500 dark:text-zinc-500 mt-0.5">
-                  {t("dashboard.monthlyRecurring")} {capitalizedMonth}
-                </p>
-              </div>
-            </div>
-            <span className="text-2xl font-bold text-purple-600 dark:text-purple-400 tracking-tight">
-              {formatCurrency(summary.monthlySubscriptionCost, language)}
-            </span>
-          </div>
-        </div>
-      </div>
-
+      {/* â”€â”€ Upcoming payments â”€â”€ */}
       <section className="space-y-4">
         <div>
           <h2 className="text-xl font-semibold flex items-center gap-2.5 text-zinc-900 dark:text-white tracking-tight">
@@ -211,7 +205,7 @@ export function DashboardView(): React.JSX.Element {
         </div>
 
         <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-          {summary.upcomingPayments.length === 0 ? (
+          {upcomingPayments.length === 0 ? (
             <div className="md:col-span-2 lg:col-span-3 card-surface rounded-xl p-6 flex flex-col items-center justify-center gap-2 text-center">
               <div className="bg-cyan-500/10 p-3 rounded-xl ring-1 ring-cyan-500/10 mb-1">
                 <Calendar className="w-6 h-6 text-cyan-500 dark:text-cyan-400" />
@@ -220,43 +214,32 @@ export function DashboardView(): React.JSX.Element {
               <p className="text-xs text-zinc-500 dark:text-zinc-500">{t("dashboard.noUpcomingPaymentsDesc")}</p>
             </div>
           ) : (
-            summary.upcomingPayments.map((payment: IUpcomingPayment) => {
+            upcomingPayments.map((payment: IUpcomingPayment) => {
               const daysUntil = getDaysUntil(payment.dueDate);
               const isUrgent = daysUntil <= 3;
-
               let dueText = "";
               if (daysUntil === 0) {
                 dueText = t("dashboard.dueToday");
               } else if (daysUntil === 1) {
                 dueText = t("dashboard.dueTomorrow");
               } else {
-                const template = t("dashboard.inDays");
-                dueText = template.replace("{days}", daysUntil.toString());
+                dueText = t("dashboard.inDays").replace("{days}", daysUntil.toString());
               }
-
               return (
                 <div
                   key={payment.id}
                   className={cn(
-                    "card-surface rounded-xl p-4 transition-all duration-300 hover:card-elevated hover:scale-[1.02] group",
-                    isUrgent && "ring-1 ring-amber-500/30"
+                    "card-surface rounded-xl p-4 transition-all duration-300 hover:card-elevated hover:scale-[1.02]",
+                    isUrgent && "ring-1 ring-amber-500/30",
                   )}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
                       <h4 className="font-semibold text-zinc-900 dark:text-white text-sm">{payment.name}</h4>
                       <p className="text-xs text-zinc-500 dark:text-zinc-500 mt-1.5">
-                        {payment.dueDate.toLocaleDateString(locale, {
-                          month: "short",
-                          day: "numeric",
-                        })}
-                        {" · "}
-                        <span
-                          className={cn(
-                            "font-medium",
-                            isUrgent ? "text-amber-500 dark:text-amber-400" : "text-zinc-500 dark:text-zinc-500"
-                          )}
-                        >
+                        {payment.dueDate.toLocaleDateString(locale, { month: "short", day: "numeric" })}
+                        {" Â· "}
+                        <span className={cn("font-medium", isUrgent ? "text-amber-500 dark:text-amber-400" : "text-zinc-500 dark:text-zinc-500")}>
                           {dueText}
                         </span>
                       </p>
@@ -265,17 +248,8 @@ export function DashboardView(): React.JSX.Element {
                       <p className="font-bold text-zinc-900 dark:text-white text-sm tracking-tight">
                         {formatCurrency(payment.amount, language)}
                       </p>
-                      <span
-                        className={cn(
-                          "inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold tracking-wide uppercase",
-                          payment.type === "card" && "bg-blue-500/10 text-blue-600 dark:text-blue-400 ring-1 ring-blue-500/20",
-                          payment.type === "subscription" && "bg-purple-500/10 text-purple-600 dark:text-purple-400 ring-1 ring-purple-500/20",
-                          payment.type === "loan" && "bg-orange-500/10 text-orange-600 dark:text-orange-400 ring-1 ring-orange-500/20"
-                        )}
-                      >
-                        {payment.type === "card" && t("dashboard.card")}
-                        {payment.type === "subscription" && t("dashboard.subscription")}
-                        {payment.type === "loan" && t("dashboard.bill")}
+                      <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold tracking-wide uppercase bg-purple-500/10 text-purple-600 dark:text-purple-400 ring-1 ring-purple-500/20">
+                        {t("dashboard.subscription")}
                       </span>
                     </div>
                   </div>
@@ -286,6 +260,7 @@ export function DashboardView(): React.JSX.Element {
         </div>
       </section>
 
+      {/* â”€â”€ Recent transactions â”€â”€ */}
       <section className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
@@ -306,64 +281,16 @@ export function DashboardView(): React.JSX.Element {
         </div>
 
         <div className="space-y-3">
-          {recentTransactions.map((transaction: ITransaction) => {
-            const isIncome = transaction.type === "income";
-            const isPending = transaction.status === "pending";
-            
-            return (
-              <div
-                key={transaction.id}
-                className={cn(
-                  "card-surface rounded-xl p-4 transition-all duration-300 hover:card-elevated hover:scale-[1.01] group flex items-center gap-4",
-                  isPending && "opacity-70"
-                )}
-              >
-                <div
-                  className={cn(
-                    "w-10 h-10 rounded-lg flex items-center justify-center text-xl flex-shrink-0",
-                    isIncome
-                      ? "bg-emerald-100 dark:bg-emerald-950/30"
-                      : "bg-red-100 dark:bg-red-950/30"
-                  )}
-                >
-                  {isIncome ? "💰" : "💸"}
-                </div>
-
-                <div className="flex-1 min-w-0">
-                  <h4 className="font-semibold text-zinc-900 dark:text-white text-sm truncate">
-                    {transaction.description}
-                  </h4>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-500 mt-1 flex items-center gap-2">
-                    <span>{transaction.transactionDate.toLocaleDateString(locale, { month: "short", day: "numeric" })}</span>
-                    {transaction.source && (
-                      <>
-                        <span>•</span>
-                        <span className="truncate">{transaction.source}</span>
-                      </>
-                    )}
-                  </p>
-                </div>
-
-                <div className="text-right flex-shrink-0">
-                  <p
-                    className={cn(
-                      "font-bold text-sm tracking-tight",
-                      isIncome
-                        ? "text-emerald-600 dark:text-emerald-400"
-                        : "text-red-600 dark:text-red-400"
-                    )}
-                  >
-                    {isIncome ? "+" : "-"} {formatCurrency(transaction.amount, language)}
-                  </p>
-                  {isPending && (
-                    <span className="text-xs text-amber-600 dark:text-amber-400 font-medium">
-                      {t("transactions.pending")}
-                    </span>
-                  )}
-                </div>
-              </div>
-            );
-          })}
+          {recentTransactions.length === 0 ? (
+            <div className="card-surface rounded-xl p-8 flex flex-col items-center justify-center gap-2 text-center">
+              <Receipt className="w-10 h-10 text-zinc-300 dark:text-zinc-700 mb-1" />
+              <p className="font-medium text-zinc-500 dark:text-zinc-400 text-sm">{t("transactions.noTransactions")}</p>
+            </div>
+          ) : (
+            recentTransactions.map((transaction) => (
+              <TransactionCard key={transaction.id} transaction={transaction} />
+            ))
+          )}
         </div>
       </section>
     </div>

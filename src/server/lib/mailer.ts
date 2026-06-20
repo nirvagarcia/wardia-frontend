@@ -16,8 +16,7 @@ export async function sendPasswordResetEmail(to: string, resetUrl: string): Prom
   const transporter = createTransporter();
 
   if (!transporter) {
-    // Dev mode: no SMTP configured — log to console
-    console.log("\n📧 Password reset link (configure SMTP_* env vars to send real emails):");
+    console.log("\nPassword reset link (configure SMTP_* env vars to send real emails):");
     console.log(`   ${resetUrl}\n`);
     return;
   }
