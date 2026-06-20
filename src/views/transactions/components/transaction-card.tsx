@@ -9,7 +9,7 @@ import { usePreferencesStore } from "@/shared/stores/preferences-store";
 import { getTranslation } from "@/shared/langs";
 import { getLocale, formatCurrency } from "@/shared/utils/currency";
 import { formatDate } from "@/shared/utils/date";
-import { ArrowUpCircle, ArrowDownCircle, Clock, Pencil, Trash2 } from "lucide-react";
+import { Clock, Pencil, Trash2 } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import {
   getCategoryIcon,
@@ -45,92 +45,63 @@ export function TransactionCard({
     <div
       className={cn(
         "w-full bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 transition-all",
-        "flex items-center gap-4",
         isPending && "opacity-70"
       )}
     >
-      <button
-        onClick={onClick}
-        className="flex items-center gap-4 flex-1 min-w-0 text-left"
-      >
-        <div className="flex-shrink-0">
-          <div
-            className={cn(
-              "w-12 h-12 rounded-xl flex items-center justify-center text-2xl",
-              isIncome
-                ? "bg-emerald-100 dark:bg-emerald-950/30"
-                : "bg-red-100 dark:bg-red-950/30"
-            )}
-          >
+      <div className="flex items-start justify-between gap-3">
+        <button
+          onClick={onClick}
+          className="flex items-start gap-3 flex-1 min-w-0 text-left"
+        >
+          <div className="relative w-9 h-9 rounded-lg flex-shrink-0 bg-zinc-100 dark:bg-zinc-800 ring-1 ring-zinc-200/50 dark:ring-zinc-700 flex items-center justify-center text-lg flex-shrink-0">
             {categoryIcon}
           </div>
-        </div>
-
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            <h3 className="font-semibold text-zinc-900 dark:text-white truncate">
-              {transaction.description}
-            </h3>
-            {isPending && <Clock className="w-4 h-4 text-amber-500 flex-shrink-0" />}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-1.5 mb-1">
+              <h3 className="font-semibold text-sm text-zinc-900 dark:text-white">
+                {transaction.description}
+              </h3>
+              {isPending && <Clock className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />}
+            </div>
+            <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
+              <span className="text-zinc-500 dark:text-zinc-500">{formattedDate}</span>
+              <span className="px-2 py-0.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 rounded-full font-medium capitalize">
+                {categoryLabel}
+              </span>
+              {transaction.source && (
+                <span className="text-zinc-400 dark:text-zinc-600 truncate">{transaction.source}</span>
+              )}
+            </div>
           </div>
-          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-            <span>{categoryLabel}</span>
-            {transaction.source && (
-              <>
-                <span>•</span>
-                <span className="truncate">{transaction.source}</span>
-              </>
-            )}
-          </div>
-          <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">{formattedDate}</p>
-        </div>
+        </button>
 
-        <div className="flex-shrink-0 text-right">
-          <div
-            className={cn(
-              "font-bold text-lg flex items-center gap-1",
-              isIncome
-                ? "text-emerald-600 dark:text-emerald-400"
-                : "text-red-600 dark:text-red-400"
-            )}
-          >
-            {isIncome ? (
-              <ArrowUpCircle className="w-5 h-5" />
-            ) : (
-              <ArrowDownCircle className="w-5 h-5" />
-            )}
-            <span>
-              {isIncome ? "+" : "-"} {formattedAmount}
-            </span>
-          </div>
-          {isPending && (
-            <span className="text-xs text-amber-600 dark:text-amber-400 font-medium">
-              {t("transactions.pending")}
-            </span>
-          )}
-        </div>
-      </button>
-
-      {(onEdit || onDelete) && (
-        <div className="flex items-center gap-1 flex-shrink-0">
+        <div className="flex items-center gap-0.5 flex-shrink-0">
+          <p className={cn(
+            "font-bold text-sm whitespace-nowrap mr-1",
+            isIncome ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"
+          )}>
+            {isIncome ? "+" : "-"} {formattedAmount}
+          </p>
           {onEdit && (
             <button
               onClick={() => onEdit(transaction)}
-              className="p-2 rounded-lg text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+              onPointerDown={(e) => e.stopPropagation()}
+              className="p-1.5 hover:bg-zinc-200/80 dark:hover:bg-zinc-700/50 rounded-lg transition-colors group/btn"
             >
-              <Pencil className="w-4 h-4" />
+              <Pencil className="w-3.5 h-3.5 text-zinc-400 dark:text-zinc-500 group-hover/btn:text-blue-500" />
             </button>
           )}
           {onDelete && (
             <button
               onClick={() => onDelete(transaction.id)}
-              className="p-2 rounded-lg text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors"
+              onPointerDown={(e) => e.stopPropagation()}
+              className="p-1.5 hover:bg-red-500/10 rounded-lg transition-colors group/btn"
             >
-              <Trash2 className="w-4 h-4" />
+              <Trash2 className="w-3.5 h-3.5 text-zinc-400 dark:text-zinc-500 group-hover/btn:text-red-500" />
             </button>
           )}
         </div>
-      )}
+      </div>
     </div>
   );
 }

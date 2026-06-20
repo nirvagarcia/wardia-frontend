@@ -232,23 +232,22 @@ export function ServicesView(): React.JSX.Element {
           <p className="text-sm md:text-base text-zinc-500 dark:text-zinc-500 mt-1">{t("services.subtitle")}</p>
         </div>
 
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-cyan-500 via-cyan-600 to-teal-700 p-8 card-elevated transition-all duration-300 hover:scale-[1.02]">
-          <div className="gradient-mesh-cyan absolute inset-0 opacity-50" />
-          <div className="relative flex flex-col items-center justify-center text-center space-y-4">
-            <div className="bg-white/15 backdrop-blur-sm p-3 rounded-xl ring-1 ring-white/20">
-              <Layers className="w-6 h-6 text-white" />
-            </div>
+        <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-cyan-500 to-teal-600 p-4 shadow-md">
+          <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="text-cyan-100/80 text-sm font-medium mb-2">{t("services.totalMonthlyCost")}</p>
-              <h2 className="text-[2.5rem] leading-none font-bold text-white tracking-tight">
+              <p className="text-cyan-100/80 text-xs font-medium mb-0.5">{t("services.totalMonthlyCost")}</p>
+              <h2 className="text-2xl font-bold text-white tracking-tight">
                 {currency === "PEN" ? "S/" : currency === "USD" ? "$" : "€"}{" "}
                 {totalInUserCurrency.toLocaleString(locale, { minimumFractionDigits: 2 })}
               </h2>
+              <p className="text-cyan-200/70 text-xs mt-0.5">
+                {filteredServices.filter((s) => s.status === "active").length}{" "}
+                {t("services.activeServices")}
+              </p>
             </div>
-            <p className="text-cyan-200/70 text-sm">
-              {filteredServices.filter((s) => s.status === "active").length}{" "}
-              {t("services.activeServices")}
-            </p>
+            <div className="bg-white/15 backdrop-blur-sm p-2.5 rounded-xl ring-1 ring-white/20 flex-shrink-0">
+              <Layers className="w-5 h-5 text-white" />
+            </div>
           </div>
         </div>
 

@@ -36,23 +36,25 @@ export const BottomNav: React.FC = () => {
 
   return (
     <>
-      <div className="md:hidden fixed top-0 left-0 right-0 z-40 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-xl border-b border-zinc-200/80 dark:border-zinc-800/80">
-        <div className="max-w-lg mx-auto px-4 py-2.5 flex items-center justify-center">
+      <div className="md:hidden fixed top-0 left-0 right-0 z-40 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-xl border-b border-zinc-200/80 dark:border-zinc-800/80"
+        style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
+        <div className="max-w-lg mx-auto px-4 py-2 flex items-center justify-start">
           <div className="flex items-center gap-2">
             <Image 
               src="/assets/wardia-icon.png" 
               alt="Wardia" 
-              width={28}
-              height={28}
-              className="rounded-lg shadow-sm"
+              width={26}
+              height={26}
+              className="rounded-md shadow-sm"
             />
-            <span className="text-lg font-bold bg-gradient-to-r from-cyan-500 to-teal-500 bg-clip-text text-transparent">Wardia</span>
+            <span className="text-base font-bold bg-gradient-to-r from-cyan-500 to-teal-500 bg-clip-text text-transparent">Wardia</span>
           </div>
         </div>
       </div>
 
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/90 dark:bg-zinc-950/90 backdrop-blur-xl border-t border-zinc-200/80 dark:border-zinc-800/80 safe-area-inset-bottom">
-        <div className="max-w-lg mx-auto px-2 py-1.5">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/90 dark:bg-zinc-950/90 backdrop-blur-xl border-t border-zinc-200/80 dark:border-zinc-800/80"
+        style={{ paddingBottom: 'max(10px, env(safe-area-inset-bottom))' }}>
+        <div className="max-w-lg mx-auto px-2 py-2">
         <ul className="flex items-center justify-around">
           {navItems.map((item) => {
             const Icon = item.icon;

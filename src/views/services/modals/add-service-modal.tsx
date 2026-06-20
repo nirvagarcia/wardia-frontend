@@ -27,11 +27,11 @@ interface AddServiceModalProps {
 
 const categories = [
   { key: "housing", icon: "🏠" },
-  { key: "utilities", icon: "⚡" },
-  { key: "telecom", icon: "📡" },
-  { key: "health", icon: "💪" },
-  { key: "productivity", icon: "💼" },
-  { key: "entertainment", icon: "🎬" },
+  { key: "utilities", icon: "💡" },
+  { key: "telecom", icon: "📱" },
+  { key: "health", icon: "🩺" },
+  { key: "productivity", icon: "📚" },
+  { key: "entertainment", icon: "🎵" },
 ];
 
 export function AddServiceModal({ isOpen, onClose, onAdd, editingService, onUpdate }: AddServiceModalProps): React.JSX.Element | null {
