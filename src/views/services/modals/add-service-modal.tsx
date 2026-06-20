@@ -158,7 +158,7 @@ export function AddServiceModal({ isOpen, onClose, onAdd, editingService, onUpda
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 pb-20 md:pb-4" onClick={onClose}>
       <div 
-        className="bg-white dark:bg-zinc-900 rounded-2xl w-full max-w-md sm:max-w-2xl max-h-[90vh] flex flex-col" 
+        className="bg-white dark:bg-zinc-900 rounded-2xl w-full max-w-md sm:max-w-2xl max-h-[80vh] md:max-h-[90vh] flex flex-col" 
         onClick={(e) => e.stopPropagation()}
       >
         <div className="shrink-0 bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 p-4 sm:p-6 flex items-center justify-between rounded-t-2xl">
@@ -277,25 +277,23 @@ export function AddServiceModal({ isOpen, onClose, onAdd, editingService, onUpda
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label className="flex items-center gap-2 mb-2">
-                <RefreshCw className="w-4 h-4" />
-                {t("forms.frequency")}
-              </Label>
-              <div className="relative">
-                <select
-                  value={formData.frequency}
-                  onChange={(e) => setFormData({ ...formData, frequency: e.target.value as PaymentFrequency })}
-                  className="w-full h-10 appearance-none rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 pr-8 text-sm text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 transition-colors"
-                >
-                  <option value="monthly">{t("services.monthly")}</option>
-                  <option value="yearly">{t("services.yearly")}</option>
-                  <option value="weekly">{t("services.weekly")}</option>
-                  <option value="quarterly">{t("services.quarterly")}</option>
-                </select>
-                <svg className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"/></svg>
-              </div>
+          <div>
+            <Label className="flex items-center gap-2 mb-2">
+              <RefreshCw className="w-4 h-4" />
+              {t("forms.frequency")}
+            </Label>
+            <div className="relative">
+              <select
+                value={formData.frequency}
+                onChange={(e) => setFormData({ ...formData, frequency: e.target.value as PaymentFrequency })}
+                className="w-full h-10 appearance-none rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 pr-8 text-sm text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 transition-colors"
+              >
+                <option value="monthly">{t("services.monthly")}</option>
+                <option value="yearly">{t("services.yearly")}</option>
+                <option value="weekly">{t("services.weekly")}</option>
+                <option value="quarterly">{t("services.quarterly")}</option>
+              </select>
+              <svg className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"/></svg>
             </div>
           </div>
 
@@ -347,21 +345,14 @@ export function AddServiceModal({ isOpen, onClose, onAdd, editingService, onUpda
         </form>
         </div>
 
-        <div className="shrink-0 flex gap-3 p-4 sm:p-6 border-t border-zinc-200 dark:border-zinc-800">
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex-1 px-6 py-3 rounded-xl border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors font-medium"
-          >
-            {t("common.cancel")}
-          </button>
+        <div className="shrink-0 p-4 sm:p-6 border-t border-zinc-200 dark:border-zinc-800">
           <button
             type="submit"
             form="service-form"
             disabled={isSubmitting}
-            className="flex-1 px-6 py-3 rounded-xl bg-cyan-500 hover:bg-cyan-600 disabled:opacity-60 disabled:cursor-not-allowed text-white transition-colors font-medium shadow-sm"
+            className="w-full px-6 py-3 rounded-xl bg-cyan-500 hover:bg-cyan-600 disabled:opacity-60 disabled:cursor-not-allowed text-white transition-colors font-medium shadow-sm"
           >
-            {isSubmitting ? t("common.loading") : isEditMode ? t("forms.saveChanges") : t("forms.addService")}
+            {isSubmitting ? t("common.loading") : t("forms.saveChanges")}
           </button>
         </div>
       </div>

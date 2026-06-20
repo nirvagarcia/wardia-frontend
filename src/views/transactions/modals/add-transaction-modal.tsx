@@ -8,12 +8,11 @@
 import React, { useState, useEffect } from "react";
 import { usePreferencesStore } from "@/shared/stores/preferences-store";
 import { getTranslation } from "@/shared/langs";
-import { X } from "lucide-react";
+import { X, Tag, FileText } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { DatePicker } from "@/shared/components/ui/date-picker";
-import { Textarea } from "@/shared/components/ui/textarea";
 import { transactionModalSchema } from "@/shared/validation/schemas";
 import type { ITransaction } from "@/shared/types/finance";
 import type { TransactionType } from "@/shared/types";
@@ -49,7 +48,7 @@ export function AddTransactionModal({
     description: string;
     amount: string;
     currency: "PEN" | "USD" | "EUR";
-    source: string;
+    merchant: string;
     date: string;
     notes: string;
     status: "pending" | "completed" | "failed";
@@ -59,7 +58,7 @@ export function AddTransactionModal({
     description: "",
     amount: "",
     currency: "PEN",
-    source: "",
+    merchant: "",
     date: "",
     notes: "",
     status: "completed",
@@ -78,10 +77,10 @@ export function AddTransactionModal({
         description: editingTransaction.description,
         amount: editingTransaction.amount.value.toString(),
         currency: editingTransaction.amount.currency,
-        source: editingTransaction.source || "",
+        merchant: editingTransaction.source || "",
         date: toLocalDateString(editingTransaction.transactionDate),
         notes: editingTransaction.notes || "",
-        status: editingTransaction.status === "pending" ? "pending" : "completed",
+        status: "completed",
       });
     } else {
       setFormData({
@@ -90,7 +89,7 @@ export function AddTransactionModal({
         description: "",
         amount: "",
         currency: "PEN",
-        source: "",
+        merchant: "",
         date: toLocalDateString(new Date()),
         notes: "",
         status: "completed",
@@ -155,7 +154,7 @@ export function AddTransactionModal({
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 pb-20 md:pb-4" onClick={onClose}>
       <div
-        className="bg-white dark:bg-zinc-900 rounded-2xl w-full max-w-md sm:max-w-2xl max-h-[90vh] flex flex-col"
+        className="bg-white dark:bg-zinc-900 rounded-2xl w-full max-w-md sm:max-w-2xl max-h-[80vh] md:max-h-[90vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="shrink-0 bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 p-4 sm:p-6 flex items-center justify-between rounded-t-2xl">
@@ -239,9 +238,10 @@ export function AddTransactionModal({
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="description">
-              {t("transactions.description")} <span className="text-red-500">*</span>
+          <div>
+            <Label className="flex items-center gap-2 mb-2">
+              <Tag className="w-4 h-4" />
+              {t("forms.transactionName")} <span className="text-red-500">*</span>
             </Label>
             <Input
               id="description"
@@ -301,13 +301,16 @@ export function AddTransactionModal({
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="source">{t("transactions.source")}</Label>
+          <div>
+            <Label className="flex items-center gap-2 mb-2">
+              <FileText className="w-4 h-4" />
+              {t("forms.description")} ({t("credentials.optional")})
+            </Label>
             <Input
-              id="source"
-              value={formData.source}
-              onChange={(e) => setFormData({ ...formData, source: e.target.value })}
-              placeholder={t("transactions.sourcePlaceholder")}
+              id="merchant"
+              value={formData.merchant}
+              onChange={(e) => setFormData({ ...formData, merchant: e.target.value })}
+              placeholder={t("forms.descriptionPlaceholder")}
             />
           </div>
 
@@ -327,67 +330,17 @@ export function AddTransactionModal({
             {errors['date'] && <p className="text-sm text-red-500">{errors['date']}</p>}
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-zinc-700 dark:text-gray-300 mb-3">
-              {t("transactions.status")}
-            </label>
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={() => setFormData({ ...formData, status: "completed" })}
-                className={cn(
-                  "p-3 rounded-xl border-2 transition-all font-medium",
-                  formData.status === "completed"
-                    ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400"
-                    : "border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600 text-zinc-600 dark:text-zinc-400"
-                )}
-              >
-                {t("transactions.completed")}
-              </button>
-              <button
-                type="button"
-                onClick={() => setFormData({ ...formData, status: "pending" })}
-                className={cn(
-                  "p-3 rounded-xl border-2 transition-all font-medium",
-                  formData.status === "pending"
-                    ? "border-amber-500 bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400"
-                    : "border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600 text-zinc-600 dark:text-zinc-400"
-                )}
-              >
-                {t("transactions.pending")}
-              </button>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="notes">{t("transactions.notes")}</Label>
-            <Textarea
-              id="notes"
-              value={formData.notes}
-              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-              placeholder={t("forms.notesPlaceholder")}
-              rows={3}
-            />
-          </div>
-
         </form>
         </div>
 
-        <div className="shrink-0 flex gap-3 p-4 sm:p-6 border-t border-zinc-200 dark:border-zinc-800">
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex-1 px-4 py-3 rounded-xl border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-gray-300 font-medium hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-          >
-            {t("forms.cancel")}
-          </button>
+        <div className="shrink-0 p-4 sm:p-6 border-t border-zinc-200 dark:border-zinc-800">
           <button
             type="submit"
             form="txn-form"
             disabled={isSubmitting}
-            className="flex-1 px-4 py-3 rounded-xl bg-cyan-500 hover:bg-cyan-600 disabled:opacity-50 text-white font-medium transition-colors"
+            className="w-full px-4 py-3 rounded-xl bg-cyan-500 hover:bg-cyan-600 disabled:opacity-50 text-white font-medium transition-colors"
           >
-            {isSubmitting ? t("common.loading") : isEditMode ? t("forms.saveChanges") : t("forms.add")}
+            {isSubmitting ? t("common.loading") : t("forms.saveChanges")}
           </button>
         </div>
       </div>

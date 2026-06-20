@@ -56,11 +56,13 @@ export function ServiceCardContent({
           <div className="flex-1 min-w-0">
             <h3 className="font-semibold text-sm text-zinc-900 dark:text-white">{sub.name}</h3>
             <p className={cn(
-              "text-xs font-medium mt-0.5",
+              "text-xs font-bold mt-0.5",
               daysUntil === 0
                 ? "text-red-500 dark:text-red-400"
                 : daysUntil <= 3
                 ? "text-amber-500 dark:text-amber-400"
+                : daysUntil <= 7
+                ? "text-cyan-600 dark:text-cyan-400"
                 : "text-zinc-400 dark:text-zinc-500"
             )}>
               {daysUntil === 0
@@ -95,7 +97,7 @@ export function ServiceCardContent({
         <div className="flex items-center gap-1 text-zinc-500 dark:text-zinc-500">
           <Calendar className="w-3 h-3 flex-shrink-0" />
           <span className="whitespace-nowrap">
-            {sub.nextPaymentDate.toLocaleDateString(locale, { month: "short", day: "numeric" })}
+            {sub.nextPaymentDate.toLocaleDateString(locale, { day: "numeric", month: "short", year: "numeric" })}
           </span>
         </div>
         <span className="px-2 py-0.5 bg-zinc-200/80 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 rounded-full capitalize whitespace-nowrap font-medium">

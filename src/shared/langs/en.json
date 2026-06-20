@@ -291,6 +291,7 @@
     "usedCredit": "Used Credit",
     "invalidUsedCredit": "Invalid used credit",
     "serviceName": "Service Name",
+    "transactionName": "Name",
     "serviceNamePlaceholder": "e.g. Netflix Premium",
     "nameRequired": "Name required",
     "description": "Description",

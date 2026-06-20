@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { usePreferencesStore } from "@/shared/stores/preferences-store";
 import { getTranslation } from "@/shared/langs";
 import { formatCurrency, getLocale } from "@/shared/utils/currency";
-import { Receipt, Plus, Filter, History } from "lucide-react";
+import { Receipt, Plus, Filter, History, Layers, TrendingUp, TrendingDown } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import { TransactionStats } from "./components/transaction-stats";
 import { TransactionCard } from "./components/transaction-card";
@@ -234,25 +234,38 @@ export function TransactionsView(): React.JSX.Element {
             <h3 className="font-semibold text-zinc-900 dark:text-white mb-3">
               {t("transactions.filters")}
             </h3>
-            <div className="flex gap-2">
-              {(["all", "income", "expense"] as const).map((type) => (
-                <button
-                  key={type}
-                  onClick={() => setFilterType(type)}
-                  className={cn(
-                    "px-4 py-2 rounded-lg text-sm font-medium transition-colors",
-                    filterType === type
-                      ? type === "income"
-                        ? "bg-emerald-500 text-white"
-                        : type === "expense"
-                        ? "bg-red-500 text-white"
-                        : "bg-cyan-500 text-white"
-                      : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700"
-                  )}
-                >
-                  {t(`transactions.${type === "all" ? "all" : type === "income" ? "income" : "expenses"}`)}
-                </button>
-              ))}
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {([
+                { type: "all"     as const, Icon: Layers,      label: t("transactions.all"),      activeBorder: "border-cyan-500 bg-cyan-50 dark:bg-cyan-950/30",          activeIcon: "text-cyan-600 dark:text-cyan-400",     activeBadge: "bg-cyan-500 text-white",     activeText: "text-cyan-600 dark:text-cyan-400"     },
+                { type: "income"  as const, Icon: TrendingUp,  label: t("transactions.income"),   activeBorder: "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/30",  activeIcon: "text-emerald-600 dark:text-emerald-400", activeBadge: "bg-emerald-500 text-white", activeText: "text-emerald-600 dark:text-emerald-400" },
+                { type: "expense" as const, Icon: TrendingDown, label: t("transactions.expenses"), activeBorder: "border-red-500 bg-red-50 dark:bg-red-950/30",             activeIcon: "text-red-600 dark:text-red-400",       activeBadge: "bg-red-500 text-white",       activeText: "text-red-600 dark:text-red-400"       },
+              ]).map(({ type, Icon, label, activeBorder, activeIcon, activeBadge, activeText }) => {
+                const isActive = filterType === type;
+                const count = type === "all" ? transactions.length : transactions.filter((tr) => tr.type === type).length;
+                return (
+                  <button
+                    key={type}
+                    onClick={() => setFilterType(type)}
+                    className={cn(
+                      "flex items-center justify-between gap-2 p-3 rounded-xl border-2 transition-all overflow-hidden",
+                      isActive ? activeBorder : "border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600"
+                    )}
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <Icon className={cn("w-4 h-4 flex-shrink-0", isActive ? activeIcon : "text-zinc-600 dark:text-zinc-400")} />
+                      <span className={cn("text-sm font-medium truncate", isActive ? activeText : "text-zinc-600 dark:text-zinc-400")}>
+                        {label}
+                      </span>
+                    </div>
+                    <span className={cn(
+                      "flex-shrink-0 min-w-[1.25rem] h-5 px-1.5 rounded-full text-xs font-bold flex items-center justify-center",
+                      isActive ? activeBadge : "bg-zinc-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-400"
+                    )}>
+                      {count > 9 ? "+9" : count}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 

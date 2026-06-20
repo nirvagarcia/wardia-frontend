@@ -65,39 +65,51 @@ export function TransactionFilters({
       </div>
 
       {/* Type Filters */}
-      <div className="flex gap-2">
+      <div className="grid grid-cols-3 gap-2">
         <button
           onClick={() => onFilterTypeChange("all")}
           className={cn(
-            "px-4 py-2 rounded-lg text-sm font-medium transition-colors",
+            "p-3 rounded-xl border-2 transition-all flex flex-col items-center gap-1.5",
             filterType === "all"
-              ? "bg-cyan-500 text-white"
-              : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700"
+              ? "border-cyan-500 bg-cyan-50 dark:bg-cyan-950/30"
+              : "border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600"
           )}
         >
-          {allLabel}
+          <span className="text-xl">📋</span>
+          <span className={cn(
+            "text-xs font-medium",
+            filterType === "all" ? "text-cyan-600 dark:text-cyan-400" : "text-zinc-600 dark:text-zinc-400"
+          )}>{allLabel}</span>
         </button>
         <button
           onClick={() => onFilterTypeChange("income")}
           className={cn(
-            "px-4 py-2 rounded-lg text-sm font-medium transition-colors",
+            "p-3 rounded-xl border-2 transition-all flex flex-col items-center gap-1.5",
             filterType === "income"
-              ? "bg-emerald-500 text-white"
-              : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700"
+              ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/30"
+              : "border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600"
           )}
         >
-          {incomeLabel}
+          <span className="text-xl">💰</span>
+          <span className={cn(
+            "text-xs font-medium",
+            filterType === "income" ? "text-emerald-600 dark:text-emerald-400" : "text-zinc-600 dark:text-zinc-400"
+          )}>{incomeLabel}</span>
         </button>
         <button
           onClick={() => onFilterTypeChange("expense")}
           className={cn(
-            "px-4 py-2 rounded-lg text-sm font-medium transition-colors",
+            "p-3 rounded-xl border-2 transition-all flex flex-col items-center gap-1.5",
             filterType === "expense"
-              ? "bg-red-500 text-white"
-              : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700"
+              ? "border-red-500 bg-red-50 dark:bg-red-950/30"
+              : "border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600"
           )}
         >
-          {expensesLabel}
+          <span className="text-xl">💸</span>
+          <span className={cn(
+            "text-xs font-medium",
+            filterType === "expense" ? "text-red-600 dark:text-red-400" : "text-zinc-600 dark:text-zinc-400"
+          )}>{expensesLabel}</span>
         </button>
       </div>
 
