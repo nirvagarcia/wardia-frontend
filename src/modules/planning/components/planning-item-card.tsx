@@ -5,6 +5,9 @@ import { ExternalLink, CheckCircle2, Circle, ImageIcon } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import type { IPlanningItem } from "@/shared/types/planning";
 import { getStatusColor, formatPrice } from "../utils/helpers";
+import { useCallback } from "react";
+import { usePreferencesStore } from "@/shared/stores/preferences-store";
+import { getTranslation } from "@/shared/langs";
 
 interface PlanningItemCardProps {
   item: IPlanningItem;
@@ -12,6 +15,8 @@ interface PlanningItemCardProps {
 }
 
 export function PlanningItemCard({ item, onClick }: PlanningItemCardProps) {
+  const { language } = usePreferencesStore();
+  const t = useCallback((key: string) => getTranslation(language, key), [language]);
   const isPurchased = item.status === "purchased";
 
   return (
@@ -52,7 +57,7 @@ export function PlanningItemCard({ item, onClick }: PlanningItemCardProps) {
               {formatPrice(item.priceValue * item.quantity, item.priceCurrency)}
             </p>
             <p className="text-[10px] text-zinc-400 dark:text-zinc-500">
-              {item.quantity} {item.quantity === 1 ? "unidad" : "unidades"}
+              {item.quantity} {item.quantity === 1 ? t("planning.itemUnit") : t("planning.itemUnits")}
             </p>
           </div>
         )}
@@ -73,7 +78,7 @@ export function PlanningItemCard({ item, onClick }: PlanningItemCardProps) {
         <div className="flex items-center justify-between mt-2.5 ml-3.5">
           <span className={cn("flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border", getStatusColor(item.status))}>
             {isPurchased ? <CheckCircle2 className="w-3 h-3" /> : <Circle className="w-3 h-3" />}
-            {isPurchased ? "Comprado" : "Pendiente"}
+            {isPurchased ? t("planning.itemPurchased") : t("planning.itemPending")}
           </span>
           {item.links.length > 0 && (
             <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>

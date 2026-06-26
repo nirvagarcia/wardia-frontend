@@ -136,12 +136,9 @@ export interface ICredential {
   bankName: string;
   credentialName?: string;
   description?: string;
-
-  // Bank login fields
   username?: string;
   password?: string;
 
-  // Card fields (debit + credit)
   cardName?: string;
   cardNetwork?: CardNetwork;
   accountNumber?: string;
@@ -151,7 +148,6 @@ export interface ICredential {
   cvv?: string;
   accountType?: AccountType;
 
-  // Credit-specific fields
   cardholderName?: string;
   creditLimitValue?: number;
   creditLimitCurrency?: string;

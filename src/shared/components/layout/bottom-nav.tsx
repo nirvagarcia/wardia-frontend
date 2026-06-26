@@ -27,7 +27,7 @@ export const BottomNav: React.FC = () => {
   const t = (key: string) => getTranslation(language, key);
 
   const navItems: NavItem[] = [
-    { href: "/dashboard", labelKey: "nav.home", icon: Home },
+    { href: "/home", labelKey: "nav.home", icon: Home },
     { href: "/transactions", labelKey: "nav.transactions", icon: TrendingUp },
     { href: "/planning", labelKey: "nav.planning", icon: LayoutGrid },
     { href: "/accounts", labelKey: "nav.accounts", icon: Wallet },

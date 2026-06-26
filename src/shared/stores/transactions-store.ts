@@ -19,7 +19,6 @@ const customStorage = {
       const parsed = JSON.parse(str);
       const { state } = parsed;
       
-      // Convert date strings back to Date objects
       if (state.transactions && Array.isArray(state.transactions)) {
         state.transactions = state.transactions.map((txn: ITransaction) => ({
           ...txn,
@@ -42,22 +41,18 @@ const customStorage = {
 };
 
 interface TransactionsState {
-  // State
   transactions: ITransaction[];
   isLoading: boolean;
   error: string | null;
 
-  // Actions
   addTransaction: (transaction: Omit<ITransaction, "id">) => void;
   updateTransaction: (id: string, transaction: Omit<ITransaction, "id">) => void;
   deleteTransaction: (id: string) => void;
   setTransactions: (transactions: ITransaction[]) => void;
 
-  // Loading states
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
 
-  // Computed/selectors
   getTotalIncome: (startDate?: Date, endDate?: Date) => number;
   getTotalExpenses: (startDate?: Date, endDate?: Date) => number;
   getBalance: (startDate?: Date, endDate?: Date) => number;
@@ -70,12 +65,10 @@ interface TransactionsState {
 export const useTransactionsStore = create<TransactionsState>()(
   persist(
     (set, get) => ({
-      // Initial state
       transactions: [],
       isLoading: false,
       error: null,
 
-      // Actions
       addTransaction: (transactionData) => {
         const newTransaction: ITransaction = {
           ...transactionData,
@@ -107,7 +100,6 @@ export const useTransactionsStore = create<TransactionsState>()(
         set({ transactions, error: null });
       },
 
-      // Loading states
       setLoading: (loading) => {
         set({ isLoading: loading });
       },
@@ -116,7 +108,6 @@ export const useTransactionsStore = create<TransactionsState>()(
         set({ error, isLoading: false });
       },
 
-      // Computed/selectors
       getTotalIncome: (startDate, endDate) => {
         const { transactions } = get();
         return transactions

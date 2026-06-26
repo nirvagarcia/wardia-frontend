@@ -7,6 +7,8 @@ import { cn } from "@/shared/utils/cn";
 import { planningService } from "@/shared/services/planning-service";
 import { uploadPlanningImage } from "@/shared/hooks/use-planning-query";
 import type { IPlanningItem, ItemPriority, PlanningCurrency } from "@/shared/types/planning";
+import { usePreferencesStore } from "@/shared/stores/preferences-store";
+import { getTranslation } from "@/shared/langs";
 
 export interface ItemFormPayload {
   title: string;
@@ -30,13 +32,15 @@ interface AddItemModalProps {
 }
 
 const CURRENCIES: PlanningCurrency[] = ["PEN", "USD", "EUR"];
-const PRIORITIES: { value: ItemPriority; label: string }[] = [
-  { value: "low", label: "Baja" },
-  { value: "medium", label: "Media" },
-  { value: "high", label: "Alta" },
-];
 
 export function AddItemModal({ isOpen, editingItem, onClose, onSave }: AddItemModalProps) {
+  const { language } = usePreferencesStore();
+  const t = useCallback((key: string) => getTranslation(language, key), [language]);
+  const PRIORITIES: { value: ItemPriority; label: string }[] = [
+    { value: "low", label: t("planning.itemPriorityLow") },
+    { value: "medium", label: t("planning.itemPriorityMedium") },
+    { value: "high", label: t("planning.itemPriorityHigh") },
+  ];
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [imageUrl, setImageUrl] = useState<string | null>(null);
@@ -151,7 +155,7 @@ export function AddItemModal({ isOpen, editingItem, onClose, onSave }: AddItemMo
       <div className="bg-white dark:bg-zinc-900 w-full max-w-lg rounded-2xl border border-zinc-200/80 dark:border-zinc-800 shadow-2xl my-auto">
         <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-zinc-100 dark:border-zinc-800">
           <h2 className="font-semibold text-zinc-900 dark:text-zinc-100">
-            {editingItem ? "Editar Item" : "Agregar Item"}
+            {editingItem ? t("planning.editItem") : t("planning.newItem")}
           </h2>
           <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
             <X className="w-4 h-4 text-zinc-500" />
@@ -160,13 +164,13 @@ export function AddItemModal({ isOpen, editingItem, onClose, onSave }: AddItemMo
 
         <form onSubmit={handleSubmit} className="p-6 space-y-5 max-h-[75vh] overflow-y-auto">
           <div>
-            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">Imagen</label>
+            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">{t("planning.itemImage")}</label>
             {imageUrl ? (
               <div className="relative rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-700 h-40">
                 <NextImage src={imageUrl} alt="preview" fill sizes="(max-width: 640px) 100vw, 512px" className="object-cover" />
                 {ogDetected && (
                   <div className="absolute top-2 left-2 flex items-center gap-1 px-2 py-0.5 rounded-md bg-cyan-500/90 text-white text-xs">
-                    <Wand2 className="w-3 h-3" /> Detectada automáticamente
+                    <Wand2 className="w-3 h-3" /> {t("planning.itemImageDetected")}
                   </div>
                 )}
                 <button
@@ -189,7 +193,7 @@ export function AddItemModal({ isOpen, editingItem, onClose, onSave }: AddItemMo
                   )}
                 >
                   {imageLoading ? <div className="w-4 h-4 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin" /> : <Upload className="w-4 h-4" />}
-                  Subir imagen
+                  {t("planning.itemImageUpload")}
                 </button>
                 <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-400">
                   <ImageOff className="w-4 h-4" />
@@ -200,39 +204,39 @@ export function AddItemModal({ isOpen, editingItem, onClose, onSave }: AddItemMo
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">Título *</label>
+            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">{t("planning.itemTitle")} *</label>
             <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="ej: Juego de ollas Tramontina" required autoFocus
               className={cn("w-full px-3.5 py-2.5 rounded-xl border text-sm", "border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800", "text-zinc-900 dark:text-zinc-100 placeholder-zinc-400", "focus:outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500 transition")} />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">Descripción</label>
+            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">{t("planning.itemDescription")}</label>
             <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={2} placeholder="Descripción del item..."
               className={cn("w-full px-3.5 py-2.5 rounded-xl border text-sm resize-none", "border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800", "text-zinc-900 dark:text-zinc-100 placeholder-zinc-400", "focus:outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500 transition")} />
           </div>
 
           <div className="grid grid-cols-3 gap-3">
             <div className="col-span-1">
-              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">Precio unit.</label>
+              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">{t("planning.itemPrice")}</label>
               <input value={priceValue} onChange={(e) => setPriceValue(e.target.value)} type="number" min="0" step="0.01" placeholder="0.00"
                 className={cn("w-full px-3 py-2.5 rounded-xl border text-sm", "border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800", "text-zinc-900 dark:text-zinc-100 placeholder-zinc-400", "focus:outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500 transition")} />
             </div>
             <div className="col-span-1">
-              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">Moneda</label>
+              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">{t("planning.itemCurrency")}</label>
               <select value={priceCurrency} onChange={(e) => setPriceCurrency(e.target.value as PlanningCurrency)}
                 className={cn("w-full px-3 py-2.5 rounded-xl border text-sm", "border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800", "text-zinc-900 dark:text-zinc-100", "focus:outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500 transition")}>
                 {CURRENCIES.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
             <div className="col-span-1">
-              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">Cantidad</label>
+              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">{t("planning.itemQuantity")}</label>
               <input value={quantity} onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))} type="number" min="1" step="1"
                 className={cn("w-full px-3 py-2.5 rounded-xl border text-sm", "border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800", "text-zinc-900 dark:text-zinc-100", "focus:outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500 transition")} />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">Prioridad</label>
+            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">{t("planning.itemPriority")}</label>
             <select value={priority} onChange={(e) => setPriority(e.target.value as ItemPriority)}
               className={cn("w-full px-3 py-2.5 rounded-xl border text-sm", "border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800", "text-zinc-900 dark:text-zinc-100", "focus:outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500 transition")}>
               {PRIORITIES.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}
@@ -240,7 +244,7 @@ export function AddItemModal({ isOpen, editingItem, onClose, onSave }: AddItemMo
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">Etiquetas</label>
+            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">{t("planning.itemTags")}</label>
             <div className={cn("flex flex-wrap gap-1.5 px-3 py-2 rounded-xl border min-h-[42px]", "border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800")}>
               {tags.map((tag) => (
                 <span key={tag} className="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-cyan-100 dark:bg-cyan-950/50 text-cyan-700 dark:text-cyan-300 text-xs">
@@ -249,26 +253,26 @@ export function AddItemModal({ isOpen, editingItem, onClose, onSave }: AddItemMo
                 </span>
               ))}
               <input value={tagInput} onChange={(e) => setTagInput(e.target.value)} onKeyDown={handleTagKeyDown}
-                placeholder={tags.length === 0 ? "Agregar etiqueta y presionar Enter..." : ""}
+                placeholder={tags.length === 0 ? t("planning.itemTagsPlaceholder") : ""}
                 className="flex-1 min-w-24 bg-transparent text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 outline-none" />
             </div>
           </div>
 
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Links de referencia</label>
+              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">{t("planning.itemLinks")}</label>
               <button type="button" onClick={() => setLinks((p) => [...p, { label: "", url: "" }])}
                 className="flex items-center gap-1 text-xs text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 transition-colors">
-                <Plus className="w-3.5 h-3.5" /> Agregar
+                <Plus className="w-3.5 h-3.5" /> {t("planning.itemLinkAdd")}
               </button>
             </div>
             <div className="space-y-2">
               {links.map((link, idx) => (
                 <div key={idx} className="flex gap-2">
                   <input value={link.label} onChange={(e) => setLinks((p) => p.map((l, i) => i === idx ? { ...l, label: e.target.value } : l))}
-                    placeholder="Mercado Libre" className={cn("w-28 px-3 py-2 rounded-xl border text-xs", "border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800", "text-zinc-900 dark:text-zinc-100 placeholder-zinc-400", "focus:outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500 transition")} />
+                    placeholder={t("planning.itemLinkLabel")} className={cn("w-28 px-3 py-2 rounded-xl border text-xs", "border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800", "text-zinc-900 dark:text-zinc-100 placeholder-zinc-400", "focus:outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500 transition")} />
                   <input value={link.url} onChange={(e) => handleLinkUrlChange(idx, e.target.value)}
-                    placeholder="https://..." className={cn("flex-1 px-3 py-2 rounded-xl border text-xs", "border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800", "text-zinc-900 dark:text-zinc-100 placeholder-zinc-400", "focus:outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500 transition")} />
+                    placeholder={t("planning.itemLinkUrl")} className={cn("flex-1 px-3 py-2 rounded-xl border text-xs", "border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800", "text-zinc-900 dark:text-zinc-100 placeholder-zinc-400", "focus:outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500 transition")} />
                   <button type="button" onClick={() => setLinks((p) => p.filter((_, i) => i !== idx))}
                     className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/30 text-rose-400 transition-colors flex-shrink-0 self-center">
                     <Trash2 className="w-3.5 h-3.5" />
@@ -281,11 +285,11 @@ export function AddItemModal({ isOpen, editingItem, onClose, onSave }: AddItemMo
           <div className="flex gap-3 pt-2">
             <button type="button" onClick={onClose}
               className="flex-1 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
-              Cancelar
+              {t("common.cancel")}
             </button>
             <button type="submit" disabled={isSaving || !title.trim()}
               className="flex-1 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-600 disabled:opacity-50 text-white text-sm font-medium transition-colors">
-              {isSaving ? "Guardando..." : editingItem ? "Guardar cambios" : "Agregar item"}
+              {isSaving ? t("planning.saving") : editingItem ? t("planning.saveChanges") : t("planning.addItemBtn")}
             </button>
           </div>
         </form>

@@ -5,6 +5,9 @@ import { X, ExternalLink, ShoppingBag, Edit2, Trash2, Flag, Tag, StickyNote, Che
 import { cn } from "@/shared/utils/cn";
 import type { IPlanningItem } from "@/shared/types/planning";
 import { getPriorityColor, getStatusColor, formatPrice, formatDate } from "../../utils/helpers";
+import { useCallback } from "react";
+import { usePreferencesStore } from "@/shared/stores/preferences-store";
+import { getTranslation } from "@/shared/langs";
 
 interface ItemDetailModalProps {
   item: IPlanningItem | null;
@@ -15,6 +18,8 @@ interface ItemDetailModalProps {
 }
 
 export function ItemDetailModal({ item, onClose, onEdit, onDelete, onPurchase }: ItemDetailModalProps) {
+  const { language } = usePreferencesStore();
+  const t = useCallback((key: string) => getTranslation(language, key), [language]);
   if (!item) return null;
 
   const isPurchased = item.status === "purchased";
@@ -53,11 +58,11 @@ export function ItemDetailModal({ item, onClose, onEdit, onDelete, onPurchase }:
             <div className="flex items-center gap-2 mt-1.5 flex-wrap">
               <span className={cn("flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border", getStatusColor(item.status))}>
                 {isPurchased ? <CheckCircle2 className="w-3 h-3" /> : <Circle className="w-3 h-3" />}
-                {isPurchased ? "Comprado" : "Pendiente"}
+                {isPurchased ? t("planning.itemPurchased") : t("planning.itemPending")}
               </span>
               <span className={cn("flex items-center gap-1 text-xs px-2 py-0.5 rounded-full", getPriorityColor(item.priority))}>
                 <Flag className="w-3 h-3" />
-                {item.priority === "high" ? "Alta" : item.priority === "medium" ? "Media" : "Baja"}
+                {item.priority === "high" ? t("planning.itemPriorityHigh") : item.priority === "medium" ? t("planning.itemPriorityMedium") : t("planning.itemPriorityLow")}
               </span>
               {item.priceValue != null && (
                 <span className="text-sm font-bold text-cyan-600 dark:text-cyan-400">
@@ -77,7 +82,7 @@ export function ItemDetailModal({ item, onClose, onEdit, onDelete, onPurchase }:
           {isPurchased && item.purchasedAt && (
             <div className="flex items-center gap-2 p-3 rounded-xl bg-cyan-50 dark:bg-cyan-950/20 border border-cyan-200 dark:border-cyan-800">
               <CheckCircle2 className="w-4 h-4 text-cyan-500 flex-shrink-0" />
-              <p className="text-sm text-cyan-700 dark:text-cyan-300">Comprado el {formatDate(item.purchasedAt)}</p>
+              <p className="text-sm text-cyan-700 dark:text-cyan-300">{getTranslation(language, "planning.purchasedOn", { date: formatDate(item.purchasedAt!) })}</p>
             </div>
           )}
 
@@ -85,7 +90,7 @@ export function ItemDetailModal({ item, onClose, onEdit, onDelete, onPurchase }:
             <div>
               <div className="flex items-center gap-1.5 mb-2 text-xs text-zinc-500 font-medium">
                 <Tag className="w-3.5 h-3.5" />
-                Etiquetas
+                {t("planning.itemTags")}
               </div>
               <div className="flex flex-wrap gap-1.5">
                 {item.tags.map((tag) => (
@@ -101,7 +106,7 @@ export function ItemDetailModal({ item, onClose, onEdit, onDelete, onPurchase }:
             <div>
               <p className="text-xs text-zinc-500 font-medium mb-2 flex items-center gap-1.5">
                 <ExternalLink className="w-3.5 h-3.5" />
-                Links de referencia
+                {t("planning.itemLinks")}
               </p>
               <div className="space-y-1.5">
                 {item.links.map((link) => (
@@ -126,7 +131,7 @@ export function ItemDetailModal({ item, onClose, onEdit, onDelete, onPurchase }:
             <div className="p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700">
               <p className="text-xs text-zinc-500 font-medium mb-1 flex items-center gap-1.5">
                 <StickyNote className="w-3.5 h-3.5" />
-                Notas
+                {t("planning.itemNotes")}
               </p>
               <p className="text-sm text-zinc-600 dark:text-zinc-400">{item.notes}</p>
             </div>
@@ -139,7 +144,7 @@ export function ItemDetailModal({ item, onClose, onEdit, onDelete, onPurchase }:
                 className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-600 text-white text-sm font-medium transition-colors"
               >
                 <ShoppingBag className="w-4 h-4" />
-                Marcar comprado
+                {t("planning.markAsPurchased")}
               </button>
             )}
             <button

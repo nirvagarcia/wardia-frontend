@@ -50,9 +50,6 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     this.setState({
       errorInfo,
     });
-
-    // TODO: Send error to logging service in production
-    // Example: logErrorToService(error, errorInfo);
   }
 
   handleReset = (): void => {

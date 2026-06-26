@@ -1,9 +1,2 @@
-/**
- * Forgot Password page
- */
+export { default } from "@/modules/auth/forgot-password/ForgotPasswordPage";
 
-import { ForgotPasswordView } from "@/views/auth/forgot-password";
-
-export default function ForgotPasswordPage(): React.JSX.Element {
-  return <ForgotPasswordView />;
-}

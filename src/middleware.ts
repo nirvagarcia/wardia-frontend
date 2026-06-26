@@ -36,7 +36,7 @@ export async function middleware(request: NextRequest) {
 
   if (AUTH_PATHS.some((p) => pathname === p || pathname.startsWith(p + "/"))) {
     if (token && (await isValidToken(token))) {
-      return NextResponse.redirect(new URL("/dashboard", request.url));
+      return NextResponse.redirect(new URL("/home", request.url));
     }
     return NextResponse.next();
   }

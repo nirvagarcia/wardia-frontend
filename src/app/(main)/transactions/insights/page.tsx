@@ -1,6 +1,2 @@
-import React from "react";
-import { TransactionInsightsView } from "@/views/transactions/insights";
+export { default } from "@/modules/transactions/insights/TransactionInsightsPage";
 
-export default function InsightsPage(): React.JSX.Element {
-  return <TransactionInsightsView />;
-}

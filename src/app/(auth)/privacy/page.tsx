@@ -1,9 +1,2 @@
-/**
- * Privacy Policy page
- */
+export { default } from "@/modules/legal/privacy/PrivacyPage";
 
-import { PrivacyView } from "@/views/legal/privacy";
-
-export default function PrivacyPage(): React.JSX.Element {
-  return <PrivacyView />;
-}

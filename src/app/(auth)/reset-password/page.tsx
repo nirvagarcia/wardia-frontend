@@ -1,10 +1,11 @@
 import { Suspense } from "react";
-import { ResetPasswordView } from "@/views/auth/reset-password";
+import ResetPasswordPage from "@/modules/auth/reset-password/ResetPasswordPage";
 
-export default function ResetPasswordPage() {
+export default function Page() {
   return (
     <Suspense>
-      <ResetPasswordView />
+      <ResetPasswordPage />
     </Suspense>
   );
 }
+

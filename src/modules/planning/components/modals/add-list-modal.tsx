@@ -1,9 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { X } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import type { IPlanningList } from "@/shared/types/planning";
+import { usePreferencesStore } from "@/shared/stores/preferences-store";
+import { getTranslation } from "@/shared/langs";
 
 interface AddListModalProps {
   isOpen: boolean;
@@ -13,6 +15,8 @@ interface AddListModalProps {
 }
 
 export function AddListModal({ isOpen, editingList, onClose, onSave }: AddListModalProps) {
+  const { language } = usePreferencesStore();
+  const t = useCallback((key: string) => getTranslation(language, key), [language]);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [isSaving, setIsSaving] = useState(false);
@@ -44,7 +48,7 @@ export function AddListModal({ isOpen, editingList, onClose, onSave }: AddListMo
       <div className="bg-white dark:bg-zinc-900 w-full max-w-md rounded-2xl border border-zinc-200/80 dark:border-zinc-800 shadow-2xl">
         <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-zinc-100 dark:border-zinc-800">
           <h2 className="font-semibold text-zinc-900 dark:text-zinc-100">
-            {editingList ? "Editar Lista" : "Nueva Lista"}
+            {editingList ? t("planning.editList") : t("planning.newList")}
           </h2>
           <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
             <X className="w-4 h-4 text-zinc-500" />
@@ -52,7 +56,7 @@ export function AddListModal({ isOpen, editingList, onClose, onSave }: AddListMo
         </div>
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">Título *</label>
+            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">{t("planning.listTitle")} *</label>
             <input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
@@ -67,7 +71,7 @@ export function AddListModal({ isOpen, editingList, onClose, onSave }: AddListMo
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">Descripción (opcional)</label>
+            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">{t("planning.listDescription")} ({t("credentials.optional")})</label>
             <input
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -83,11 +87,11 @@ export function AddListModal({ isOpen, editingList, onClose, onSave }: AddListMo
           <div className="flex gap-3 pt-2">
             <button type="button" onClick={onClose}
               className="flex-1 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
-              Cancelar
+              {t("common.cancel")}
             </button>
             <button type="submit" disabled={isSaving || !title.trim()}
               className="flex-1 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-600 disabled:opacity-50 text-white text-sm font-medium transition-colors">
-              {isSaving ? "Guardando..." : editingList ? "Guardar cambios" : "Crear lista"}
+              {isSaving ? t("planning.saving") : editingList ? t("planning.saveChanges") : t("planning.createList")}
             </button>
           </div>
         </form>

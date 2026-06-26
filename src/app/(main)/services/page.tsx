@@ -1,13 +1,4 @@
-/**
- * Services Page - Subscriptions and recurring payments management route.
- * 
- * NOTE: In Next.js App Router, this file MUST be named "page.tsx" for routing.
- * The actual component logic is in ServicesView for better modularity.
- */
+export { default } from "@/modules/services/ServicesPage";
 
-import React from "react";
-import { ServicesView } from "@/views/services";
+export const metadata = { title: "Servicios — Wardia" };
 
-export default function Page(): React.JSX.Element {
-  return <ServicesView />;
-}

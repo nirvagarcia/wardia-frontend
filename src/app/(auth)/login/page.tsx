@@ -1,10 +1,2 @@
-/**
- * Login page
- * Modern authentication interface with form validation
- */
+export { default } from "@/modules/auth/login/LoginPage";
 
-import { LoginView } from "@/views/auth/login";
-
-export default function LoginPage(): React.JSX.Element {
-  return <LoginView />;
-}

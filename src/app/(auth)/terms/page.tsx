@@ -1,9 +1,2 @@
-/**
- * Terms and Conditions page
- */
+export { default } from "@/modules/legal/terms/TermsPage";
 
-import { TermsView } from "@/views/legal/terms";
-
-export default function TermsPage(): React.JSX.Element {
-  return <TermsView />;
-}

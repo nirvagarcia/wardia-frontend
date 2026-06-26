@@ -1,6 +1,2 @@
-import React from "react";
-import { TransactionHistoryView } from "@/views/transactions/history";
+export { default } from "@/modules/transactions/history/TransactionHistoryPage";
 
-export default function HistoryPage(): React.JSX.Element {
-  return <TransactionHistoryView />;
-}

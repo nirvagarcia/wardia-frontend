@@ -108,8 +108,6 @@ export function useReorderBoards() {
   });
 }
 
-// ─── Lists ────────────────────────────────────────────────────────────────────
-
 export function useAddList(boardId: string) {
   const queryClient = useQueryClient();
   return useMutation({
@@ -170,8 +168,6 @@ export function useReorderLists(boardId: string) {
   });
 }
 
-// ─── Items ────────────────────────────────────────────────────────────────────
-
 export function useAddItem(boardId: string) {
   const queryClient = useQueryClient();
   return useMutation({
@@ -229,8 +225,6 @@ export function useReorderItems(boardId: string) {
   });
 }
 
-// ─── Storage warning hook ─────────────────────────────────────────────────────
-
 export function useStorageWarning() {
   const { data } = useStorageUsage();
   if (data && data.usedPercent >= 80) {
@@ -241,8 +235,6 @@ export function useStorageWarning() {
   }
 }
 
-// ─── Image upload helper ──────────────────────────────────────────────────────
-
 export async function uploadPlanningImage(file: File): Promise<string> {
   const params = await planningService.getUploadParams();
   if (params.storageWarning) {
@@ -252,8 +244,6 @@ export async function uploadPlanningImage(file: File): Promise<string> {
   }
   return planningService.uploadToCloudinary(file, params);
 }
-
-// ─── Stats helpers ────────────────────────────────────────────────────────────
 
 export function computeBoardStats(board: IPlanningBoard) {
   const allItems: IPlanningItem[] = board.lists.flatMap((l) => l.items);

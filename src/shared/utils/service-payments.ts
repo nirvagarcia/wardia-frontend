@@ -53,14 +53,12 @@ export function getServicePaymentsInRange(
 ): ITransaction[] {
   if (service.status !== "active") return [];
 
-  // Normalise the base date to noon so DST shifts don't push it across midnight
   const base = new Date(service.nextPaymentDate);
   base.setHours(12, 0, 0, 0);
 
   const stepMs = FREQ_APPROX_MS[service.frequency];
   const rangeMs = periodEnd.getTime() - periodStart.getTime();
 
-  // How many steps back from base to guarantee we're before periodStart
   const stepsBack =
     Math.ceil((base.getTime() - periodStart.getTime()) / stepMs) + 2;
 

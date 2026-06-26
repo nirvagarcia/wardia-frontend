@@ -1,5 +1,4 @@
-import { TransactionsView } from "@/views/transactions";
+export { default } from "@/modules/transactions/TransactionsPage";
 
-export default function TransactionsPage(): React.JSX.Element {
-  return <TransactionsView />;
-}
+export const metadata = { title: "Transacciones — Wardia" };
+

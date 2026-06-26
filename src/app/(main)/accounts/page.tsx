@@ -1,13 +1,4 @@
-/**
- * Accounts Page - Banking products management route.
- * 
- * NOTE: In Next.js App Router, this file MUST be named "page.tsx" for routing.
- * The actual component logic is in AccountsView for better modularity.
- */
+export { default } from "@/modules/accounts/AccountsPage";
 
-import React from "react";
-import { AccountsView } from "@/views/accounts";
+export const metadata = { title: "Cuentas — Wardia" };
 
-export default function Page(): React.JSX.Element {
-  return <AccountsView />;
-}

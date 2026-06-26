@@ -50,33 +50,27 @@ const customStorage = {
 };
 
 interface AccountsState {
-  // State
   accounts: IAccount[];
   creditCards: ICreditCard[];
   isLoading: boolean;
   error: string | null;
 
-  // Account actions
   addAccount: (account: Omit<IAccount, "id" | "lastUpdated">) => void;
   updateAccount: (id: string, account: Omit<IAccount, "id" | "lastUpdated">) => void;
   deleteAccount: (id: string) => void;
   setAccounts: (accounts: IAccount[]) => void;
 
-  // Credit card actions
   addCreditCard: (card: Omit<ICreditCard, "id" | "lastStatementDate" | "nextPaymentDate" | "minimumPayment">) => void;
   updateCreditCard: (id: string, card: Omit<ICreditCard, "id" | "lastStatementDate" | "nextPaymentDate" | "minimumPayment">) => void;
   deleteCreditCard: (id: string) => void;
   setCreditCards: (cards: ICreditCard[]) => void;
 
-  // Reordering
   reorderAccounts: (accounts: IAccount[]) => void;
   reorderCreditCards: (cards: ICreditCard[]) => void;
 
-  // Loading states
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
 
-  // Computed/selectors
   getTotalBalance: () => number;
   getTotalCreditUsed: () => number;
   getTotalCreditAvailable: () => number;
@@ -86,13 +80,11 @@ interface AccountsState {
 export const useAccountsStore = create<AccountsState>()(
   persist(
     (set, get) => ({
-      // Initial state
       accounts: [],
       creditCards: [],
       isLoading: false,
       error: null,
 
-      // Account actions
       addAccount: (accountData) => {
         const newAccount: IAccount = {
           ...accountData,
@@ -127,7 +119,6 @@ export const useAccountsStore = create<AccountsState>()(
         set({ accounts, error: null });
       },
 
-      // Credit card actions
       addCreditCard: (cardData) => {
         const today = new Date();
         const nextMonth = new Date(today);
@@ -205,7 +196,6 @@ export const useAccountsStore = create<AccountsState>()(
         set({ creditCards: cards, error: null });
       },
 
-      // Reordering
       reorderAccounts: (accounts) => {
         set({ accounts });
       },
@@ -214,7 +204,6 @@ export const useAccountsStore = create<AccountsState>()(
         set({ creditCards: cards });
       },
 
-      // Loading states
       setLoading: (loading) => {
         set({ isLoading: loading });
       },
@@ -223,7 +212,6 @@ export const useAccountsStore = create<AccountsState>()(
         set({ error, isLoading: false });
       },
 
-      // Computed/selectors
       getTotalBalance: () => {
         const { accounts } = get();
         return accounts.reduce((sum, acc) => sum + acc.balance.value, 0);
@@ -247,7 +235,6 @@ export const useAccountsStore = create<AccountsState>()(
     {
       name: "wardia-accounts",
       storage: customStorage,
-      // Don't persist sensitive data in production - use secure storage
       partialize: (state) => ({
         accounts: state.accounts,
         creditCards: state.creditCards,

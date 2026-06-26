@@ -13,12 +13,15 @@ import { PurchaseModal } from "./components/modals/purchase-modal";
 import { ItemDetailModal } from "./components/modals/item-detail-modal";
 import { ConfirmModal } from "@/shared/components/modals/confirm-modal";
 import { useBoardDetail } from "./hooks/use-board-detail";
+import { usePreferencesStore } from "@/shared/stores/preferences-store";
+import { getTranslation } from "@/shared/langs";
 
 interface BoardDetailPageProps {
   boardId: string;
 }
 
 export default function BoardDetailPage({ boardId }: BoardDetailPageProps) {
+  const { language } = usePreferencesStore();
   const {
     mounted, board, isLoading, stats, activeLists, t, router,
     activeFilter, setActiveFilter,
@@ -69,8 +72,8 @@ export default function BoardDetailPage({ boardId }: BoardDetailPageProps) {
             <div className="flex items-center justify-between text-sm mb-2">
               <span className="text-zinc-600 dark:text-zinc-400"><span className="font-semibold text-zinc-900 dark:text-zinc-100">{stats.purchasedItems}</span> / <span>{stats.totalItems} {t("planning.items")} {t("planning.purchased")}</span></span>
               <div className="flex items-center gap-3">
-                {stats.purchasedTotal > 0 && <span className="text-xs text-emerald-500 font-medium">{formatPrice(stats.purchasedTotal, "PEN")} gastado</span>}
-                {stats.estimatedTotal > stats.purchasedTotal && <span className="text-xs text-zinc-400">{formatPrice(Math.round((stats.estimatedTotal - stats.purchasedTotal) * 100) / 100, "PEN")} pendiente</span>}
+                {stats.purchasedTotal > 0 && <span className="text-xs text-emerald-500 font-medium">{formatPrice(stats.purchasedTotal, "PEN")} {t("planning.spent")}</span>}
+                {stats.estimatedTotal > stats.purchasedTotal && <span className="text-xs text-zinc-400">{formatPrice(Math.round((stats.estimatedTotal - stats.purchasedTotal) * 100) / 100, "PEN")} {t("planning.pending")}</span>}
                 <span className="font-semibold text-cyan-600 dark:text-cyan-400">{stats.percentPurchased}%</span>
               </div>
             </div>
@@ -82,7 +85,7 @@ export default function BoardDetailPage({ boardId }: BoardDetailPageProps) {
           <div className="mt-3 flex items-center gap-2 p-3 rounded-xl bg-cyan-50 dark:bg-cyan-950/20 border border-cyan-200 dark:border-cyan-800">
             <Share2 className="w-4 h-4 text-cyan-500 flex-shrink-0" />
             <span className="flex-1 text-xs text-cyan-700 dark:text-cyan-300 truncate">{`${typeof window !== "undefined" ? window.location.origin : ""}/planning/shared/${board.shareToken}`}</span>
-            <button onClick={copyShareLink} className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-cyan-500 hover:bg-cyan-600 text-white text-xs transition-colors flex-shrink-0"><LinkIcon className="w-3 h-3" />{copiedShare ? t("planning.linkCopied") : "Copiar"}</button>
+            <button onClick={copyShareLink} className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-cyan-500 hover:bg-cyan-600 text-white text-xs transition-colors flex-shrink-0"><LinkIcon className="w-3 h-3" />{copiedShare ? t("planning.linkCopied") : t("common.copy")}</button>
           </div>
         )}
       </div>
@@ -99,7 +102,7 @@ export default function BoardDetailPage({ boardId }: BoardDetailPageProps) {
           {activeLists.map((list) => (
             <PlanningList key={list.id} list={list} activeFilter={activeFilter}
               onAddItem={setAddItemListId} onEditList={setEditingList} onDeleteList={setDeletingList}
-              onArchiveList={(l) => archiveList.mutate(l.id, { onSuccess: () => toast.success("Lista archivada"), onError: () => toast.error("Error al archivar") })}
+              onArchiveList={(l) => archiveList.mutate(l.id, { onSuccess: () => toast.success(t("planning.listArchived")), onError: () => toast.error(t("planning.archiveError")) })}
               onCompleteList={setCompletingList}
               onItemClick={(item, listId) => setDetailItem({ item, listId })}
               onReorderItems={(listId, items) => reorderItems.mutate({ listId, items })}
@@ -109,7 +112,7 @@ export default function BoardDetailPage({ boardId }: BoardDetailPageProps) {
       )}
 
       <AddListModal isOpen={isAddListOpen || !!editingList} editingList={editingList ?? undefined} onClose={() => { setIsAddListOpen(false); setEditingList(null); }}
-        onSave={async (data) => { if (editingList) { await updateList.mutateAsync({ listId: editingList.id, data }); toast.success("Lista actualizada"); } else { await addList.mutateAsync(data); toast.success("Lista creada"); } setIsAddListOpen(false); setEditingList(null); }}
+        onSave={async (data) => { if (editingList) { await updateList.mutateAsync({ listId: editingList.id, data }); toast.success(t("planning.listUpdated")); } else { await addList.mutateAsync(data); toast.success(t("planning.listCreated")); } setIsAddListOpen(false); setEditingList(null); }}
       />
       <AddItemModal isOpen={!!addItemListId || !!editingItem} editingItem={editingItem?.item} onClose={() => { setAddItemListId(null); setEditingItem(null); }} onSave={handleSaveItem} />
       <ItemDetailModal item={detailItem?.item ?? null} onClose={() => setDetailItem(null)}
@@ -119,9 +122,9 @@ export default function BoardDetailPage({ boardId }: BoardDetailPageProps) {
       />
       <PurchaseModal isOpen={!!purchasingItem} item={purchasingItem?.item ?? null} onClose={() => setPurchasingItem(null)} onConfirm={handlePurchase} />
 
-      {deletingList && <ConfirmModal isOpen title={t("planning.deleteList")} message={`¿Seguro que quieres eliminar la lista "${deletingList.title}" y todos sus items?`} confirmText="Eliminar" cancelText="Cancelar" variant="danger" onConfirm={() => deleteList.mutate(deletingList.id, { onSuccess: () => { toast.success("Lista eliminada"); setDeletingList(null); }, onError: () => toast.error("Error al eliminar") })} onClose={() => setDeletingList(null)} />}
-      {completingList && <ConfirmModal isOpen title={t("planning.completeList")} message={`¿Marcar todos los items de "${completingList.title}" como comprados y archivar la lista?`} confirmText="Completar todo" cancelText="Cancelar" variant="warning" onConfirm={() => completeList.mutate(completingList.id, { onSuccess: () => { toast.success("Lista completada 🎉"); setCompletingList(null); }, onError: () => toast.error("Error al completar") })} onClose={() => setCompletingList(null)} />}
-      {deletingItem && <ConfirmModal isOpen title={t("planning.deleteItem")} message={`¿Seguro que quieres eliminar "${deletingItem.item.title}"?`} confirmText="Eliminar" cancelText="Cancelar" variant="danger" onConfirm={() => deleteItem.mutate({ listId: deletingItem.listId, itemId: deletingItem.item.id }, { onSuccess: () => { toast.success("Item eliminado"); setDeletingItem(null); }, onError: () => toast.error("Error al eliminar") })} onClose={() => setDeletingItem(null)} />}
+      {deletingList && <ConfirmModal isOpen title={t("planning.deleteList")} message={getTranslation(language, "planning.deleteConfirmList", { title: deletingList.title })} confirmText={t("common.delete")} cancelText={t("common.cancel")} variant="danger" onConfirm={() => deleteList.mutate(deletingList.id, { onSuccess: () => { toast.success(t("planning.listDeleted")); setDeletingList(null); }, onError: () => toast.error(t("planning.deleteError")) })} onClose={() => setDeletingList(null)} />}
+      {completingList && <ConfirmModal isOpen title={t("planning.completeList")} message={getTranslation(language, "planning.completeConfirm", { title: completingList.title })} confirmText={t("planning.completeAll")} cancelText={t("common.cancel")} variant="warning" onConfirm={() => completeList.mutate(completingList.id, { onSuccess: () => { toast.success(t("planning.listCompleted")); setCompletingList(null); }, onError: () => toast.error(t("planning.completeListError")) })} onClose={() => setCompletingList(null)} />}
+      {deletingItem && <ConfirmModal isOpen title={t("planning.deleteItem")} message={getTranslation(language, "planning.deleteConfirmItem", { title: deletingItem.item.title })} confirmText={t("common.delete")} cancelText={t("common.cancel")} variant="danger" onConfirm={() => deleteItem.mutate({ listId: deletingItem.listId, itemId: deletingItem.item.id }, { onSuccess: () => { toast.success(t("planning.itemDeleted")); setDeletingItem(null); }, onError: () => toast.error(t("planning.deleteError")) })} onClose={() => setDeletingItem(null)} />}
     </div>
   );
 }

@@ -55,11 +55,11 @@ export function useBoardDetail(boardId: string) {
     if (editingItem) {
       await updateItem.mutateAsync({ listId: editingItem.listId, itemId: editingItem.item.id, data: castData });
       setEditingItem(null);
-      toast.success("Item actualizado");
+      toast.success(t("planning.itemUpdated"));
     } else if (addItemListId) {
       await addItem.mutateAsync({ listId: addItemListId, data: castData });
       setAddItemListId(null);
-      toast.success("Item agregado");
+      toast.success(t("planning.itemAdded"));
     }
   }, [editingItem, addItemListId, addItem, updateItem]);
 
@@ -68,7 +68,7 @@ export function useBoardDetail(boardId: string) {
     await purchaseItem.mutateAsync({ listId: purchasingItem.listId, itemId: purchasingItem.item.id, data });
     setPurchasingItem(null);
     setDetailItem(null);
-    toast.success("¡Item marcado como comprado! 🎉");
+    toast.success(t("planning.itemMarkedPurchased"));
   }, [purchasingItem, purchaseItem]);
 
   const handleToggleShare = useCallback(async () => {
@@ -76,7 +76,7 @@ export function useBoardDetail(boardId: string) {
       const result = await toggleShare.mutateAsync(boardId);
       if (!result.shareToken) toast.success(t("planning.stopSharing"));
     } catch {
-      toast.error("Error al cambiar compartido");
+      toast.error(t("planning.shareError"));
     }
   }, [boardId, toggleShare, t]);
 

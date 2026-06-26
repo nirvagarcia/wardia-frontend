@@ -38,7 +38,7 @@ export const Sidebar: React.FC = () => {
   }, []);
 
   const navItems: NavItem[] = [
-    { href: "/dashboard", labelKey: "nav.home", icon: Home },
+    { href: "/home", labelKey: "nav.home", icon: Home },
     { href: "/transactions", labelKey: "nav.transactions", icon: TrendingUp },
     { href: "/services", labelKey: "nav.services", icon: Receipt },
     { href: "/accounts", labelKey: "nav.accounts", icon: Wallet },
