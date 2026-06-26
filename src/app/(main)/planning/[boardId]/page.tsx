@@ -1,12 +1,8 @@
-import { BoardDetailView } from "@/views/planning/board";
+import BoardDetailPage from "@/modules/planning/BoardDetailPage";
 
 export const metadata = { title: "Tablero — Wardia" };
 
-export default async function BoardDetailPage({
-  params,
-}: {
-  params: Promise<{ boardId: string }>;
-}) {
+export default async function Page({ params }: { params: Promise<{ boardId: string }> }) {
   const { boardId } = await params;
-  return <BoardDetailView boardId={boardId} />;
+  return <BoardDetailPage boardId={boardId} />;
 }

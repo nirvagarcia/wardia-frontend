@@ -70,7 +70,6 @@ export function EditProfileModal({ isOpen, onClose }: EditProfileModalProps): Re
         className="bg-white dark:bg-zinc-900 rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto animate-slide-up"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
         <div className="flex items-center justify-between p-4 sm:p-6 border-b border-zinc-200 dark:border-zinc-800">
           <div className="flex items-center gap-3">
             <div className="bg-cyan-500/10 p-2 rounded-lg">
@@ -86,7 +85,6 @@ export function EditProfileModal({ isOpen, onClose }: EditProfileModalProps): Re
           </button>
         </div>
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 pb-8">
           {apiError && (
             <div className="flex items-center gap-2 p-3 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">

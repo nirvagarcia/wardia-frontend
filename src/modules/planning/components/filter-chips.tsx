@@ -1,5 +1,7 @@
 "use client";
 
+import { usePreferencesStore } from "@/shared/stores/preferences-store";
+import { getTranslation } from "@/shared/langs";
 import { cn } from "@/shared/utils/cn";
 
 type FilterType = "all" | "pending" | "purchased" | "high";
@@ -9,17 +11,18 @@ interface FilterChipsProps {
   onChange: (f: FilterType) => void;
 }
 
-const FILTERS: { value: FilterType; label: string }[] = [
-  { value: "all", label: "Todos" },
-  { value: "pending", label: "Pendientes" },
-  { value: "purchased", label: "Comprados" },
-  { value: "high", label: "Alta prioridad" },
-];
+const FILTER_VALUES: FilterType[] = ["all", "pending", "purchased", "high"];
+const FILTER_KEYS = ["planning.filterAll", "planning.filterPending", "planning.filterPurchased", "planning.filterHighPriority"];
 
 export function FilterChips({ active, onChange }: FilterChipsProps) {
+  const { language } = usePreferencesStore();
+  const t = (key: string) => getTranslation(language, key);
+
+  const filters = FILTER_VALUES.map((value, i) => ({ value, label: t(FILTER_KEYS[i]!) }));
+
   return (
     <div className="flex items-center gap-2 flex-wrap">
-      {FILTERS.map(({ value, label }) => (
+      {filters.map(({ value, label }) => (
         <button
           key={value}
           onClick={() => onChange(value)}

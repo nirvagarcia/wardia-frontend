@@ -1,8 +1,3 @@
-/**
- * Profile View Helper Utilities
- * Contains types, constants, and utility functions for profile management.
- */
-
 import { Theme, Language, Currency } from "@/shared/stores/preferences-store";
 import { Sun, Moon, Monitor } from "lucide-react";
 

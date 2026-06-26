@@ -7,10 +7,12 @@ import {
 } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { usePreferencesStore } from "@/shared/stores/preferences-store";
+import { getTranslation } from "@/shared/langs";
 import { cn } from "@/shared/utils/cn";
 import type { IPlanningItem, IPlanningList } from "@/shared/types/planning";
 import { PlanningItemCard } from "./planning-item-card";
-import { computeListStats, filterItems, formatPrice } from "../../utils/helpers";
+import { computeListStats, filterItems, formatPrice } from "../utils/helpers";
 import type { FilterType } from "./filter-chips";
 
 function SortableItem({
@@ -55,6 +57,9 @@ interface PlanningListProps {
 export function PlanningList({
   list, activeFilter, onAddItem, onEditList, onDeleteList, onArchiveList, onCompleteList, onItemClick, onReorderItems,
 }: PlanningListProps) {
+  const { language } = usePreferencesStore();
+  const t = (key: string) => getTranslation(language, key);
+
   const [menuOpen, setMenuOpen] = useState(false);
   const [items, setItems] = useState<IPlanningItem[]>(list.items);
   const stats = computeListStats(list);
@@ -89,14 +94,14 @@ export function PlanningList({
           {stats.estimatedTotal > 0 && (
             <div className="text-xs text-zinc-400 mt-0.5 flex items-center gap-1.5">
               {stats.purchasedTotal > 0 && (
-                <span className="text-emerald-500 font-medium">{formatPrice(stats.purchasedTotal, "PEN")} gastado</span>
+                <span className="text-emerald-500 font-medium">{formatPrice(stats.purchasedTotal, "PEN")} {t("planning.spent")}</span>
               )}
               {stats.purchasedTotal > 0 && stats.pendingTotal > 0 && <span>·</span>}
               {stats.pendingTotal > 0 && (
-                <span>{formatPrice(stats.pendingTotal, "PEN")} pendiente</span>
+                <span>{formatPrice(stats.pendingTotal, "PEN")} {t("planning.pending")}</span>
               )}
               {stats.purchasedTotal === 0 && (
-                <span>{formatPrice(stats.estimatedTotal, "PEN")} estimado</span>
+                <span>{formatPrice(stats.estimatedTotal, "PEN")} {t("planning.estimated")}</span>
               )}
             </div>
           )}
@@ -130,10 +135,10 @@ export function PlanningList({
                 <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
                 <div className="absolute right-0 top-8 z-20 min-w-44 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-xl shadow-xl overflow-hidden">
                   {[
-                    { icon: Edit2, label: "Editar lista", action: () => onEditList(list) },
-                    { icon: CheckSquare, label: "Completar todo", action: () => onCompleteList(list), disabled: pendingCount === 0 },
-                    { icon: ArchiveX, label: "Archivar lista", action: () => onArchiveList(list) },
-                    { icon: Trash2, label: "Eliminar lista", action: () => onDeleteList(list), danger: true },
+                    { icon: Edit2, label: t("planning.editList"), action: () => onEditList(list) },
+                    { icon: CheckSquare, label: t("planning.completeList"), action: () => onCompleteList(list), disabled: pendingCount === 0 },
+                    { icon: ArchiveX, label: t("planning.archiveList"), action: () => onArchiveList(list) },
+                    { icon: Trash2, label: t("planning.deleteList"), action: () => onDeleteList(list), danger: true },
                   ].map(({ icon: Icon, label, action, danger, disabled }) => (
                     <button
                       key={label}
@@ -161,14 +166,14 @@ export function PlanningList({
         {visibleItems.length === 0 ? (
           <div className="py-8 text-center">
             <p className="text-sm text-zinc-400">
-              {activeFilter !== "all" ? "Sin items para este filtro" : "Sin items aún"}
+              {activeFilter !== "all" ? t("planning.noItemsFilter") : t("planning.noItems")}
             </p>
             {activeFilter === "all" && (
               <button
                 onClick={() => onAddItem(list.id)}
                 className="mt-2 text-xs text-cyan-500 hover:text-cyan-600 transition-colors"
               >
-                + Agregar primer item
+                {t("planning.addFirstItem")}
               </button>
             )}
           </div>

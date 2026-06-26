@@ -4,7 +4,7 @@ import Image from "next/image";
 import { ExternalLink, CheckCircle2, Circle, ImageIcon } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import type { IPlanningItem } from "@/shared/types/planning";
-import { getStatusColor, formatPrice } from "../../utils/helpers";
+import { getStatusColor, formatPrice } from "../utils/helpers";
 
 interface PlanningItemCardProps {
   item: IPlanningItem;

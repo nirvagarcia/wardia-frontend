@@ -1,7 +1,3 @@
-import { ArchivedView } from "@/views/planning/archived";
-
+export { default } from "@/modules/planning/ArchivedPage";
 export const metadata = { title: "Archivados — Wardia" };
 
-export default function ArchivedPage() {
-  return <ArchivedView />;
-}
