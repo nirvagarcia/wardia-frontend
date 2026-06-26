@@ -12,7 +12,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { usePreferencesStore } from "@/shared/stores/preferences-store";
 import { getTranslation } from "@/shared/langs";
-import { Home, Wallet, Receipt, TrendingUp, User } from "lucide-react";
+import { Home, Wallet, TrendingUp, User, LayoutGrid } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 
 interface NavItem {
@@ -29,7 +29,7 @@ export const BottomNav: React.FC = () => {
   const navItems: NavItem[] = [
     { href: "/dashboard", labelKey: "nav.home", icon: Home },
     { href: "/transactions", labelKey: "nav.transactions", icon: TrendingUp },
-    { href: "/services", labelKey: "nav.services", icon: Receipt },
+    { href: "/planning", labelKey: "nav.planning", icon: LayoutGrid },
     { href: "/accounts", labelKey: "nav.accounts", icon: Wallet },
     { href: "/profile", labelKey: "nav.profile", icon: User },
   ];

@@ -6,3 +6,4 @@
 export { accountsService } from "./accounts-service";
 export { servicesService } from "./services-service";
 export { transactionsService } from "./transactions-service";
+export { planningService } from "./planning-service";

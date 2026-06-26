@@ -11,7 +11,7 @@ import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
 import { usePreferencesStore } from "@/shared/stores/preferences-store";
 import { getTranslation } from "@/shared/langs";
-import { Home, Wallet, TrendingUp, Receipt } from "lucide-react";
+import { Home, Wallet, TrendingUp, Receipt, LayoutGrid } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import { SidebarHeader } from "./sidebar-header";
 import { SidebarControls } from "./sidebar-controls";
@@ -42,6 +42,7 @@ export const Sidebar: React.FC = () => {
     { href: "/transactions", labelKey: "nav.transactions", icon: TrendingUp },
     { href: "/services", labelKey: "nav.services", icon: Receipt },
     { href: "/accounts", labelKey: "nav.accounts", icon: Wallet },
+    { href: "/planning", labelKey: "nav.planning", icon: LayoutGrid },
   ];
 
   const toggleTheme = () => {
